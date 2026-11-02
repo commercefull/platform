@@ -28,6 +28,69 @@ export type StockAlert = DbInventoryStockAlert;
 export type PriceAlert = DbSupportPriceAlert;
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+function mapToStockAlert(row: Record<string, unknown>): StockAlert {
+  return {
+    stockAlertId: row.stockAlertId as string,
+    customerId: row.customerId as string | null,
+    email: row.email as string | null,
+    phone: row.phone as string | null,
+    productId: row.productId as string,
+    productVariantId: row.productVariantId as string | null,
+    productName: row.productName as string | null,
+    variantName: row.variantName as string | null,
+    sku: row.sku as string | null,
+    status: row.status as AlertStatus,
+    desiredQuantity: parseInt(row.desiredQuantity as string) || 1,
+    stockThreshold: parseInt(row.stockThreshold as string) || 1,
+    notifyOnAnyStock: Boolean(row.notifyOnAnyStock),
+    notificationChannel: row.notificationChannel as NotificationChannel,
+    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : null,
+    notificationCount: parseInt(row.notificationCount as string) || 0,
+    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : null,
+    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : null,
+    purchaseOrderId: row.purchaseOrderId as string | null,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
+    metadata: row.metadata as Record<string, unknown> | null,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+  };
+}
+
+function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
+  return {
+    priceAlertId: row.priceAlertId as string,
+    customerId: row.customerId as string | null,
+    email: row.email as string | null,
+    phone: row.phone as string | null,
+    productId: row.productId as string,
+    productVariantId: row.productVariantId as string | null,
+    productName: row.productName as string | null,
+    variantName: row.variantName as string | null,
+    sku: row.sku as string | null,
+    status: row.status as AlertStatus,
+    alertType: row.alertType as PriceAlertType,
+    targetPriceCents: row.targetPriceCents != null ? Number(row.targetPriceCents) : null,
+    percentageDrop: row.percentageDrop as string | null,
+    originalPriceCents: row.originalPriceCents != null ? Number(row.originalPriceCents) : null,
+    currentPriceCents: row.currentPriceCents != null ? Number(row.currentPriceCents) : null,
+    currencyCode: (row.currencyCode as string) || 'USD',
+    notificationChannel: row.notificationChannel as NotificationChannel,
+    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : null,
+    notifiedPriceCents: row.notifiedPriceCents != null ? Number(row.notifiedPriceCents) : null,
+    notificationCount: parseInt(row.notificationCount as string) || 0,
+    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : null,
+    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : null,
+    purchaseOrderId: row.purchaseOrderId as string | null,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
+    metadata: row.metadata as Record<string, unknown> | null,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+  };
+}
+// ============================================================================
 // Stock Alerts
 // ============================================================================
 
@@ -145,31 +208,12 @@ export async function notifyStockAlert(stockAlertId: string): Promise<void> {
   );
 }
 
-export async function markStockAlertPurchased(stockAlertId: string, orderId: string): Promise<void> {
-  const now = new Date().toISOString();
-  await query(
-    `UPDATE "inventoryStockAlert" SET 
-      "status" = 'purchased', "purchasedAt" = $1, "purchaseOrderId" = $2, "updatedAt" = $1
-     WHERE "stockAlertId" = $3`,
-    [now, orderId, stockAlertId],
-  );
-}
-
 export async function cancelStockAlert(stockAlertId: string): Promise<void> {
   await query(
     `UPDATE "inventoryStockAlert" SET "status" = 'cancelled', "updatedAt" = $1
      WHERE "stockAlertId" = $2`,
     [new Date().toISOString(), stockAlertId],
   );
-}
-
-export async function expireStockAlerts(): Promise<number> {
-  const result = await query<{ rowCount: number }>(
-    `UPDATE "inventoryStockAlert" SET "status" = 'expired', "updatedAt" = $1
-     WHERE "status" = 'active' AND "expiresAt" < NOW()`,
-    [new Date().toISOString()],
-  );
-  return (result as { rowCount: number } | null)?.rowCount || 0;
 }
 
 // ============================================================================
@@ -217,19 +261,6 @@ export async function getPriceAlerts(
     data: (rows || []).map(mapToPriceAlert),
     total: parseInt(countResult?.count || '0'),
   };
-}
-
-export async function getActivePriceAlertsForProduct(productId: string, productVariantId?: string): Promise<PriceAlert[]> {
-  let whereClause = '"productId" = $1 AND "status" = \'active\'';
-  const params: unknown[] = [productId];
-
-  if (productVariantId) {
-    whereClause += ' AND ("productVariantId" = $2 OR "productVariantId" IS NULL)';
-    params.push(productVariantId);
-  }
-
-  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportPriceAlert" WHERE ${whereClause}`, params);
-  return (rows || []).map(mapToPriceAlert);
 }
 
 export async function getPriceAlertsToNotify(productId: string, newPriceCents: number): Promise<PriceAlert[]> {
@@ -311,16 +342,6 @@ export async function notifyPriceAlert(priceAlertId: string, notifiedPriceCents:
   );
 }
 
-export async function markPriceAlertPurchased(priceAlertId: string, orderId: string): Promise<void> {
-  const now = new Date().toISOString();
-  await query(
-    `UPDATE "supportPriceAlert" SET 
-      "status" = 'purchased', "purchasedAt" = $1, "purchaseOrderId" = $2, "updatedAt" = $1
-     WHERE "priceAlertId" = $3`,
-    [now, orderId, priceAlertId],
-  );
-}
-
 export async function cancelPriceAlert(priceAlertId: string): Promise<void> {
   await query(
     `UPDATE "supportPriceAlert" SET "status" = 'cancelled', "updatedAt" = $1
@@ -337,75 +358,3 @@ export async function updatePriceAlertCurrentPrice(productId: string, newPriceCe
   );
 }
 
-export async function expirePriceAlerts(): Promise<number> {
-  const result = await query<{ rowCount: number }>(
-    `UPDATE "supportPriceAlert" SET "status" = 'expired', "updatedAt" = $1
-     WHERE "status" = 'active' AND "expiresAt" < NOW()`,
-    [new Date().toISOString()],
-  );
-  return (result as { rowCount: number } | null)?.rowCount || 0;
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function mapToStockAlert(row: Record<string, unknown>): StockAlert {
-  return {
-    stockAlertId: row.stockAlertId as string,
-    customerId: row.customerId as string | null,
-    email: row.email as string | null,
-    phone: row.phone as string | null,
-    productId: row.productId as string,
-    productVariantId: row.productVariantId as string | null,
-    productName: row.productName as string | null,
-    variantName: row.variantName as string | null,
-    sku: row.sku as string | null,
-    status: row.status as AlertStatus,
-    desiredQuantity: parseInt(row.desiredQuantity as string) || 1,
-    stockThreshold: parseInt(row.stockThreshold as string) || 1,
-    notifyOnAnyStock: Boolean(row.notifyOnAnyStock),
-    notificationChannel: row.notificationChannel as NotificationChannel,
-    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : null,
-    notificationCount: parseInt(row.notificationCount as string) || 0,
-    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : null,
-    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : null,
-    purchaseOrderId: row.purchaseOrderId as string | null,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
-    metadata: row.metadata as Record<string, unknown> | null,
-    createdAt: new Date(row.createdAt as string),
-    updatedAt: new Date(row.updatedAt as string),
-  };
-}
-
-function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
-  return {
-    priceAlertId: row.priceAlertId as string,
-    customerId: row.customerId as string | null,
-    email: row.email as string | null,
-    phone: row.phone as string | null,
-    productId: row.productId as string,
-    productVariantId: row.productVariantId as string | null,
-    productName: row.productName as string | null,
-    variantName: row.variantName as string | null,
-    sku: row.sku as string | null,
-    status: row.status as AlertStatus,
-    alertType: row.alertType as PriceAlertType,
-    targetPriceCents: row.targetPriceCents != null ? Number(row.targetPriceCents) : null,
-    percentageDrop: row.percentageDrop as string | null,
-    originalPriceCents: row.originalPriceCents != null ? Number(row.originalPriceCents) : null,
-    currentPriceCents: row.currentPriceCents != null ? Number(row.currentPriceCents) : null,
-    currencyCode: (row.currencyCode as string) || 'USD',
-    notificationChannel: row.notificationChannel as NotificationChannel,
-    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : null,
-    notifiedPriceCents: row.notifiedPriceCents != null ? Number(row.notifiedPriceCents) : null,
-    notificationCount: parseInt(row.notificationCount as string) || 0,
-    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : null,
-    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : null,
-    purchaseOrderId: row.purchaseOrderId as string | null,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
-    metadata: row.metadata as Record<string, unknown> | null,
-    createdAt: new Date(row.createdAt as string),
-    updatedAt: new Date(row.updatedAt as string),
-  };
-}

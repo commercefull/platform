@@ -12,7 +12,7 @@ import type { SupportMessageRecord } from './ManageSupportTickets';
 
 export type { TicketStatus, TicketPriority, TicketCategory } from '../../domain/repositories/SupportRepository';
 
-export interface StorefrontTicketCreateParams {
+interface StorefrontTicketCreateParams {
   customerId?: string;
   orderId?: string;
   email: string;
@@ -25,7 +25,7 @@ export interface StorefrontTicketCreateParams {
   channel?: TicketChannel;
 }
 
-export interface StorefrontMessageParams {
+interface StorefrontMessageParams {
   supportTicketId: string;
   senderId?: string;
   senderType: SenderType;
@@ -38,7 +38,7 @@ export interface StorefrontMessageParams {
   isAutoReply?: boolean;
 }
 
-export interface StorefrontTicketFilters {
+interface StorefrontTicketFilters {
   customerId?: string;
   assignedAgentId?: string;
   status?: TicketStatus;
@@ -47,7 +47,7 @@ export interface StorefrontTicketFilters {
   isEscalated?: boolean;
 }
 
-export type SupportAttachmentRecord = SupportAttachment;
+type SupportAttachmentRecord = SupportAttachment;
 
 export interface StorefrontSupportPort {
   getAgent(supportAgentId: string): Promise<SupportAgent | null>;

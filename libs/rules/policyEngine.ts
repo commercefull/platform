@@ -15,7 +15,7 @@ import { AttributeCondition, ConditionContext, matchesConditions } from './condi
 import { filterDateActive } from './resolver';
 
 /** What a matching policy does to the decision. */
-export type PolicyEffect = 'allow' | 'deny' | 'require_obligation';
+type PolicyEffect = 'allow' | 'deny' | 'require_obligation';
 
 /**
  * A versioned policy rule. `conditions` match against the fact context;

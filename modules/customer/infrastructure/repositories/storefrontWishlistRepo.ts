@@ -1,6 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 
-export interface WishlistItem {
+interface WishlistItem {
   wishlistItemId: string;
   customerId: string;
   productId: string;
@@ -8,7 +8,7 @@ export interface WishlistItem {
   updatedAt: Date;
 }
 
-export async function findByCustomer(customerId: string): Promise<unknown[]> {
+async function findByCustomer(customerId: string): Promise<unknown[]> {
   const results = await query<unknown[]>(
     `SELECT w.*, p."name", bp."priceCents", bp."salePriceCents", p."sku", p."status",
             pm."url" as "imageUrl"
@@ -23,14 +23,14 @@ export async function findByCustomer(customerId: string): Promise<unknown[]> {
   return results || [];
 }
 
-export async function findExisting(customerId: string, productId: string): Promise<WishlistItem | null> {
+async function findExisting(customerId: string, productId: string): Promise<WishlistItem | null> {
   return await queryOne<WishlistItem>(`SELECT "wishlistItemId" FROM "wishlistItem" WHERE "customerId" = $1 AND "productId" = $2`, [
     customerId,
     productId,
   ]);
 }
 
-export async function create(customerId: string, productId: string): Promise<WishlistItem | null> {
+async function create(customerId: string, productId: string): Promise<WishlistItem | null> {
   return await queryOne<WishlistItem>(
     `INSERT INTO "wishlistItem" ("customerId", "productId", "createdAt", "updatedAt")
      VALUES ($1, $2, NOW(), NOW()) RETURNING "wishlistItemId"`,
@@ -38,7 +38,7 @@ export async function create(customerId: string, productId: string): Promise<Wis
   );
 }
 
-export async function remove(customerId: string, productId: string): Promise<WishlistItem | null> {
+async function remove(customerId: string, productId: string): Promise<WishlistItem | null> {
   return await queryOne<WishlistItem>(
     `DELETE FROM "wishlistItem" WHERE "customerId" = $1 AND "productId" = $2 RETURNING "wishlistItemId"`,
     [customerId, productId],

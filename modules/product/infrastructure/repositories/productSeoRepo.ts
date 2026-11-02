@@ -8,7 +8,7 @@ export type ProductSeo = DbProductSeo;
 export type ProductSeoCreateParams = Omit<ProductSeo, 'productSeoId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type ProductSeoUpdateParams = Partial<Omit<ProductSeo, 'productSeoId' | 'productId' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
 
-export class ProductSeoRepo {
+class ProductSeoRepo {
   async findById(id: string): Promise<ProductSeo | null> {
     return await queryOne<ProductSeo>(`SELECT * FROM "productSeo" WHERE "productSeoId" = $1 AND "deletedAt" IS NULL`, [id]);
   }

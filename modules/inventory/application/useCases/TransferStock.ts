@@ -6,7 +6,7 @@
 
 import { InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
 
-export interface TransferStockItemInput {
+interface TransferStockItemInput {
   productId: string;
   variantId?: string;
   sku?: string;
@@ -22,7 +22,7 @@ export interface TransferStockInput {
   initiatedBy?: string;
 }
 
-export interface TransferResult {
+interface TransferResult {
   productId: string;
   variantId?: string;
   sku?: string;

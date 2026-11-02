@@ -8,7 +8,7 @@ import type { NotificationBatch, NotificationBatchRepository } from '../domain/r
 import type { NotificationCommandRepository } from '../domain/repositories/NotificationCommandRepository';
 import type { NotificationDeliveryLog, NotificationDeliveryLogRepository } from '../domain/repositories/NotificationDeliveryLogRepository';
 import type { NotificationDevice, NotificationDeviceRepository } from '../domain/repositories/NotificationDeviceRepository';
-import type { NotificationEventLog, NotificationEventLogRepository } from '../domain/repositories/NotificationEventLogRepository';
+import type { NotificationEventLogRepository } from '../domain/repositories/NotificationEventLogRepository';
 import type { NotificationPreference, NotificationPreferenceRepository } from '../domain/repositories/NotificationPreferenceRepository';
 import type { NotificationTemplate, NotificationTemplateRepository } from '../domain/repositories/NotificationTemplateRepository';
 import type {
@@ -115,14 +115,6 @@ export function createNotificationDeliveryLog(overrides: Partial<NotificationDel
   } as NotificationDeliveryLog;
 }
 
-export function createNotificationEventLog(overrides: Partial<NotificationEventLog> = {}): NotificationEventLog {
-  return {
-    notificationEventLogId: 'evt-1',
-    eventType: 'notification.sent',
-    createdAt: new Date('2024-01-01'),
-    ...overrides,
-  } as NotificationEventLog;
-}
 
 export function createNotificationPreference(overrides: Partial<NotificationPreference> = {}): NotificationPreference {
   return {

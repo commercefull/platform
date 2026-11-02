@@ -32,14 +32,14 @@ export interface ResendVerificationOutput {
   message: string;
 }
 
-export interface CustomerRecord {
+interface CustomerRecord {
   customerId: string;
   email: string;
   emailVerified: boolean;
   firstName?: string;
 }
 
-export interface EmailVerificationRecord {
+interface EmailVerificationRecord {
   customerId: string;
   token: string;
   expiresAt: Date;

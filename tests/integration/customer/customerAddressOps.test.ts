@@ -51,13 +51,29 @@ describe('Customer Address Operations Tests', () => {
   it('creates and updates international addresses — GB no-state, AE no-postal, JP prefecture, US state+ZIP', async () => {
     const cases = [
       // GB: no administrative area — a postcode is enough
-      { label: 'GB', body: { addressLine1: '10 Downing St', city: 'London', postalCode: 'SW1A 2AA', country: 'GB', addressType: 'shipping' } },
+      {
+        label: 'GB',
+        body: { addressLine1: '10 Downing St', city: 'London', postalCode: 'SW1A 2AA', country: 'GB', addressType: 'shipping' },
+      },
       // AE: no postal code system — emirate carried in `state`
       { label: 'AE', body: { addressLine1: 'Sheikh Zayed Road 1', city: 'Dubai', state: 'Dubai', country: 'AE', addressType: 'shipping' } },
       // JP: prefecture + postal code
-      { label: 'JP', body: { addressLine1: '1-1 Chiyoda', city: 'Tokyo', state: 'Tokyo', postalCode: '100-0001', country: 'JP', addressType: 'billing' } },
+      {
+        label: 'JP',
+        body: { addressLine1: '1-1 Chiyoda', city: 'Tokyo', state: 'Tokyo', postalCode: '100-0001', country: 'JP', addressType: 'billing' },
+      },
       // US: state + 5-digit ZIP
-      { label: 'US', body: { addressLine1: '1600 Amphitheatre Pkwy', city: 'Mountain View', state: 'CA', postalCode: '94043', country: 'US', addressType: 'shipping' } },
+      {
+        label: 'US',
+        body: {
+          addressLine1: '1600 Amphitheatre Pkwy',
+          city: 'Mountain View',
+          state: 'CA',
+          postalCode: '94043',
+          country: 'US',
+          addressType: 'shipping',
+        },
+      },
     ];
 
     for (const { label, body } of cases) {

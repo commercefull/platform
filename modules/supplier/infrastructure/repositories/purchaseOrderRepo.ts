@@ -26,9 +26,8 @@ import type {
 // ============================================================================
 
 export type SupplierPurchaseOrderStatus = 'draft' | 'pending' | 'approved' | 'sent' | 'confirmed' | 'partial' | 'completed' | 'cancelled';
-export type SupplierPurchaseOrderType = 'standard' | 'restock' | 'backOrder' | 'special' | 'emergency';
-export type SupplierPurchaseOrderPriority = 'low' | 'normal' | 'high' | 'urgent';
-export type SupplierPurchaseOrderItemStatus = 'pending' | 'partial' | 'received' | 'cancelled' | 'backOrdered';
+
+type SupplierPurchaseOrderItemStatus = 'pending' | 'partial' | 'received' | 'cancelled' | 'backOrdered';
 
 export type SupplierPurchaseOrder = DbSupplierPurchaseOrder;
 

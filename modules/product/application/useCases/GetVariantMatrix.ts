@@ -13,7 +13,7 @@ import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 // Response
 // ============================================================================
 
-export interface VariantMatrixRow {
+interface VariantMatrixRow {
   variantId: string;
   sku: string;
   name: string;

@@ -44,7 +44,7 @@ export interface UpdateUserMembershipInput {
   paymentMethod?: string;
 }
 
-export type CreateUserMembershipParams = Omit<CreateUserMembershipInput, 'userId' | 'tierId'> & {
+type CreateUserMembershipParams = Omit<CreateUserMembershipInput, 'userId' | 'tierId'> & {
   userId: string;
   tierId: string;
   startDate: string;

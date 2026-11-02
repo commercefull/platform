@@ -12,7 +12,7 @@ export interface CalculateTierStatusInput {
   programId?: string;
 }
 
-export interface TierInfo {
+interface TierInfo {
   tierId: string;
   tierName: string;
   tierLevel: number;
@@ -31,7 +31,7 @@ export interface CalculateTierStatusOutput {
   qualifyingPurchases: number;
 }
 
-export interface LoyaltyTierData {
+interface LoyaltyTierData {
   tierId: string;
   name: string;
   level: number;
@@ -41,16 +41,16 @@ export interface LoyaltyTierData {
   pointsMultiplier?: number;
 }
 
-export interface CustomerLoyaltyData {
+interface CustomerLoyaltyData {
   currentTier?: LoyaltyTierData;
 }
 
-export interface QualificationPeriod {
+interface QualificationPeriod {
   startDate: Date;
   endDate: Date;
 }
 
-export interface QualifyingMetrics {
+interface QualifyingMetrics {
   points: number;
   purchases: number;
 }

@@ -12,10 +12,10 @@
  */
 
 /** BCP 47 text direction for rendered HTML (`dir` attribute). */
-export type TextDirection = 'ltr' | 'rtl';
+type TextDirection = 'ltr' | 'rtl';
 
 /** Measurement system preference for weight/dimension units. */
-export type MeasurementSystem = 'metric' | 'imperial' | 'us';
+type MeasurementSystem = 'metric' | 'imperial' | 'us';
 
 export interface LocaleContext {
   /** Full BCP 47 locale, e.g. 'en-GB', 'de-DE', 'ja-JP', 'ar-AE'. */
@@ -37,12 +37,12 @@ const RTL_LANGUAGES = new Set(['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw', 'ks',
 const IMPERIAL_COUNTRIES = new Set(['US', 'LR', 'MM']);
 
 /** Parse the language subtag out of a BCP 47 locale string. */
-export function languageOf(locale: string): string {
+function languageOf(locale: string): string {
   return locale.split(/[-_]/)[0]?.toLowerCase() ?? 'en';
 }
 
 /** Derive text direction from a BCP 47 locale. */
-export function textDirectionOf(locale: string): TextDirection {
+function textDirectionOf(locale: string): TextDirection {
   return RTL_LANGUAGES.has(languageOf(locale)) ? 'rtl' : 'ltr';
 }
 
@@ -51,7 +51,7 @@ export function textDirectionOf(locale: string): TextDirection {
  * 'en-US' → 'us'; 'en-GB' → 'imperial' (UK conventionally mixes);
  * everything else → 'metric'.
  */
-export function measurementSystemOf(locale: string): MeasurementSystem {
+function measurementSystemOf(locale: string): MeasurementSystem {
   const region = locale.split(/[-_]/)[1]?.toUpperCase();
   if (region === 'US') return 'us';
   if (region && IMPERIAL_COUNTRIES.has(region)) return 'imperial';

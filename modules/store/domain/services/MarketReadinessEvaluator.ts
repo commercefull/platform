@@ -23,7 +23,7 @@ export type ReadinessDimensionKey =
   | 'support'
   | 'fraud';
 
-export type ReadinessStatus = 'ready' | 'warning' | 'missing';
+type ReadinessStatus = 'ready' | 'warning' | 'missing';
 
 export interface ReadinessDimensionResult {
   dimension: ReadinessDimensionKey;

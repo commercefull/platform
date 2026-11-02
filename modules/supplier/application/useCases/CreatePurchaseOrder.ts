@@ -5,7 +5,7 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { SupplierNotFoundError, SupplierNotActiveError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
-export interface PurchaseOrderItem {
+interface PurchaseOrderItem {
   productId: string;
   variantId?: string;
   sku: string;

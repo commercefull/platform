@@ -1,11 +1,21 @@
 import { StorePickupLocationAdapter } from './StorePickupLocationAdapter';
-import type * as pickupLocationRepo from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type {
+  saveLocation,
+  getLocation,
+  getLocations,
+  updateLocation,
+  deleteLocation,
+} from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 describe('StorePickupLocationAdapter', () => {
   let adapter: StorePickupLocationAdapter;
-  let mockRepo: jest.Mocked<
-    Pick<typeof pickupLocationRepo, 'saveLocation' | 'getLocation' | 'getLocations' | 'updateLocation' | 'deleteLocation'>
-  >;
+  let mockRepo: jest.Mocked<{
+    saveLocation: typeof saveLocation;
+    getLocation: typeof getLocation;
+    getLocations: typeof getLocations;
+    updateLocation: typeof updateLocation;
+    deleteLocation: typeof deleteLocation;
+  }>;
 
   beforeEach(() => {
     mockRepo = {

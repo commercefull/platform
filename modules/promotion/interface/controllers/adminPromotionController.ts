@@ -84,21 +84,33 @@ export const createPromotionForm = async (req: HttpRequest, res: HttpResponse): 
 export const createPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const { code, name, description, type, value, currency, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
-      body as {
-        code?: string;
-        name: string;
-        description?: string;
-        type: 'percentage' | 'fixed_amount' | 'free_shipping';
-        value: string;
-        currency?: string;
-        minOrderAmount?: string;
-        maxDiscountAmount?: string;
-        usageLimit?: string;
-        usageLimitPerCustomer?: string;
-        startsAt?: string;
-        endsAt?: string;
-      };
+    const {
+      code,
+      name,
+      description,
+      type,
+      value,
+      currency,
+      minOrderAmount,
+      maxDiscountAmount,
+      usageLimit,
+      usageLimitPerCustomer,
+      startsAt,
+      endsAt,
+    } = body as {
+      code?: string;
+      name: string;
+      description?: string;
+      type: 'percentage' | 'fixed_amount' | 'free_shipping';
+      value: string;
+      currency?: string;
+      minOrderAmount?: string;
+      maxDiscountAmount?: string;
+      usageLimit?: string;
+      usageLimitPerCustomer?: string;
+      startsAt?: string;
+      endsAt?: string;
+    };
 
     const promotionCurrency = currency || 'USD';
     const command = new CreatePromotionCommand(
@@ -228,7 +240,8 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   if (status !== undefined) updates.status = status;
   if (value !== undefined) updates.value = parseFloat(value);
   const updateCurrency = currency || 'USD';
-  if (minOrderAmount !== undefined) updates.minOrderAmountCents = minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), updateCurrency) : undefined;
+  if (minOrderAmount !== undefined)
+    updates.minOrderAmountCents = minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), updateCurrency) : undefined;
   if (maxDiscountAmount !== undefined)
     updates.maxDiscountAmountCents = maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), updateCurrency) : undefined;
   if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;

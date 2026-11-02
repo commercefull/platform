@@ -317,7 +317,11 @@ const _validatePromotionForCart = async (
   }
 
   // Validate the promotion
-  const isValid = await managePromotionsUseCase.isValidForOrder(promotionId, toMinorUnits(parseFloat(cartTotal), currency || 'USD'), customerId);
+  const isValid = await managePromotionsUseCase.isValidForOrder(
+    promotionId,
+    toMinorUnits(parseFloat(cartTotal), currency || 'USD'),
+    customerId,
+  );
 
   if (isValid) {
     jsonResponse(res, 200, {

@@ -7,7 +7,7 @@
 
 import { eventBus } from '../../../libs/events/eventBus';
 import { generateUUID } from '../../../libs/uuid';
-import type { PaymentGateway, PaymentMethodConfig, PaymentTransaction } from '../../../libs/db/types';
+import type { PaymentGateway, PaymentMethodConfig } from '../../../libs/db/types';
 import type { PaymentBalance } from '../domain/repositories/PaymentBalanceRepository';
 import type { PaymentDispute } from '../domain/repositories/PaymentDisputeRepository';
 import type { PaymentFee } from '../domain/repositories/PaymentFeeRepository';
@@ -129,26 +129,6 @@ export function createPaymentMethodConfig(overrides: Partial<PaymentMethodConfig
   };
 }
 
-export function createPaymentTransaction(overrides: Partial<PaymentTransaction> = {}): PaymentTransaction {
-  return {
-    paymentTransactionId: 'txn-1',
-    createdAt: now,
-    updatedAt: now,
-    organizationId: 'org-1',
-    orderId: null,
-    customerId: null,
-    amountCents: '100',
-    currencyCode: 'USD',
-    status: 'succeeded',
-    type: 'charge',
-    provider: 'stripe',
-    gatewayId: null,
-    externalTransactionId: null,
-    paymentMethod: null,
-    metadata: null,
-    ...overrides,
-  } as PaymentTransaction;
-}
 
 export function createPaymentBalance(overrides: Partial<PaymentBalance> = {}): PaymentBalance {
   return {

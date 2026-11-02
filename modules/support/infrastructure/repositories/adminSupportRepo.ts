@@ -9,7 +9,7 @@ import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import type { SupportTicketProps as SupportTicketProps } from '../../domain/entities/SupportTicket';
 import type { SupportMessage } from 'libs/db/types';
 
-export type SupportTicket = SupportTicketProps;
+type SupportTicket = SupportTicketProps;
 
 export type SupportTicketWithCustomer = SupportTicket & {
   customerEmail?: string;
@@ -130,3 +130,4 @@ export async function addTicketMessage(ticketId: string, message: string, sender
     [ticketId],
   );
 }
+

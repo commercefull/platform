@@ -24,7 +24,7 @@ interface DbCoPurchaseRow {
   coCount: string;
 }
 
-export class RecommendationSignalRepository implements CoPurchaseRepository {
+class RecommendationSignalRepository implements CoPurchaseRepository {
   async incrementPairs(scope: SignalScope, productIds: string[], delta: number = 1): Promise<void> {
     if (productIds.length < 2) return;
     // Ordered pairs A≠B — unnest generates every (a,b) combination in one
@@ -153,7 +153,7 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
   }
 }
 
-export class ProcessedOrderRepositoryImpl implements ProcessedOrderRepository {
+class ProcessedOrderRepositoryImpl implements ProcessedOrderRepository {
   async get(orderId: string): Promise<ProcessedOrderRecord | null> {
     const row = await queryOne<{
       orderId: string;

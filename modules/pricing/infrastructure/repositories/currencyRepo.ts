@@ -15,7 +15,7 @@ import {
  * Uses camelCase for table and column names as per platform convention.
  * Tables: currency, currencyRegion (from db/types.ts)
  */
-export class CurrencyRepo {
+class CurrencyRepo {
   private readonly currencyTable = Table.Currency;
   private readonly currencyRegionTable = 'currencyRegion';
 

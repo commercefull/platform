@@ -25,11 +25,7 @@ router.get('/stores', async (req: HttpRequest, res: HttpResponse) => {
 router.get('/markets/context', async (req: HttpRequest, res: HttpResponse) => {
   try {
     const context = await resolveMarketContextUseCase.execute(
-      new ResolveMarketContextCommand(
-        req.hostname,
-        req.query.currency as string | undefined,
-        req.query.locale as string | undefined,
-      ),
+      new ResolveMarketContextCommand(req.hostname, req.query.currency as string | undefined, req.query.locale as string | undefined),
     );
     jsonResponse(res, 200, { data: context });
   } catch (error) {

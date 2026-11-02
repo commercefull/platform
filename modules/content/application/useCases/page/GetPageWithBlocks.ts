@@ -14,7 +14,7 @@ export class GetPageWithBlocksQuery {
   ) {}
 }
 
-export interface BlockWithType {
+interface BlockWithType {
   contentBlockId: string;
   title: string | null;
   sortOrder: number;

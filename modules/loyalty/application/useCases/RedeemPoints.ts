@@ -27,12 +27,12 @@ export interface RedeemPointsOutput {
   discountValue?: number;
 }
 
-export interface RedeemPointsMember {
+interface RedeemPointsMember {
   memberId: string;
   availablePoints: number;
 }
 
-export interface RedeemPointsReward {
+interface RedeemPointsReward {
   isActive: boolean;
   pointsCost: number;
   discountValue?: number;

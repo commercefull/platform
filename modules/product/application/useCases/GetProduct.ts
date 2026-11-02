@@ -32,7 +32,7 @@ export class GetProductCommand {
 // Response
 // ============================================================================
 
-export interface ProductVariantResponse {
+interface ProductVariantResponse {
   variantId: string;
   sku: string;
   name: string;

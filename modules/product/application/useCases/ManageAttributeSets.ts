@@ -1,7 +1,7 @@
 import type { ProductAttributeSetAttribute } from '../../domain/repositories/ProductCatalogPorts';
 import { AttributeSetNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
-export interface ProductAttributeSetRecord {
+interface ProductAttributeSetRecord {
   productAttributeSetId?: string | null;
   name?: string | null;
   code?: string | null;
@@ -39,7 +39,7 @@ export interface AttributeSetUpdateInput {
   isActive?: boolean;
 }
 
-export interface AttributeSetMappingInput {
+interface AttributeSetMappingInput {
   attributeSetId: string;
   attributeId: string;
   position?: number;

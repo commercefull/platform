@@ -26,7 +26,7 @@ export interface AdminRepository {
   updateLastLogin(adminId: string): Promise<void>;
 }
 
-export interface AdminUser {
+interface AdminUser {
   adminId: string;
   email: string;
   name: string;

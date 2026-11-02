@@ -29,7 +29,7 @@ export interface CreateLocaleOutput {
   createdAt: string;
 }
 
-export interface CreateLocaleData {
+interface CreateLocaleData {
   localeId: string;
   code: string;
   name: string;

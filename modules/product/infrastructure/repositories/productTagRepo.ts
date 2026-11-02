@@ -4,7 +4,7 @@ import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductTag, ProductTagCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 export type { ProductTag, ProductTagCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
-export class ProductTagRepo {
+class ProductTagRepo {
   async findAll(includeDeleted = false): Promise<ProductTag[]> {
     const sql = includeDeleted ? `SELECT * FROM "productTag" ORDER BY "name" ASC` : `SELECT * FROM "productTag" ORDER BY "name" ASC`;
     return (await query<ProductTag[]>(sql)) || [];

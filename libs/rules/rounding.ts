@@ -20,7 +20,7 @@
 export type RoundingMode = 'perLine' | 'perTotal';
 
 /** Default number of decimal places (2 = cents). */
-export const DEFAULT_DECIMALS = 2;
+const DEFAULT_DECIMALS = 2;
 
 /**
  * Round a single number to `decimals` places using half-up rounding.

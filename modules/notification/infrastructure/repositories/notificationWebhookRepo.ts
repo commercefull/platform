@@ -1,6 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 
-export interface NotificationWebhook {
+interface NotificationWebhook {
   notificationWebhookId: string;
   organizationId?: string;
   url: string;
@@ -11,7 +11,7 @@ export interface NotificationWebhook {
   updatedAt: Date;
 }
 
-export async function findActive(event: string): Promise<NotificationWebhook[]> {
+async function findActive(event: string): Promise<NotificationWebhook[]> {
   return (
     (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`, [
       JSON.stringify([event]),
@@ -19,12 +19,12 @@ export async function findActive(event: string): Promise<NotificationWebhook[]> 
   );
 }
 
-export async function findByMerchant(_organizationId?: string): Promise<NotificationWebhook[]> {
+async function findByMerchant(_organizationId?: string): Promise<NotificationWebhook[]> {
   // notificationWebhook has no organizationId column — webhooks are global.
   return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
 }
 
-export async function create(
+async function create(
   params: Omit<NotificationWebhook, 'notificationWebhookId' | 'createdAt' | 'updatedAt'>,
 ): Promise<NotificationWebhook | null> {
   const now = new Date();
@@ -41,14 +41,14 @@ export async function create(
   );
 }
 
-export async function deactivate(notificationWebhookId: string): Promise<void> {
+async function deactivate(notificationWebhookId: string): Promise<void> {
   await query(`UPDATE "notificationWebhook" SET "isActive" = false, "updatedAt" = $1 WHERE "notificationWebhookId" = $2`, [
     new Date(),
     notificationWebhookId,
   ]);
 }
 
-export async function findAll(): Promise<NotificationWebhook[]> {
+async function findAll(): Promise<NotificationWebhook[]> {
   return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
 }
 

@@ -2,7 +2,7 @@ import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { getStoreUseCase, manageSalesChannelsUseCase, manageMarketsUseCase, ListMarketsCommand } from '../../modules/store';
 import type { MarketResponse } from '../../modules/store';
 import { createCache } from '../../libs/cache';
-import { languageOf, textDirectionOf } from '../../libs/i18n';
+import { createLocaleContext } from '../../libs/i18n';
 import { getAddressFieldUiMetadata } from '../../libs/address';
 import type { CommerceContext } from '../../libs/commerceContext';
 
@@ -263,14 +263,15 @@ async function resolveMarket(req: HttpRequest, storeId?: string): Promise<Market
  * Build the composite CommerceContext for the request — customer-facing
  * locale/language preferences layered over the resolved market.
  */
-function buildCommerceContext(market: MarketResponse | null, locale: string, currency: string, region: string, store: ResolvedStore | null): CommerceContext {
+function buildCommerceContext(
+  market: MarketResponse | null,
+  locale: string,
+  currency: string,
+  region: string,
+  store: ResolvedStore | null,
+): CommerceContext {
   return {
-    customer: {
-      locale,
-      language: languageOf(locale),
-      textDirection: textDirectionOf(locale),
-      preferredCurrencyCode: currency,
-    },
+    customer: { ...createLocaleContext(locale), preferredCurrencyCode: currency },
     market: market
       ? {
           marketId: market.marketId,
@@ -305,7 +306,8 @@ function buildCommerceContext(market: MarketResponse | null, locale: string, cur
 function applyMarketOverrides(market: MarketResponse, req: HttpRequest): { locale: string; currency: string } {
   const session = (req.session as unknown as { store?: StoreSession } | undefined)?.store;
   let locale = session?.locale && market.supportedLocaleCodes.includes(session.locale) ? session.locale : market.defaultLocaleCode;
-  let currency = session?.currency && market.supportedCurrencyCodes.includes(session.currency) ? session.currency : market.defaultCurrencyCode;
+  let currency =
+    session?.currency && market.supportedCurrencyCodes.includes(session.currency) ? session.currency : market.defaultCurrencyCode;
 
   const queryLocale = req.query.locale as string | undefined;
   if (queryLocale && market.supportedLocaleCodes.includes(queryLocale)) locale = queryLocale;

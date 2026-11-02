@@ -2,9 +2,9 @@ import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 import type { ProductQaStatus, ProductQa, ProductQaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
-export type { ProductQaStatus, ProductQa, ProductQaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductQaStatus, ProductQa } from '../../domain/repositories/ProductCatalogPorts';
 
-export class ProductQaRepo {
+class ProductQaRepo {
   async findByProduct(productId: string, status?: ProductQaStatus): Promise<ProductQa[]> {
     let sql = `SELECT * FROM "productQa" WHERE "productId" = $1`;
     const params: unknown[] = [productId];

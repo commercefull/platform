@@ -8,7 +8,7 @@ export interface GetFeatureFlagsInput {
   includeDisabled?: boolean;
 }
 
-export interface FeatureFlag {
+interface FeatureFlag {
   key: string;
   name: string;
   description?: string;

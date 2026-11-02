@@ -11,24 +11,18 @@
  *   module use cases, not here.
  */
 
+import { LocaleContext } from './i18n';
+
 /** How the customer reads — never mutates market or currency. */
-export interface CustomerContext {
+interface CustomerContext extends LocaleContext {
   customerId?: string;
-  /** BCP 47 locale, e.g. 'en-GB'. */
-  locale: string;
-  /** ISO 639-1 language, e.g. 'en'. */
-  language: string;
-  /** 'ltr' | 'rtl'. */
-  textDirection: string;
-  /** IANA timezone, e.g. 'Europe/Paris'. */
-  timeZone?: string;
   /** Customer's stated currency preference (may differ from market default). */
   preferredCurrencyCode?: string;
   segmentIds?: string[];
 }
 
 /** Where the customer buys — defines allowed boundaries. */
-export interface MarketContext {
+interface MarketContext {
   marketId?: string;
   /** Short market code, e.g. 'GB', 'EU-DE', 'US-DIGITAL'. */
   marketCode?: string;
@@ -47,7 +41,7 @@ export interface MarketContext {
 }
 
 /** The facts of this specific transaction. */
-export interface TransactionContext {
+interface TransactionContext {
   sellerOrganizationId?: string;
   sellerEntityId?: string;
   buyerCustomerId?: string;
@@ -68,7 +62,7 @@ export interface TransactionContext {
 }
 
 /** Which legal entity contracts and which jurisdictions apply. */
-export interface LegalContext {
+interface LegalContext {
   contractingEntityId?: string;
   taxJurisdiction?: string;
   /** Privacy regime, e.g. 'EU_GDPR', 'UK_GDPR', 'US_CCPA', 'BR_LGPD', 'JP_APPI'. */
@@ -83,14 +77,4 @@ export interface CommerceContext {
   market: MarketContext;
   transaction: TransactionContext;
   legal: LegalContext;
-}
-
-/** Empty context — use-case defaults; callers fill what they resolved. */
-export function emptyCommerceContext(): CommerceContext {
-  return {
-    customer: { locale: 'en-US', language: 'en', textDirection: 'ltr' },
-    market: {},
-    transaction: {},
-    legal: {},
-  };
 }

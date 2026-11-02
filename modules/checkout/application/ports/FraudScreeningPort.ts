@@ -9,7 +9,7 @@
  * See `docs/e2e-rule-engine-implementation-plan.md` Epic G.
  */
 
-export type FraudScreeningDecision = 'approved' | 'review' | 'blocked';
+type FraudScreeningDecision = 'approved' | 'review' | 'blocked';
 
 export interface FraudScreeningRequest {
   checkoutId: string;

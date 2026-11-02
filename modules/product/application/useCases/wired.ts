@@ -17,8 +17,7 @@ import brandRepo from '../../infrastructure/repositories/brandRepo';
 import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
 import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductPricingAdapter } from '../../infrastructure/acl/ProductPricingAdapter';
-import { InventoryStockAvailabilityAdapter } from '../../infrastructure/acl/InventoryStockAvailabilityAdapter';
-import InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
+
 
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
@@ -27,8 +26,7 @@ import { UpdateProductUseCase } from './UpdateProduct';
 import { DeleteProductUseCase } from './DeleteProduct';
 import { UpdateProductStatusUseCase } from './UpdateProductStatus';
 import { ListProductTypesUseCase } from './ListProductTypes';
-import { GetProductVariantsUseCase } from './GetProductVariants';
-import { CreateProductVariantUseCase } from './CreateProductVariant';
+
 import { UpdateVariantInventoryPolicyUseCase } from './UpdateVariantInventoryPolicy';
 import { ManageProductQaUseCase } from './ManageProductQa';
 import { ManageProductCategoriesUseCase } from './ManageProductCategories';
@@ -75,7 +73,19 @@ import catalogVariantRepo from '../../infrastructure/repositories/productVariant
 import productRelationshipRepo from '../../infrastructure/repositories/productRelationshipRepo';
 import productImageRepo from '../../infrastructure/repositories/productImageRepo';
 import productDownloadRepo from '../../infrastructure/repositories/productDownloadRepo';
-import * as bundleRepo from '../../infrastructure/repositories/bundleRepo';
+import {
+  getBundle,
+  getBundleItem,
+  getBundleItems,
+  getBundleByProductId,
+  getBundles,
+  getActiveBundles,
+  saveBundle,
+  deleteBundle,
+  saveBundleItem,
+  deleteBundleItem,
+  calculateBundlePrice,
+} from '../../infrastructure/repositories/bundleRepo';
 import { ManageAttributeSetsUseCase } from './ManageAttributeSets';
 import { ManageBundlesUseCase } from './ManageBundles';
 import { ManageProductTypesUseCase } from './ManageProductTypes';
@@ -86,7 +96,7 @@ import {
   ManageProductVariantsUseCase,
 } from './ManageProductAssets';
 
-export const dynamicAttributeRepo: DynamicAttributePort = new DynamicAttributeRepository();
+const dynamicAttributeRepo: DynamicAttributePort = new DynamicAttributeRepository();
 const attributeSetRepo = new ProductAttributeSetRepository();
 
 // Pricing is owned by the pricing module — product consumes it through this
@@ -100,12 +110,7 @@ export const updateProductUseCase = new UpdateProductUseCase(productRepo, produc
 export const deleteProductUseCase = new DeleteProductUseCase(productRepo);
 export const updateProductStatusUseCase = new UpdateProductStatusUseCase(productRepo);
 export const listProductTypesUseCase = new ListProductTypesUseCase(productTypeRepo);
-export const getProductVariantsUseCase = new GetProductVariantsUseCase(
-  productVariantRepo,
-  productPricingPort,
-  new InventoryStockAvailabilityAdapter(InventoryRepo),
-);
-export const createProductVariantUseCase = new CreateProductVariantUseCase(productVariantRepo, productPricingPort);
+
 export const updateVariantInventoryPolicyUseCase = new UpdateVariantInventoryPolicyUseCase(productVariantRepo);
 export const manageProductQaUseCase = new ManageProductQaUseCase(productQaRepo);
 export const manageProductCategoriesUseCase = new ManageProductCategoriesUseCase(productCategoryRepo);
@@ -131,7 +136,7 @@ export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmen
 );
 export const getProductAttributesUseCase = new GetProductAttributesUseCase(dynamicAttributeRepo);
 export const searchProductsUseCase = new SearchProductsUseCase(productRepo, productPricingPort);
-export { brandRepo };
+
 
 export const createCatalogVariantUseCase = new CreateCatalogVariantUseCase(catalogVariantRepo, productPricingPort);
 export const updateCatalogVariantUseCase = new UpdateCatalogVariantUseCase(catalogVariantRepo, productPricingPort);
@@ -156,7 +161,19 @@ export const findByAttributeUseCase = new FindByAttributeUseCase(productSearchSe
 
 export const manageAttributeSetsUseCase = new ManageAttributeSetsUseCase(attributeSetRepo);
 export const manageProductTypesUseCase = new ManageProductTypesUseCase(productTypeRepo, attributeSetRepo);
-export const manageBundlesUseCase = new ManageBundlesUseCase(bundleRepo);
+export const manageBundlesUseCase = new ManageBundlesUseCase({
+  getBundle,
+  getBundleItem,
+  getBundleItems,
+  getBundleByProductId,
+  getBundles,
+  getActiveBundles,
+  saveBundle,
+  deleteBundle,
+  saveBundleItem,
+  deleteBundleItem,
+  calculateBundlePrice,
+});
 export const manageProductImagesUseCase = new ManageProductImagesUseCase(productImageRepo);
 export const manageProductDownloadsUseCase = new ManageProductDownloadsUseCase(productDownloadRepo);
 export const manageProductRelationshipsUseCase = new ManageProductRelationshipsUseCase(

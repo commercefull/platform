@@ -29,7 +29,7 @@ export interface RegisterOrganizationOutput {
   requiresApproval: boolean;
 }
 
-export interface OrganizationRecord {
+interface OrganizationRecord {
   organizationId: string;
   email: string;
 }

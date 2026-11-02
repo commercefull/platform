@@ -38,7 +38,7 @@ import { getVatRegistrationsByMerchant, validateVatNumberFormat, extractCountryF
  * Repository for tax-related read operations only
  * Following the Command Query Responsibility Segregation (CQRS) pattern
  */
-export class TaxQueryRepo {
+class TaxQueryRepo {
   // Tax Rate query methods
   async findTaxRateById(id: string): Promise<TaxRate | null> {
     const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);

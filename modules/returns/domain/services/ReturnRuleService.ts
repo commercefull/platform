@@ -80,4 +80,3 @@ export class ReturnRuleService {
   }
 }
 
-export const returnRuleService = new ReturnRuleService();

@@ -10,7 +10,7 @@ export interface GetCustomerTicketsInput {
   limit?: number;
 }
 
-export interface TicketSummary {
+interface TicketSummary {
   ticketId: string;
   ticketNumber: string;
   subject: string;

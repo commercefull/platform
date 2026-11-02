@@ -38,7 +38,7 @@ export interface TierPriceFindAllOptions {
   customerGroupId?: string;
 }
 
-export interface PriceListRecord {
+interface PriceListRecord {
   priceListId: string;
   name: string;
   description?: string;

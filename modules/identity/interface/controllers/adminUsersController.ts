@@ -243,5 +243,3 @@ const AVAILABLE_PERMISSIONS = [
   { key: 'roles.view', name: 'View Roles', category: 'Roles' },
   { key: 'roles.manage', name: 'Manage Roles', category: 'Roles' },
 ];
-
-export { AVAILABLE_PERMISSIONS };

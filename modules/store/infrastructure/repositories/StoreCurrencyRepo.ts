@@ -19,7 +19,7 @@ interface StoreCurrencyRow {
   code?: string;
 }
 
-export class StoreCurrencyRepo implements StoreCurrencyRepository {
+class StoreCurrencyRepo implements StoreCurrencyRepository {
   async findByStore(storeId: string): Promise<StoreCurrency[]> {
     const rows = await query<StoreCurrencyRow[]>(
       `SELECT sc.*, c.code FROM "storeCurrency" sc

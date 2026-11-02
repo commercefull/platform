@@ -19,7 +19,7 @@ export interface SetExchangeRateOutput {
   updatedAt: string;
 }
 
-export interface CurrencyForExchangeRate {
+interface CurrencyForExchangeRate {
   currencyId: string;
   exchangeRate: number;
 }

@@ -9,9 +9,58 @@
 
 import DashboardQueryRepository from './DashboardQueryRepository';
 import adminAnalyticsRepo from './adminAnalyticsRepo';
-import * as analyticsRepo from './analyticsRepo';
-import * as reportingRepo from './reportingRepo';
-
+import {
+  getCustomerCohorts,
+  getProductPerformance,
+  getSalesDaily,
+  getSalesSummary,
+  getSearchQueries,
+  getTopProducts,
+  upsertProductPerformance,
+  upsertSalesDaily,
+  upsertSearchQuery,
+} from './analyticsRepo';
+const analyticsRepo = {
+  getCustomerCohorts,
+  getProductPerformance,
+  getSalesDaily,
+  getSalesSummary,
+  getSearchQueries,
+  getTopProducts,
+  upsertProductPerformance,
+  upsertSalesDaily,
+  upsertSearchQuery,
+};
+import {
+  createSnapshot,
+  deleteDashboard,
+  getDashboard,
+  getDashboards,
+  getEventCounts,
+  getEvents,
+  getLatestSnapshot,
+  getRealTimeMetrics,
+  getSnapshots,
+  getUnprocessedEvents,
+  markEventsProcessed,
+  saveDashboard,
+  trackEvent,
+} from './reportingRepo';
+const reportingRepo = {
+  createSnapshot,
+  deleteDashboard,
+  getDashboard,
+  getDashboards,
+  getEventCounts,
+  getEvents,
+  getLatestSnapshot,
+  getRealTimeMetrics,
+  getSnapshots,
+  getUnprocessedEvents,
+  markEventsProcessed,
+  saveDashboard,
+  trackEvent,
+};
 class AnalyticsDataRepository {
   readonly dashboard = DashboardQueryRepository;
   readonly admin = adminAnalyticsRepo;

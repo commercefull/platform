@@ -1,7 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductAttributeToGroup {
+interface ProductAttributeToGroup {
   productAttributeToGroupId: string;
   createdAt: string;
   attributeGroupId: string;
@@ -9,9 +9,9 @@ export interface ProductAttributeToGroup {
   position: number;
 }
 
-export type ProductAttributeToGroupCreateParams = Omit<ProductAttributeToGroup, 'productAttributeToGroupId' | 'createdAt'>;
+type ProductAttributeToGroupCreateParams = Omit<ProductAttributeToGroup, 'productAttributeToGroupId' | 'createdAt'>;
 
-export class ProductAttributeToGroupRepo {
+class ProductAttributeToGroupRepo {
   async findByGroup(attributeGroupId: string): Promise<ProductAttributeToGroup[]> {
     return (
       (await query<ProductAttributeToGroup[]>(`SELECT * FROM "productAttributeToGroup" WHERE "groupId" = $1 ORDER BY "position" ASC`, [

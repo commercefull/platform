@@ -39,7 +39,7 @@ export class CalculateShippingRatesCommand {
 // Response
 // ============================================================================
 
-export interface ShippingRateOption {
+interface ShippingRateOption {
   shippingMethodId: string;
   shippingMethodName: string;
   shippingMethodCode: string;

@@ -23,7 +23,7 @@ export class GetShippingMethodsQuery {
 // Response
 // ============================================================================
 
-export interface ShippingMethodWithCarrier extends ShippingMethod {
+interface ShippingMethodWithCarrier extends ShippingMethod {
   carrier?: ShippingCarrier;
 }
 

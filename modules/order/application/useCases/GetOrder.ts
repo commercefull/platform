@@ -27,7 +27,7 @@ export class GetOrderCommand {
 // Response
 // ============================================================================
 
-export interface OrderItemResponse {
+interface OrderItemResponse {
   orderItemId: string;
   productId: string;
   productVariantId?: string;
@@ -46,7 +46,7 @@ export interface OrderItemResponse {
   isDigital: boolean;
 }
 
-export interface OrderAddressResponse {
+interface OrderAddressResponse {
   orderAddressId: string;
   addressType: string;
   firstName: string;

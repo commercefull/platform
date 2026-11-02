@@ -46,7 +46,7 @@ export async function findById(id: string): Promise<MembershipPlan | null> {
 /**
  * Find a membership plan by code
  */
-export async function findByCode(code: string): Promise<MembershipPlan | null> {
+async function findByCode(code: string): Promise<MembershipPlan | null> {
   const row = await queryOne<MembershipPlanRow>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
   return row ? toPlan(row) : null;
 }
@@ -61,24 +61,6 @@ export async function findAll(activeOnly = false): Promise<MembershipPlan[]> {
   }
   sql += ` ORDER BY "priority" DESC, "level" ASC`;
   return ((await query<MembershipPlanRow[]>(sql)) || []).map(toPlan);
-}
-
-/**
- * Find the default membership plan
- */
-export async function findDefault(): Promise<MembershipPlan | null> {
-  const row = await queryOne<MembershipPlanRow>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
-  return row ? toPlan(row) : null;
-}
-
-/**
- * Find all public membership plans
- */
-export async function findPublic(): Promise<MembershipPlan[]> {
-  const rows =
-    (await query<MembershipPlanRow[]>(`SELECT * FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true ORDER BY "priority" DESC`)) ||
-    [];
-  return rows.map(toPlan);
 }
 
 /**
@@ -199,20 +181,6 @@ async function unsetAllDefaults(exceptId?: string): Promise<void> {
 }
 
 /**
- * Activate a membership plan
- */
-export async function activate(id: string): Promise<MembershipPlan | null> {
-  return update(id, { isActive: true });
-}
-
-/**
- * Deactivate a membership plan
- */
-export async function deactivate(id: string): Promise<MembershipPlan | null> {
-  return update(id, { isActive: false });
-}
-
-/**
  * Delete a membership plan
  */
 export async function remove(id: string): Promise<boolean> {
@@ -226,13 +194,27 @@ export async function remove(id: string): Promise<boolean> {
 /**
  * Count membership plans
  */
-export async function count(activeOnly = false): Promise<number> {
+async function count(activeOnly = false): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}"`;
   if (activeOnly) {
     sql += ` WHERE "isActive" = true`;
   }
   const result = await queryOne<{ count: string }>(sql);
   return result ? parseInt(result.count, 10) : 0;
+}
+
+/**
+ * Activate a membership plan
+ */
+export async function activate(id: string): Promise<MembershipPlan | null> {
+  return update(id, { isActive: true });
+}
+
+/**
+ * Deactivate a membership plan
+ */
+export async function deactivate(id: string): Promise<MembershipPlan | null> {
+  return update(id, { isActive: false });
 }
 
 /**
@@ -268,3 +250,4 @@ export async function getStatistics(): Promise<{
     byCycle: byCycle as Record<BillingCycle, number>,
   };
 }
+

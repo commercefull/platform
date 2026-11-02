@@ -398,10 +398,9 @@ export class CheckoutRepo implements CheckoutRepository {
       storeId: row.storeId ?? undefined,
       channelId: row.channelId ?? undefined,
       localeCode: row.localeCode ?? undefined,
-      appliedPromotions: Array.isArray(row.appliedPromotions)
-        ? (row.appliedPromotions as CheckoutSession['appliedPromotions'])
-        : undefined,
-      promotionDiscountAmount: row.promotionDiscountCents != null ? Money.fromCents(Number(row.promotionDiscountCents), currency) : undefined,
+      appliedPromotions: Array.isArray(row.appliedPromotions) ? (row.appliedPromotions as CheckoutSession['appliedPromotions']) : undefined,
+      promotionDiscountAmount:
+        row.promotionDiscountCents != null ? Money.fromCents(Number(row.promotionDiscountCents), currency) : undefined,
       notes: row.notes ?? undefined,
       metadata: row.metadata
         ? typeof row.metadata === 'string'

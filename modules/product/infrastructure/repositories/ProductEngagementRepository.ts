@@ -4,7 +4,7 @@
  * Merges productReviewRepo, productReviewMediaRepo, productReviewVoteRepo,
  * productQaRepo, productQaAnswerRepo, productQaVoteRepo,
  * productMediaRepo, productImageRepo, productRelationshipRepo,
- * bundleRepo, productListRepo, productListItemRepo
+ * productListRepo, productListItemRepo
  * into a single aggregate-aligned repository.
  *
  * Aggregate: Product Engagement (reviews, Q&A, media, images, relationships, bundles, lists)
@@ -18,7 +18,6 @@ import productQaRepo from './productQaRepo';
 import productMediaRepo from './productMediaRepo';
 import productImageRepo from './productImageRepo';
 import productRelationshipRepo from './productRelationshipRepo';
-import * as bundleRepo from './bundleRepo';
 
 // Re-export types for backward compatibility
 export type { ProductReview, ReviewFilters, ReviewRating } from './productReviewRepo';
@@ -36,7 +35,6 @@ class ProductEngagementRepository {
   readonly media = productMediaRepo;
   readonly images = productImageRepo;
   readonly relationships = productRelationshipRepo;
-  readonly bundles = bundleRepo;
 }
 
 export default new ProductEngagementRepository();

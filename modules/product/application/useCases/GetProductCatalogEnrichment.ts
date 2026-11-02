@@ -34,7 +34,7 @@ export class GetProductCatalogEnrichmentCommand {
 // Response
 // ============================================================================
 
-export interface QaWithAnswers extends ProductQa {
+interface QaWithAnswers extends ProductQa {
   answers: ProductQaAnswer[];
 }
 

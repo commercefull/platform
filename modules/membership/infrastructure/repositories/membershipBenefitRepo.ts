@@ -12,15 +12,14 @@ export type MembershipBenefit = DbMembershipBenefit;
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 
 // Type aliases for benefit and value types (used in application logic)
-export type BenefitType =
+type BenefitType =
   'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
-export type ValueType = 'fixed' | 'percentage' | 'boolean' | 'text' | 'json';
 
 // Derived types for create/update operations
-export type MembershipBenefitCreateParams = Omit<MembershipBenefit, 'membershipBenefitId' | 'createdAt' | 'updatedAt'>;
-export type MembershipBenefitUpdateParams = Partial<Omit<MembershipBenefit, 'membershipBenefitId' | 'code' | 'createdAt' | 'updatedAt'>>;
+type MembershipBenefitCreateParams = Omit<MembershipBenefit, 'membershipBenefitId' | 'createdAt' | 'updatedAt'>;
+type MembershipBenefitUpdateParams = Partial<Omit<MembershipBenefit, 'membershipBenefitId' | 'code' | 'createdAt' | 'updatedAt'>>;
 
-export class MembershipBenefitRepo {
+class MembershipBenefitRepo {
   async findById(id: string): Promise<MembershipBenefit | null> {
     return await queryOne<MembershipBenefit>(`SELECT * FROM "membershipBenefit" WHERE "membershipBenefitId" = $1`, [id]);
   }

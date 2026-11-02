@@ -8,7 +8,7 @@ import { Table, ShippingRate } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import { calculateRate } from '../../domain/services/calculateRate';
 
-export { ShippingRate, calculateRate };
+export { ShippingRate };
 
 export type CreateShippingRateInput = Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingRateInput = Partial<
@@ -17,11 +17,11 @@ export type UpdateShippingRateInput = Partial<
 
 const TABLE = Table.ShippingRate;
 
-export async function findById(id: string): Promise<ShippingRate | null> {
+async function findById(id: string): Promise<ShippingRate | null> {
   return queryOne<ShippingRate>(`SELECT * FROM "${TABLE}" WHERE "shippingRateId" = $1`, [id]);
 }
 
-export async function findByZone(zoneId: string, activeOnly = false): Promise<ShippingRate[]> {
+async function findByZone(zoneId: string, activeOnly = false): Promise<ShippingRate[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1`;
   if (activeOnly) {
     sql += ` AND "isActive" = true AND ("validFrom" IS NULL OR "validFrom" <= NOW()) AND ("validTo" IS NULL OR "validTo" >= NOW())`;
@@ -30,7 +30,7 @@ export async function findByZone(zoneId: string, activeOnly = false): Promise<Sh
   return (await query<ShippingRate[]>(sql, [zoneId])) || [];
 }
 
-export async function findByMethod(methodId: string, activeOnly = false): Promise<ShippingRate[]> {
+async function findByMethod(methodId: string, activeOnly = false): Promise<ShippingRate[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "shippingMethodId" = $1`;
   if (activeOnly) {
     sql += ` AND "isActive" = true AND ("validFrom" IS NULL OR "validFrom" <= NOW()) AND ("validTo" IS NULL OR "validTo" >= NOW())`;
@@ -39,7 +39,7 @@ export async function findByMethod(methodId: string, activeOnly = false): Promis
   return (await query<ShippingRate[]>(sql, [methodId])) || [];
 }
 
-export async function findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null> {
+async function findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null> {
   return queryOne<ShippingRate>(
     `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1 AND "shippingMethodId" = $2 AND "isActive" = true ORDER BY "priority" ASC LIMIT 1`,
     [zoneId, methodId],
@@ -51,7 +51,7 @@ export async function findByZoneAndMethod(zoneId: string, methodId: string): Pro
  * first match in their preferred zone order; ordering by priority preserves the
  * per-(zone, method) "lowest priority wins" semantics of findByZoneAndMethod.
  */
-export async function findByZonesAndMethods(zoneIds: string[], methodIds: string[]): Promise<ShippingRate[]> {
+async function findByZonesAndMethods(zoneIds: string[], methodIds: string[]): Promise<ShippingRate[]> {
   if (zoneIds.length === 0 || methodIds.length === 0) return [];
   return (
     (await query<ShippingRate[]>(
@@ -61,7 +61,7 @@ export async function findByZonesAndMethods(zoneIds: string[], methodIds: string
   );
 }
 
-export async function findActive(zoneId?: string, methodId?: string): Promise<ShippingRate[]> {
+async function findActive(zoneId?: string, methodId?: string): Promise<ShippingRate[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "isActive" = true`;
   const params: unknown[] = [];
 
@@ -80,7 +80,7 @@ export async function findActive(zoneId?: string, methodId?: string): Promise<Sh
   return (await query<ShippingRate[]>(sql, params)) || [];
 }
 
-export async function create(input: CreateShippingRateInput): Promise<ShippingRate> {
+async function create(input: CreateShippingRateInput): Promise<ShippingRate> {
   const result = await queryOne<ShippingRate>(
     `INSERT INTO "${TABLE}" (
       "shippingZoneId", "shippingMethodId", "name", "description", "isActive", "rateType", "baseRateCents",
@@ -114,7 +114,7 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
   return result;
 }
 
-export async function update(id: string, input: UpdateShippingRateInput): Promise<ShippingRate | null> {
+async function update(id: string, input: UpdateShippingRateInput): Promise<ShippingRate | null> {
   const updateFields: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -138,15 +138,15 @@ export async function update(id: string, input: UpdateShippingRateInput): Promis
   );
 }
 
-export async function activate(id: string): Promise<ShippingRate | null> {
+async function activate(id: string): Promise<ShippingRate | null> {
   return update(id, { isActive: true });
 }
 
-export async function deactivate(id: string): Promise<ShippingRate | null> {
+async function deactivate(id: string): Promise<ShippingRate | null> {
   return update(id, { isActive: false });
 }
 
-export async function deleteRate(id: string): Promise<boolean> {
+async function deleteRate(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingRateId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingRateId" = $1 RETURNING "shippingRateId"`,
     [id],
@@ -154,7 +154,7 @@ export async function deleteRate(id: string): Promise<boolean> {
   return !!result;
 }
 
-export async function count(zoneId?: string, methodId?: string): Promise<number> {
+async function count(zoneId?: string, methodId?: string): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}" WHERE 1=1`;
   const params: unknown[] = [];
 

@@ -38,7 +38,7 @@ function toProps(row: DbCandidateRow): RecommendationCandidateProps {
   };
 }
 
-export class RecommendationCandidateRepository implements CandidateRepository {
+class RecommendationCandidateRepository implements CandidateRepository {
   async listForProducts(
     scope: SignalScope,
     productIds: string[],

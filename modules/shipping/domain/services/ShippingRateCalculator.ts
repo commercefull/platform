@@ -118,4 +118,3 @@ export class ShippingRateCalculator {
   }
 }
 
-export const shippingRateCalculator = new ShippingRateCalculator();

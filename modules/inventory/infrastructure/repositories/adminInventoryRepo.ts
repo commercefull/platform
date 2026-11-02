@@ -11,7 +11,7 @@ import { generateUUID } from '../../../../libs/uuid';
 // Types
 // ============================================================================
 
-export interface InventoryLevelWithProduct {
+interface InventoryLevelWithProduct {
   inventoryLevelId: string;
   productId: string;
   productVariantId?: string;
@@ -25,7 +25,7 @@ export interface InventoryLevelWithProduct {
   locationName?: string;
 }
 
-export interface InventoryStats {
+interface InventoryStats {
   totalProducts: number;
   inStock: number;
   lowStock: number;
@@ -45,7 +45,7 @@ const ADJUSTMENT_TYPE_CODES: Record<string, string> = {
 // Inventory Level Queries
 // ============================================================================
 
-export async function findInventoryLevels(params: {
+async function findInventoryLevels(params: {
   search?: string;
   locationId?: string;
   stockStatus?: string;
@@ -101,7 +101,7 @@ export async function findInventoryLevels(params: {
   );
 }
 
-export async function countInventoryLevels(params: { search?: string; locationId?: string; stockStatus?: string }): Promise<number> {
+async function countInventoryLevels(params: { search?: string; locationId?: string; stockStatus?: string }): Promise<number> {
   let whereClause = 'WHERE 1=1';
   const queryParams: unknown[] = [];
   let paramIndex = 1;
@@ -135,7 +135,7 @@ export async function countInventoryLevels(params: { search?: string; locationId
   return parseInt(result?.count || '0');
 }
 
-export async function getInventoryStats(): Promise<InventoryStats> {
+async function getInventoryStats(): Promise<InventoryStats> {
   const result = await queryOne<Record<string, string>>(
     `SELECT 
       COUNT(*) as "totalProducts",
@@ -153,7 +153,7 @@ export async function getInventoryStats(): Promise<InventoryStats> {
   };
 }
 
-export async function findAllLocations(): Promise<Array<{ locationId: string; name: string }>> {
+async function findAllLocations(): Promise<Array<{ locationId: string; name: string }>> {
   return (
     (await query<Array<{ locationId: string; name: string }>>(
       `SELECT "distributionWarehouseId" as "locationId", "name" FROM "distributionWarehouse" WHERE "isActive" = true ORDER BY "name"`,
@@ -161,7 +161,7 @@ export async function findAllLocations(): Promise<Array<{ locationId: string; na
   );
 }
 
-export async function findLowStockItems(limit: number = 10): Promise<Record<string, string>[]> {
+async function findLowStockItems(limit: number = 10): Promise<Record<string, string>[]> {
   return (
     (await query<Record<string, string>[]>(
       `SELECT 
@@ -184,7 +184,7 @@ export async function findLowStockItems(limit: number = 10): Promise<Record<stri
 // Inventory Level Detail
 // ============================================================================
 
-export async function findInventoryLevelById(inventoryLevelId: string): Promise<Record<string, string> | null> {
+async function findInventoryLevelById(inventoryLevelId: string): Promise<Record<string, string> | null> {
   return queryOne<Record<string, string>>(
     `SELECT il.*, il."onHandQuantity" as "quantity", il."reservedQuantity" as "reserved",
             il."distributionWarehouseId" as "locationId", p."name" as "productName", p."sku"
@@ -207,7 +207,7 @@ async function findLevelContext(inventoryLevelId: string): Promise<Record<string
   );
 }
 
-export async function findTransactionsByLevelId(
+async function findTransactionsByLevelId(
   inventoryLevelId: string,
   limit: number,
   offset: number,
@@ -228,7 +228,7 @@ export async function findTransactionsByLevelId(
   );
 }
 
-export async function countTransactionsByLevelId(inventoryLevelId: string): Promise<number> {
+async function countTransactionsByLevelId(inventoryLevelId: string): Promise<number> {
   const level = await findLevelContext(inventoryLevelId);
   if (!level) return 0;
 
@@ -241,7 +241,7 @@ export async function countTransactionsByLevelId(inventoryLevelId: string): Prom
   return parseInt(result?.count || '0');
 }
 
-export async function adjustStockLevel(
+async function adjustStockLevel(
   inventoryLevelId: string,
   newQuantity: number,
   previousQuantity: number,
@@ -299,7 +299,7 @@ export async function adjustStockLevel(
 // Locations with Stats
 // ============================================================================
 
-export async function findLocationsWithStats(): Promise<Record<string, string>[]> {
+async function findLocationsWithStats(): Promise<Record<string, string>[]> {
   return (
     (await query<Record<string, string>[]>(
       `SELECT 
@@ -318,7 +318,7 @@ export async function findLocationsWithStats(): Promise<Record<string, string>[]
 // Low Stock Report
 // ============================================================================
 
-export async function findLowStockReport(): Promise<Record<string, string>[]> {
+async function findLowStockReport(): Promise<Record<string, string>[]> {
   return (
     (await query<Record<string, string>[]>(
       `SELECT 

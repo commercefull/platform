@@ -12,7 +12,6 @@ export {
   AdjustStockUseCase as AdjustStockUseCaseV2,
   type AdjustStockInput as AdjustStockInputV2,
   type AdjustStockOutput,
-  type StockAdjustmentType,
   type AdjustStockLocationPort,
 } from './AdjustStock';
 

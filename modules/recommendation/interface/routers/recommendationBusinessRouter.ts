@@ -7,27 +7,40 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
-import * as controller from '../controllers/RecommendationBusinessController';
-
+import {
+  acceptSuggestion,
+  createExclusion,
+  createRule,
+  deleteExclusion,
+  deleteRule,
+  getStats,
+  hideSuggestion,
+  listExclusions,
+  listRules,
+  listSuggestions,
+  previewPlacement,
+  rebuild,
+  updateRule,
+} from '../controllers/RecommendationBusinessController';
 const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 
-router.get('/recommendation/products/:productId/suggestions', asyncHandler(controller.listSuggestions));
-router.post('/recommendation/products/:productId/suggestions/accept', asyncHandler(controller.acceptSuggestion));
-router.post('/recommendation/products/:productId/suggestions/hide', asyncHandler(controller.hideSuggestion));
-router.get('/recommendation/products/:productId/preview', asyncHandler(controller.previewPlacement));
+router.get('/recommendation/products/:productId/suggestions', asyncHandler(listSuggestions));
+router.post('/recommendation/products/:productId/suggestions/accept', asyncHandler(acceptSuggestion));
+router.post('/recommendation/products/:productId/suggestions/hide', asyncHandler(hideSuggestion));
+router.get('/recommendation/products/:productId/preview', asyncHandler(previewPlacement));
 
-router.get('/recommendation/rules', asyncHandler(controller.listRules));
-router.post('/recommendation/rules', asyncHandler(controller.createRule));
-router.put('/recommendation/rules/:ruleId', asyncHandler(controller.updateRule));
-router.delete('/recommendation/rules/:ruleId', asyncHandler(controller.deleteRule));
+router.get('/recommendation/rules', asyncHandler(listRules));
+router.post('/recommendation/rules', asyncHandler(createRule));
+router.put('/recommendation/rules/:ruleId', asyncHandler(updateRule));
+router.delete('/recommendation/rules/:ruleId', asyncHandler(deleteRule));
 
-router.get('/recommendation/exclusions', asyncHandler(controller.listExclusions));
-router.post('/recommendation/exclusions', asyncHandler(controller.createExclusion));
-router.delete('/recommendation/exclusions/:exclusionId', asyncHandler(controller.deleteExclusion));
+router.get('/recommendation/exclusions', asyncHandler(listExclusions));
+router.post('/recommendation/exclusions', asyncHandler(createExclusion));
+router.delete('/recommendation/exclusions/:exclusionId', asyncHandler(deleteExclusion));
 
-router.post('/recommendation/rebuild', asyncHandler(controller.rebuild));
-router.get('/recommendation/stats', asyncHandler(controller.getStats));
+router.post('/recommendation/rebuild', asyncHandler(rebuild));
+router.get('/recommendation/stats', asyncHandler(getStats));
 
 export const recommendationBusinessRouter = router;

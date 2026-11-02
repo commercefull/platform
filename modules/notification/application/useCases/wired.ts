@@ -7,10 +7,10 @@
 import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
 import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
 
-import { DeleteNotificationUseCase } from './DeleteNotification';
+
 import { GetNotificationDeliveryLogsUseCase } from './GetNotificationDeliveryLogs';
 import { GetTemplateTranslationsUseCase } from './GetTemplateTranslations';
-import { LogNotificationEventUseCase } from './LogNotificationEvent';
+
 import { ManageNotificationBatchesUseCase } from './ManageNotificationBatches';
 import { ManageNotificationPreferenceUseCase } from './ManageNotificationPreference';
 import { ManageNotificationTemplatesUseCase } from './ManageNotificationTemplates';
@@ -23,13 +23,12 @@ import { ManageNotificationRecordsUseCase } from './ManageNotificationRecords';
 import { ManageStorefrontNotificationsUseCase } from './ManageStorefrontNotifications';
 import { RegisterNotificationDeviceUseCase } from './RegisterNotificationDevice';
 import { SendNotificationBatchUseCase } from './SendNotificationBatch';
-import { UnsubscribeNotificationUseCase } from './UnsubscribeNotification';
+
 import { UpsertTemplateTranslationUseCase } from './UpsertTemplateTranslation';
 
-export const deleteNotificationUseCase = new DeleteNotificationUseCase(notificationDataRepository.notifications);
 export const getNotificationDeliveryLogsUseCase = new GetNotificationDeliveryLogsUseCase(notificationDataRepository.deliveryLogs);
 export const getTemplateTranslationsUseCase = new GetTemplateTranslationsUseCase(notificationConfigRepository.templateTranslations);
-export const logNotificationEventUseCase = new LogNotificationEventUseCase(notificationDataRepository.eventLogs);
+
 export const manageNotificationBatchesUseCase = new ManageNotificationBatchesUseCase(notificationDataRepository.batches);
 export const manageNotificationPreferenceUseCase = new ManageNotificationPreferenceUseCase(notificationConfigRepository.preferences);
 export const manageNotificationTemplatesUseCase = new ManageNotificationTemplatesUseCase(notificationConfigRepository.templates);
@@ -47,10 +46,7 @@ export const sendNotificationBatchUseCase = new SendNotificationBatchUseCase(
   notificationConfigRepository.unsubscribes,
   notificationDataRepository.eventLogs,
 );
-export const unsubscribeNotificationUseCase = new UnsubscribeNotificationUseCase(
-  notificationConfigRepository.unsubscribes,
-  notificationConfigRepository.preferences,
-);
+
 export const upsertTemplateTranslationUseCase = new UpsertTemplateTranslationUseCase(notificationConfigRepository.templateTranslations);
 
 import { GetNotificationsUseCase } from './GetNotifications';

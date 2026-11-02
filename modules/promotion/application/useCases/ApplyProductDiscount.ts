@@ -28,7 +28,7 @@ export class ApplyProductDiscountCommand {
 // Response
 // ============================================================================
 
-export interface DiscountedItem {
+interface DiscountedItem {
   productId: string;
   variantId?: string;
   originalPriceCents: number;

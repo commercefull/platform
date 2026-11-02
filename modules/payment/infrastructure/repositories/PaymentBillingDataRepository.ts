@@ -8,8 +8,46 @@
  */
 
 import paymentBillingRepo from './PaymentBillingRepository';
-import * as fraudRepo from './fraudRepo';
-
+import {
+  addToBlacklist,
+  createCheck,
+  deleteRule,
+  expireBlacklistEntries,
+  getBlacklist,
+  getBlacklistEntry,
+  getCheck,
+  getCheckByOrderId,
+  getChecks,
+  getPendingReviews,
+  getRule,
+  getRules,
+  incrementRuleTrigger,
+  isBlacklisted,
+  removeFromBlacklist,
+  reviewCheck,
+  runFraudCheck,
+  saveRule,
+} from './fraudRepo';
+const fraudRepo = {
+  addToBlacklist,
+  createCheck,
+  deleteRule,
+  expireBlacklistEntries,
+  getBlacklist,
+  getBlacklistEntry,
+  getCheck,
+  getCheckByOrderId,
+  getChecks,
+  getPendingReviews,
+  getRule,
+  getRules,
+  incrementRuleTrigger,
+  isBlacklisted,
+  removeFromBlacklist,
+  reviewCheck,
+  runFraudCheck,
+  saveRule,
+};
 // Re-export fraud types for backward compatibility
 export type { RuleType, RuleAction, CheckStatus, RiskLevel, BlacklistType, FraudRule, FraudCheck, FraudBlacklist } from './fraudRepo';
 

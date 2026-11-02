@@ -6,12 +6,6 @@ export class ReturnNotFoundError extends AppError {
   }
 }
 
-export class ReturnAlreadyExistsError extends AppError {
-  constructor(orderId: string) {
-    super(`Return request already exists for order: ${orderId}`, 409, { code: 'returns.already_exists', details: { orderId } });
-  }
-}
-
 export class InvalidReturnTransitionError extends AppError {
   constructor(from: string, to: string) {
     super(`Cannot transition return from ${from} to ${to}`, 409, { code: 'returns.invalid_transition', details: { from, to } });
@@ -24,24 +18,12 @@ export class InvalidReturnRequestError extends AppError {
   }
 }
 
-export class ReturnItemNotFoundError extends AppError {
-  constructor(itemId: string) {
-    super(`Return item not found: ${itemId}`, 404, { code: 'returns.item_not_found', details: { itemId } });
-  }
-}
-
 export class InsufficientStoreCreditError extends AppError {
   constructor(customerId: string, requested: number, available: number) {
     super(`Insufficient store credit for customer ${customerId}: requested ${requested}, available ${available}`, 400, {
       code: 'returns.store_credit_insufficient',
       details: { customerId, requested, available },
     });
-  }
-}
-
-export class StoreCreditNotFoundError extends AppError {
-  constructor(customerId: string) {
-    super(`No store credit found for customer: ${customerId}`, 404, { code: 'returns.store_credit_not_found', details: { customerId } });
   }
 }
 

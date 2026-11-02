@@ -7,10 +7,10 @@
  */
 
 /** Whether a module is required or optional. */
-export type ModuleRequirement = 'required' | 'optional';
+type ModuleRequirement = 'required' | 'optional';
 
 /** Route mount point descriptor. */
-export interface RouteDeclaration {
+interface RouteDeclaration {
   /** Express mount path, e.g. '/business/products' or '/customer/orders'. */
   path: string;
   /** Which auth scope is required. */
@@ -18,13 +18,13 @@ export interface RouteDeclaration {
 }
 
 /** GraphQL schema descriptor. */
-export interface GraphQLDeclaration {
+interface GraphQLDeclaration {
   /** Whether this module contributes to the GraphQL schema. */
   enabled: boolean;
 }
 
 /** Event subscription descriptor. */
-export interface EventDeclaration {
+interface EventDeclaration {
   /** Event types this module subscribes to. */
   subscribes: string[];
   /** Event types this module emits. */
@@ -32,7 +32,7 @@ export interface EventDeclaration {
 }
 
 /** Database table descriptor. */
-export interface TableDeclaration {
+interface TableDeclaration {
   /** Table names owned by this module. */
   names: string[];
 }

@@ -26,12 +26,7 @@ import {
   type TriggeredRuleInfo,
 } from '../../domain/services/FraudRuleEvaluator';
 
-export type {
-  FraudScreeningRequest,
-  FraudScreeningResult,
-  TriggeredRuleInfo,
-  ScreeningDecision,
-} from '../../domain/services/FraudRuleEvaluator';
+export type { FraudScreeningRequest, FraudScreeningResult } from '../../domain/services/FraudRuleEvaluator';
 
 export class ScreenForFraudUseCase {
   constructor(private readonly fraudRepo: FraudScreeningRepositoryPort) {}

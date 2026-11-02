@@ -14,8 +14,22 @@ import {
   CreatePickupLocationInput,
   UpdatePickupLocationInput,
 } from '../../application/ports/PickupLocationPort';
-import type * as pickupLocationRepo from '../../../store/infrastructure/repositories/pickupLocationRepo';
-import type { PickupLocation } from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type {
+  PickupLocation,
+  saveLocation,
+  getLocation,
+  getLocations,
+  updateLocation,
+  deleteLocation,
+} from '../../../store/infrastructure/repositories/pickupLocationRepo';
+
+type PickupLocationRepoPort = {
+  saveLocation: typeof saveLocation;
+  getLocation: typeof getLocation;
+  getLocations: typeof getLocations;
+  updateLocation: typeof updateLocation;
+  deleteLocation: typeof deleteLocation;
+};
 
 function toSummary(loc: PickupLocation): PickupLocationSummary {
   return {
@@ -30,10 +44,7 @@ function toSummary(loc: PickupLocation): PickupLocationSummary {
 
 export class StorePickupLocationAdapter implements PickupLocationPort {
   constructor(
-    private readonly locations: Pick<
-      typeof pickupLocationRepo,
-      'saveLocation' | 'getLocation' | 'getLocations' | 'updateLocation' | 'deleteLocation'
-    >,
+    private readonly locations: PickupLocationRepoPort,
   ) {}
 
   async findById(id: string): Promise<PickupLocationSummary | null> {

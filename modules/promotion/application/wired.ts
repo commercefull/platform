@@ -36,7 +36,34 @@ import couponDiscountRepository, {
   type PromotionCouponUsage,
 } from '../infrastructure/repositories/CouponDiscountRepository';
 import { PromotionGiftCard } from '../infrastructure';
-import * as giftCardRepository from '../infrastructure/repositories/GiftCardRepository';
+import {
+  activateGiftCard,
+  assignGiftCard,
+  cancelGiftCard,
+  createGiftCard,
+  expireGiftCards,
+  getGiftCard,
+  getGiftCardByCode as giftCardRepository_getGiftCardByCode,
+  getGiftCards as giftCardRepository_getGiftCards,
+  getTransactions as giftCardRepository_getTransactions,
+  redeemGiftCard,
+  refundToGiftCard,
+  reloadGiftCard,
+} from '../infrastructure/repositories/GiftCardRepository';
+const giftCardRepository = {
+  activateGiftCard,
+  assignGiftCard,
+  cancelGiftCard,
+  createGiftCard,
+  expireGiftCards,
+  getGiftCard,
+  getGiftCardByCode: giftCardRepository_getGiftCardByCode,
+  getGiftCards: giftCardRepository_getGiftCards,
+  getTransactions: giftCardRepository_getTransactions,
+  redeemGiftCard,
+  refundToGiftCard,
+  reloadGiftCard,
+};
 import { ValidateCouponUseCase } from './useCases/ValidateCoupon';
 import { RedeemCouponUseCase } from './useCases/RedeemCoupon';
 import { ApplyProductDiscountUseCase } from './useCases/ApplyProductDiscount';

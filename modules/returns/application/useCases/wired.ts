@@ -1,4 +1,4 @@
-import { ReturnRequestRepositoryImpl, ReturnItemRepositoryImpl, StoreCreditRepositoryImpl } from '../../infrastructure';
+import { ReturnRequestRepositoryImpl, StoreCreditRepositoryImpl } from '../../infrastructure';
 import { CreateReturnRequestUseCase } from './CreateReturnRequest';
 import { ApproveReturnRequestUseCase } from './ApproveReturnRequest';
 import { DenyReturnRequestUseCase } from './DenyReturnRequest';
@@ -14,7 +14,6 @@ import { GetStoreCreditLedgerUseCase } from './GetStoreCreditLedger';
 import { DebitStoreCreditUseCase } from './DebitStoreCredit';
 
 const returnRepo = new ReturnRequestRepositoryImpl();
-const itemRepo = new ReturnItemRepositoryImpl();
 const storeCreditRepo = new StoreCreditRepositoryImpl();
 
 export const createReturnRequestUseCase = new CreateReturnRequestUseCase(returnRepo);
@@ -30,5 +29,3 @@ export const listReturnRequestsUseCase = new ListReturnRequestsUseCase(returnRep
 export const getStoreCreditBalanceUseCase = new GetStoreCreditBalanceUseCase(storeCreditRepo);
 export const getStoreCreditLedgerUseCase = new GetStoreCreditLedgerUseCase(storeCreditRepo);
 export const debitStoreCreditUseCase = new DebitStoreCreditUseCase(storeCreditRepo);
-
-export { itemRepo, storeCreditRepo };

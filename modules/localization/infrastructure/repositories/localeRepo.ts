@@ -4,16 +4,16 @@ import { unixTimestamp } from '../../../../libs/date';
 import { LocaleCodeAlreadyExistsError, FailedToCreateLocaleError } from '../../domain/errors/LocalizationErrors';
 
 // Use Locale type directly from libs/db/types.ts
-export type { Locale };
+export type { };
 
 // Type alias for text direction (used in other parts of the codebase)
-export type TextDirection = 'ltr' | 'rtl';
+type TextDirection = 'ltr' | 'rtl';
 
 // Derived types for create/update operations
-export type LocaleCreateParams = Omit<Locale, 'localeId' | 'createdAt' | 'updatedAt'>;
-export type LocaleUpdateParams = Partial<Omit<Locale, 'localeId' | 'code' | 'createdAt' | 'updatedAt'>>;
+type LocaleCreateParams = Omit<Locale, 'localeId' | 'createdAt' | 'updatedAt'>;
+type LocaleUpdateParams = Partial<Omit<Locale, 'localeId' | 'code' | 'createdAt' | 'updatedAt'>>;
 
-export class LocaleRepo {
+class LocaleRepo {
   /**
    * Find locale by ID
    */

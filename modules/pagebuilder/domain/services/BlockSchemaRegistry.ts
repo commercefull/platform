@@ -13,7 +13,7 @@ import { BlockTypeAlreadyRegisteredError } from '../errors/PageBuilderErrors';
 
 // ── Field Types ────────────────────────────────────────────────
 
-export type BlockFieldType =
+type BlockFieldType =
   | 'text'
   | 'textarea'
   | 'richtext'
@@ -29,12 +29,12 @@ export type BlockFieldType =
   | 'collection-ref'
   | 'json';
 
-export interface BlockFieldOption {
+interface BlockFieldOption {
   label: string;
   value: string;
 }
 
-export interface BlockField {
+interface BlockField {
   key: string;
   label: string;
   type: BlockFieldType;

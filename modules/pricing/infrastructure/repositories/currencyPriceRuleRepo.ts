@@ -163,5 +163,3 @@ export class CurrencyPriceRuleRepo {
     };
   }
 }
-
-export default new CurrencyPriceRuleRepo();

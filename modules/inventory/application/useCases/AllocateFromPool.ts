@@ -23,7 +23,7 @@ export interface AllocateFromPoolInput {
   };
 }
 
-export interface AllocationResult {
+interface AllocationResult {
   productId: string;
   variantId?: string;
   requestedQuantity: number;

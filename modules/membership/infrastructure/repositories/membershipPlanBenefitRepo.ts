@@ -4,12 +4,12 @@ import { MembershipPlanBenefitAlreadyExistsError, FailedToCreateMembershipError 
 import type { MembershipPlanBenefit } from '../../domain/repositories/MembershipRepository';
 
 export type { MembershipPlanBenefit };
-export type MembershipPlanBenefitCreateParams = Omit<MembershipPlanBenefit, 'membershipPlanBenefitId' | 'createdAt' | 'updatedAt'>;
-export type MembershipPlanBenefitUpdateParams = Partial<
+type MembershipPlanBenefitCreateParams = Omit<MembershipPlanBenefit, 'membershipPlanBenefitId' | 'createdAt' | 'updatedAt'>;
+type MembershipPlanBenefitUpdateParams = Partial<
   Pick<MembershipPlanBenefit, 'isActive' | 'priority' | 'valueOverride' | 'rulesOverride' | 'notes'>
 >;
 
-export class MembershipPlanBenefitRepo {
+class MembershipPlanBenefitRepo {
   async findById(id: string): Promise<MembershipPlanBenefit | null> {
     return await queryOne<MembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [id]);
   }

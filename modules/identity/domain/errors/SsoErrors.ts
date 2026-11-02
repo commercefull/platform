@@ -16,12 +16,6 @@ export class SsoProviderNotFoundError extends AppError {
   }
 }
 
-export class SsoProviderAlreadyExistsError extends AppError {
-  constructor(name: string) {
-    super(`SSO provider already exists: ${name}`, 409, { code: 'identity.sso_provider_already_exists' });
-  }
-}
-
 export class SsoValidationError extends AppError {
   constructor(message: string) {
     super(message, 400, { code: 'identity.sso_validation_error' });
@@ -35,12 +29,6 @@ export class SsoValidationError extends AppError {
 export class SamlAssertionError extends AppError {
   constructor(message: string) {
     super(`SAML assertion error: ${message}`, 401, { code: 'identity.saml_assertion_error' });
-  }
-}
-
-export class SamlMetadataError extends AppError {
-  constructor(message: string) {
-    super(`SAML metadata error: ${message}`, 400, { code: 'identity.saml_metadata_error' });
   }
 }
 

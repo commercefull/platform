@@ -27,7 +27,7 @@ export interface CreateCurrencyOutput {
   createdAt: string;
 }
 
-export interface CreateCurrencyData {
+interface CreateCurrencyData {
   currencyId: string;
   code: string;
   name: string;

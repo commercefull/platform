@@ -4,8 +4,8 @@
 
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
-export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
-export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
+type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
+type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface SendNotificationInput {
   recipientId: string;

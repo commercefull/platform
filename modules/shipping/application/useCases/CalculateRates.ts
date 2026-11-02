@@ -6,14 +6,14 @@
 
 import { eventBus } from '../../../../libs/events/eventBus';
 
-export interface ShippingAddress {
+interface ShippingAddress {
   countryCode: string;
   stateCode?: string;
   postalCode?: string;
   city?: string;
 }
 
-export interface ShippingItem {
+interface ShippingItem {
   productId: string;
   quantity: number;
   weight?: number;
@@ -29,7 +29,7 @@ export interface CalculateRatesInput {
   channelId?: string;
 }
 
-export interface ShippingRate {
+interface ShippingRate {
   shippingMethodId: string;
   name: string;
   code: string;

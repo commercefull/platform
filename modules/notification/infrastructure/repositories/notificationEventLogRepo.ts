@@ -1,9 +1,9 @@
 import type { NotificationEventLog as DbNotificationEventLog } from '../../../../libs/db/types';
 import { query, queryOne } from '../../../../libs/db';
 
-export type NotificationEventLog = DbNotificationEventLog;
+type NotificationEventLog = DbNotificationEventLog;
 
-export async function create(
+async function create(
   params: Omit<NotificationEventLog, 'notificationEventLogId' | 'createdAt'>,
 ): Promise<NotificationEventLog | null> {
   return queryOne<NotificationEventLog>(
@@ -25,11 +25,11 @@ export async function create(
   );
 }
 
-export async function findUnprocessed(limit = 100): Promise<NotificationEventLog[]> {
+async function findUnprocessed(limit = 100): Promise<NotificationEventLog[]> {
   return (await query<NotificationEventLog[]>(`SELECT * FROM "notificationEventLog" ORDER BY "createdAt" ASC LIMIT $1`, [limit])) || [];
 }
 
-export async function markProcessed(notificationEventLogId: string): Promise<void> {
+async function markProcessed(notificationEventLogId: string): Promise<void> {
   await query(`UPDATE "notificationEventLog" SET "eventType" = $1 WHERE "notificationEventLogId" = $2`, [
     'processed',
     notificationEventLogId,

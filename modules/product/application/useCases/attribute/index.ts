@@ -24,7 +24,6 @@ export {
   GetProductAttributesUseCase,
   GetProductAttributesQuery,
   GetProductAttributesResponse,
-  ProductAttributeWithValue,
 } from './GetProductAttributes';
 export { RemoveProductAttributeUseCase, RemoveProductAttributeCommand, RemoveProductAttributeResponse } from './RemoveProductAttribute';
 export {

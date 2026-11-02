@@ -12,7 +12,7 @@ import { MarketRepository, MarketListFilter } from '../../domain/repositories/Ma
 import { Market, MarketStatus, MarketTaxDisplayMode } from '../../domain/entities/Market';
 import type { MarketCapabilityMap } from '../../domain/entities/MarketCapabilities';
 
-export class MarketRepo implements MarketRepository {
+class MarketRepo implements MarketRepository {
   async save(market: Market): Promise<void> {
     await query(
       `INSERT INTO market (
@@ -96,10 +96,10 @@ export class MarketRepo implements MarketRepository {
   }
 
   async findByCode(organizationId: string, code: string): Promise<Market | null> {
-    const row = await queryOne<DbMarket>(
-      'SELECT * FROM market WHERE "organizationId" = $1 AND code = $2 AND "deletedAt" IS NULL',
-      [organizationId, code.toUpperCase()],
-    );
+    const row = await queryOne<DbMarket>('SELECT * FROM market WHERE "organizationId" = $1 AND code = $2 AND "deletedAt" IS NULL', [
+      organizationId,
+      code.toUpperCase(),
+    ]);
     return row ? this.mapToMarket(row) : null;
   }
 
@@ -115,10 +115,9 @@ export class MarketRepo implements MarketRepository {
   }
 
   async findByStoreId(storeId: string): Promise<Market[]> {
-    const rows = await query<DbMarket[]>(
-      'SELECT * FROM market WHERE "storeId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC',
-      [storeId],
-    );
+    const rows = await query<DbMarket[]>('SELECT * FROM market WHERE "storeId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC', [
+      storeId,
+    ]);
     return (rows || []).map(row => this.mapToMarket(row));
   }
 

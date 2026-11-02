@@ -32,13 +32,13 @@ export interface ResetPasswordOutput {
   message: string;
 }
 
-export interface CustomerRecord {
+interface CustomerRecord {
   customerId: string;
   email: string;
   firstName?: string;
 }
 
-export interface PasswordResetRecord {
+interface PasswordResetRecord {
   customerId: string;
   token: string;
   expiresAt: Date;

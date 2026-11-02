@@ -2,7 +2,7 @@
  * GetTaxRateForAddress Use Case
  */
 
-export interface AddressInput {
+interface AddressInput {
   country: string;
   state?: string;
   city?: string;
@@ -15,7 +15,7 @@ export interface GetTaxRateForAddressInput {
   customerId?: string;
 }
 
-export interface TaxRateResult {
+interface TaxRateResult {
   taxRateId: string;
   name: string;
   rate: number;

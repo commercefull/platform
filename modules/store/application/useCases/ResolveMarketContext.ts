@@ -59,8 +59,7 @@ export class ResolveMarketContextUseCase {
       command?.currencyCode && market.supportsCurrency(command.currencyCode)
         ? command.currencyCode.toUpperCase()
         : market.defaultCurrencyCode;
-    const localeCode =
-      command?.localeCode && market.supportsLocale(command.localeCode) ? command.localeCode : market.defaultLocaleCode;
+    const localeCode = command?.localeCode && market.supportsLocale(command.localeCode) ? command.localeCode : market.defaultLocaleCode;
     return {
       marketId: market.marketId,
       code: market.code,

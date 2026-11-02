@@ -16,7 +16,7 @@ export interface ProductPriceDto {
   currency: string;
 }
 
-export function toProductPriceDto(info: ProductPriceInfo | null | undefined): ProductPriceDto | null {
+function toProductPriceDto(info: ProductPriceInfo | null | undefined): ProductPriceDto | null {
   if (!info) return null;
   const effectivePriceCents = info.salePriceCents ?? info.priceCents;
   const isOnSale = info.salePriceCents != null && info.salePriceCents < info.priceCents;

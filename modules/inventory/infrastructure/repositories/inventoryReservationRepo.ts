@@ -4,14 +4,13 @@
  * Manages inventory reservations for orders.
  */
 
-import { query, queryOne } from '../../../../libs/db';
-import { pool } from '../../../../libs/db/pool';
+import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { InventoryReservation } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
 import crypto from 'crypto';
 import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
 
-export interface CreateReservationParams {
+interface CreateReservationParams {
   orderId: string;
   productId: string;
   variantId?: string;
@@ -22,7 +21,7 @@ export interface CreateReservationParams {
   expiresAt?: Date;
 }
 
-export async function create(params: CreateReservationParams): Promise<InventoryReservation> {
+async function create(params: CreateReservationParams): Promise<InventoryReservation> {
   const reservationId = crypto.randomUUID();
   const now = new Date();
 
@@ -56,85 +55,76 @@ export async function create(params: CreateReservationParams): Promise<Inventory
   return result;
 }
 
-export async function createAtomic(params: CreateReservationParams): Promise<InventoryReservation | null> {
+async function createAtomic(params: CreateReservationParams): Promise<InventoryReservation | null> {
   const reservationId = crypto.randomUUID();
   const now = new Date();
-  const client = await pool.connect();
 
   try {
-    await client.query('BEGIN');
+    return await withTransaction(async tx => {
+      const lockRow = await tx.queryOne<{ availableQuantity: string }>(
+        `SELECT "availableQuantity", "reservedQuantity" FROM "inventoryLocation"
+         WHERE "inventoryLocationId" = $1 AND "status" = 'available' FOR UPDATE`,
+        [params.locationId],
+      );
 
-    const lockResult = await client.query(
-      `SELECT "availableQuantity", "reservedQuantity" FROM "inventoryLocation"
-       WHERE "inventoryLocationId" = $1 AND "status" = 'available' FOR UPDATE`,
-      [params.locationId],
-    );
+      if (!lockRow) {
+        return null;
+      }
 
-    if (lockResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return null;
-    }
+      const available = parseInt(lockRow.availableQuantity, 10);
+      if (available < params.quantity) {
+        return null;
+      }
 
-    const available = parseInt(lockResult.rows[0].availableQuantity, 10);
-    if (available < params.quantity) {
-      await client.query('ROLLBACK');
-      return null;
-    }
+      await tx.query(
+        `UPDATE "inventoryLocation"
+         SET "reservedQuantity" = "reservedQuantity" + $2,
+             "availableQuantity" = "availableQuantity" - $2,
+             "updatedAt" = $3
+         WHERE "inventoryLocationId" = $1`,
+        [params.locationId, params.quantity, now],
+      );
 
-    await client.query(
-      `UPDATE "inventoryLocation"
-       SET "reservedQuantity" = "reservedQuantity" + $2,
-           "availableQuantity" = "availableQuantity" - $2,
-           "updatedAt" = $3
-       WHERE "inventoryLocationId" = $1`,
-      [params.locationId, params.quantity, now],
-    );
-
-    const insertResult = await client.query(
-      `INSERT INTO "inventoryReservation" (
-        "inventoryReservationId", "inventoryItemId", "productId", "variantId", "sku",
-        "orderId", "locationId", "quantity", "status", "expiresAt", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      RETURNING *`,
-      [
-        reservationId,
-        params.inventoryItemId,
-        params.productId,
-        params.variantId || null,
-        params.sku || null,
-        params.orderId,
-        params.locationId,
-        params.quantity,
-        'reserved',
-        params.expiresAt || null,
-        now,
-        now,
-      ],
-    );
-
-    await client.query('COMMIT');
-    return insertResult.rows[0] as InventoryReservation;
+      return tx.queryOne<InventoryReservation>(
+        `INSERT INTO "inventoryReservation" (
+          "inventoryReservationId", "inventoryItemId", "productId", "variantId", "sku",
+          "orderId", "locationId", "quantity", "status", "expiresAt", "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING *`,
+        [
+          reservationId,
+          params.inventoryItemId,
+          params.productId,
+          params.variantId || null,
+          params.sku || null,
+          params.orderId,
+          params.locationId,
+          params.quantity,
+          'reserved',
+          params.expiresAt || null,
+          now,
+          now,
+        ],
+      );
+    });
   } catch (err: unknown) {
-    await client.query('ROLLBACK');
     logger.warn(`createAtomic failed: ${(err as Error).message}`);
     throw err;
-  } finally {
-    client.release();
   }
 }
 
-export async function findById(reservationId: string): Promise<InventoryReservation | null> {
+async function findById(reservationId: string): Promise<InventoryReservation | null> {
   return queryOne<InventoryReservation>('SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1', [reservationId]);
 }
 
-export async function findByOrder(orderId: string): Promise<InventoryReservation[]> {
+async function findByOrder(orderId: string): Promise<InventoryReservation[]> {
   const result = await query<InventoryReservation[]>('SELECT * FROM "inventoryReservation" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [
     orderId,
   ]);
   return result ?? [];
 }
 
-export async function findByLocation(locationId: string, productId?: string, variantId?: string): Promise<InventoryReservation[]> {
+async function findByLocation(locationId: string, productId?: string, variantId?: string): Promise<InventoryReservation[]> {
   let sql = 'SELECT * FROM "inventoryReservation" WHERE "locationId" = $1 AND "status" = \'reserved\'';
   const params: unknown[] = [locationId];
 
@@ -151,7 +141,7 @@ export async function findByLocation(locationId: string, productId?: string, var
   return result ?? [];
 }
 
-export async function getReservedQuantity(locationId: string, productId: string, variantId?: string): Promise<number> {
+async function getReservedQuantity(locationId: string, productId: string, variantId?: string): Promise<number> {
   let sql =
     'SELECT COALESCE(SUM("quantity"), 0) as total FROM "inventoryReservation" WHERE "locationId" = $1 AND "productId" = $2 AND "status" = \'reserved\'';
   const params: unknown[] = [locationId, productId];
@@ -165,41 +155,36 @@ export async function getReservedQuantity(locationId: string, productId: string,
   return parseInt(result?.total || '0', 10);
 }
 
-export async function release(inventoryReservationId: string): Promise<boolean> {
+async function release(inventoryReservationId: string): Promise<boolean> {
   const reservation = await findById(inventoryReservationId);
   if (!reservation || reservation.status !== 'reserved') return false;
 
   const now = new Date();
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    return await withTransaction(async tx => {
+      await tx.query(
+        `UPDATE "inventoryLocation"
+         SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
+             "availableQuantity" = "availableQuantity" + $2,
+             "updatedAt" = $3
+         WHERE "inventoryLocationId" = $1`,
+        [reservation.locationId, reservation.quantity, now],
+      );
 
-    await client.query(
-      `UPDATE "inventoryLocation"
-       SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
-           "availableQuantity" = "availableQuantity" + $2,
-           "updatedAt" = $3
-       WHERE "inventoryLocationId" = $1`,
-      [reservation.locationId, reservation.quantity, now],
-    );
+      await tx.query(
+        'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2 AND "status" = \'reserved\'',
+        [now, inventoryReservationId],
+      );
 
-    await client.query(
-      'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2 AND "status" = \'reserved\'',
-      [now, inventoryReservationId],
-    );
-
-    await client.query('COMMIT');
-    return true;
+      return true;
+    });
   } catch (err: unknown) {
-    await client.query('ROLLBACK');
     logger.warn(`release failed for ${inventoryReservationId}: ${(err as Error).message}`);
     return false;
-  } finally {
-    client.release();
   }
 }
 
-export async function consume(reservationId: string): Promise<boolean> {
+async function consume(reservationId: string): Promise<boolean> {
   const result = await queryOne<InventoryReservation>(
     'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2 AND "status" = \'reserved\' RETURNING *',
     [new Date(), reservationId],
@@ -207,45 +192,40 @@ export async function consume(reservationId: string): Promise<boolean> {
   return result !== null;
 }
 
-export async function releaseByOrder(orderId: string): Promise<number> {
+async function releaseByOrder(orderId: string): Promise<number> {
   const reservations = await findByOrder(orderId);
   const active = reservations.filter(r => r.status === 'reserved');
   if (active.length === 0) return 0;
 
   const now = new Date();
-  const client = await pool.connect();
   let count = 0;
   try {
-    await client.query('BEGIN');
+    return await withTransaction(async tx => {
+      for (const r of active) {
+        await tx.query(
+          `UPDATE "inventoryLocation"
+           SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
+               "availableQuantity" = "availableQuantity" + $2,
+               "updatedAt" = $3
+           WHERE "inventoryLocationId" = $1`,
+          [r.locationId, r.quantity, now],
+        );
+        await tx.query(
+          'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2 AND "status" = \'reserved\'',
+          [now, r.inventoryReservationId],
+        );
+        count++;
+      }
 
-    for (const r of active) {
-      await client.query(
-        `UPDATE "inventoryLocation"
-         SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
-             "availableQuantity" = "availableQuantity" + $2,
-             "updatedAt" = $3
-         WHERE "inventoryLocationId" = $1`,
-        [r.locationId, r.quantity, now],
-      );
-      await client.query(
-        'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2 AND "status" = \'reserved\'',
-        [now, r.inventoryReservationId],
-      );
-      count++;
-    }
-
-    await client.query('COMMIT');
-    return count;
+      return count;
+    });
   } catch (err: unknown) {
-    await client.query('ROLLBACK');
     logger.warn(`releaseByOrder failed for order ${orderId}: ${(err as Error).message}`);
     return count;
-  } finally {
-    client.release();
   }
 }
 
-export async function consumeByOrder(orderId: string): Promise<number> {
+async function consumeByOrder(orderId: string): Promise<number> {
   // Finalize all live holds: 'reserved' (event-path), 'active' (checkout
   // orchestration), and 'confirmed' (post-payment allocations).
   const result = await query<InventoryReservation[]>(
@@ -264,38 +244,33 @@ export async function releaseExpired(): Promise<number> {
 
   if (!expired || expired.length === 0) return 0;
 
-  const client = await pool.connect();
   let count = 0;
   try {
-    await client.query('BEGIN');
+    return await withTransaction(async tx => {
+      for (const r of expired) {
+        // 'active' rows (checkout path) store the inventoryLocationId in
+        // inventoryItemId; 'reserved' rows (event path) store it in locationId.
+        const locationKey = r.status === 'active' ? r.inventoryItemId : r.locationId;
+        await tx.query(
+          `UPDATE "inventoryLocation"
+           SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
+               "availableQuantity" = "availableQuantity" + $2,
+               "updatedAt" = $3
+           WHERE "inventoryLocationId" = $1`,
+          [locationKey, r.quantity, now],
+        );
+        await tx.query('UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2', [
+          now,
+          r.inventoryReservationId,
+        ]);
+        count++;
+      }
 
-    for (const r of expired) {
-      // 'active' rows (checkout path) store the inventoryLocationId in
-      // inventoryItemId; 'reserved' rows (event path) store it in locationId.
-      const locationKey = r.status === 'active' ? r.inventoryItemId : r.locationId;
-      await client.query(
-        `UPDATE "inventoryLocation"
-         SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
-             "availableQuantity" = "availableQuantity" + $2,
-             "updatedAt" = $3
-         WHERE "inventoryLocationId" = $1`,
-        [locationKey, r.quantity, now],
-      );
-      await client.query(
-        'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2',
-        [now, r.inventoryReservationId],
-      );
-      count++;
-    }
-
-    await client.query('COMMIT');
-    return count;
+      return count;
+    });
   } catch (err: unknown) {
-    await client.query('ROLLBACK');
     logger.warn(`releaseExpired failed: ${(err as Error).message}`);
     return count;
-  } finally {
-    client.release();
   }
 }
 

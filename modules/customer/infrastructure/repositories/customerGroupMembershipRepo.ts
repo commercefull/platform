@@ -6,16 +6,16 @@ import { CustomerGroupMembership as DbCustomerGroupMembership } from '../../../.
 import { CustomerValidationError, FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
-export type CustomerGroupMembership = DbCustomerGroupMembership;
+type CustomerGroupMembership = DbCustomerGroupMembership;
 
 // Derived types for create/update operations
-export type CustomerGroupMembershipCreateParams = Omit<
+type CustomerGroupMembershipCreateParams = Omit<
   CustomerGroupMembership,
   'customerGroupMembershipId' | 'createdAt' | 'updatedAt' | 'deletedAt'
 >;
-export type CustomerGroupMembershipUpdateParams = Partial<Pick<CustomerGroupMembership, 'isActive' | 'expiresAt'>>;
+type CustomerGroupMembershipUpdateParams = Partial<Pick<CustomerGroupMembership, 'isActive' | 'expiresAt'>>;
 
-export class CustomerGroupMembershipRepo {
+class CustomerGroupMembershipRepo {
   async findById(id: string): Promise<CustomerGroupMembership | null> {
     return await queryOne<CustomerGroupMembership>(
       `SELECT * FROM "customerGroupMembership" WHERE "customerGroupMembershipId" = $1 AND "deletedAt" IS NULL`,

@@ -4,7 +4,7 @@ import { query, queryOne } from '../../../../libs/db';
 // "notificationTemplateId" -> templateId, locale code -> "localeId", body -> "textTemplate".
 const TRANSLATION_COLUMNS = `t."notificationTemplateTranslationId", t."notificationTemplateId" AS "templateId", l.code AS locale, t.subject, t."textTemplate" AS body, t."createdAt", t."updatedAt"`;
 
-export interface NotificationTemplateTranslation {
+interface NotificationTemplateTranslation {
   notificationTemplateTranslationId: string;
   templateId: string;
   locale: string;
@@ -14,7 +14,7 @@ export interface NotificationTemplateTranslation {
   updatedAt: Date;
 }
 
-export async function findByTemplate(templateId: string): Promise<NotificationTemplateTranslation[]> {
+async function findByTemplate(templateId: string): Promise<NotificationTemplateTranslation[]> {
   return (
     (await query<NotificationTemplateTranslation[]>(
       `SELECT ${TRANSLATION_COLUMNS} FROM "notificationTemplateTranslation" t
@@ -25,7 +25,7 @@ export async function findByTemplate(templateId: string): Promise<NotificationTe
   );
 }
 
-export async function findByTemplateAndLocale(templateId: string, locale: string): Promise<NotificationTemplateTranslation | null> {
+async function findByTemplateAndLocale(templateId: string, locale: string): Promise<NotificationTemplateTranslation | null> {
   return queryOne<NotificationTemplateTranslation>(
     `SELECT ${TRANSLATION_COLUMNS} FROM "notificationTemplateTranslation" t
      JOIN "locale" l ON l."localeId" = t."localeId"
@@ -34,7 +34,7 @@ export async function findByTemplateAndLocale(templateId: string, locale: string
   );
 }
 
-export async function upsert(
+async function upsert(
   params: Omit<NotificationTemplateTranslation, 'notificationTemplateTranslationId' | 'createdAt' | 'updatedAt'>,
 ): Promise<NotificationTemplateTranslation | null> {
   const now = new Date();

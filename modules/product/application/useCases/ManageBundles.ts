@@ -33,7 +33,7 @@ export interface BundleItemRecord {
   metadata?: unknown;
 }
 
-export interface BundlePricing {
+interface BundlePricing {
   priceCents: number;
   savingsCents: number;
   savingsPercent: number;

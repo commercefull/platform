@@ -6,9 +6,6 @@ import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 export type { CategoryRow as Category, CategoryCreateProps, CategoryUpdateProps } from '../../domain/repositories/ProductCatalogPorts';
 import type { CategoryRow as Category, CategoryCreateProps, CategoryUpdateProps } from '../../domain/repositories/ProductCatalogPorts';
 
-// Alias for backward compatibility
-export type { Category as ProductCategory };
-
 function mapToCategory(row: DbProductCategory): Category {
   return {
     productCategoryId: row.productCategoryId,
@@ -36,7 +33,7 @@ function mapToCategory(row: DbProductCategory): Category {
   };
 }
 
-export class CategoryRepo {
+class CategoryRepo {
   private readonly tableName = Table.ProductCategory;
 
   async findOne(id: string): Promise<Category | null> {

@@ -18,7 +18,7 @@ export interface GetPaymentMethodsInput {
   marketId?: string;
 }
 
-export interface PaymentMethodInfo {
+interface PaymentMethodInfo {
   paymentMethodId: string;
   type: 'card' | 'bank_account' | 'wallet' | 'buy_now_pay_later' | 'crypto';
   provider: string;

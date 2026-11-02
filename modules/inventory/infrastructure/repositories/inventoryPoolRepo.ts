@@ -12,7 +12,7 @@ import {
   InventoryLocation as _DbInventoryLocation,
 } from '../../../../libs/db/types';
 
-export interface InventoryPool {
+interface InventoryPool {
   poolId: string;
   ownerType: 'organization';
   ownerId: string;
@@ -25,7 +25,7 @@ export interface InventoryPool {
   createdAt: Date;
 }
 
-export interface PoolLocation {
+interface PoolLocation {
   inventoryId: string;
   locationId: string;
   availableQuantity: number;
@@ -35,7 +35,7 @@ export interface PoolLocation {
   createdAt: Date;
 }
 
-export interface AllocationResultItem {
+interface AllocationResultItem {
   productId: string;
   variantId?: string;
   allocations: Array<{
@@ -44,7 +44,7 @@ export interface AllocationResultItem {
   }>;
 }
 
-export async function createPool(input: {
+async function createPool(input: {
   poolId: string;
   ownerType: 'organization';
   ownerId: string;
@@ -100,7 +100,7 @@ export async function createPool(input: {
   };
 }
 
-export async function findPoolById(poolId: string): Promise<InventoryPool | null> {
+async function findPoolById(poolId: string): Promise<InventoryPool | null> {
   const row = await queryOne<DbInventoryPool>('SELECT * FROM "inventoryPool" WHERE "inventoryPoolId" = $1', [poolId]);
   if (!row) return null;
 
@@ -131,7 +131,7 @@ interface PoolInventoryRow {
   createdAt: string;
 }
 
-export async function findAvailableInPool(poolId: string, productId: string, variantId?: string): Promise<PoolLocation[]> {
+async function findAvailableInPool(poolId: string, productId: string, variantId?: string): Promise<PoolLocation[]> {
   const rows = await query<PoolInventoryRow[]>(
     `SELECT i."inventoryLocationId" as "inventoryId", i."distributionWarehouseId" as "locationId",
             i."availableQuantity", COALESCE(pl.priority, 0) as priority, i."createdAt"
@@ -153,7 +153,7 @@ export async function findAvailableInPool(poolId: string, productId: string, var
   }));
 }
 
-export async function reserveStock(inventoryId: string, quantity: number, _orderId: string, _allocationId: string): Promise<void> {
+async function reserveStock(inventoryId: string, quantity: number, _orderId: string, _allocationId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
     `UPDATE "inventoryLocation" SET "reservedQuantity" = "reservedQuantity" + $1, "availableQuantity" = "availableQuantity" - $1, "updatedAt" = $2 WHERE "inventoryLocationId" = $3`,
@@ -161,7 +161,7 @@ export async function reserveStock(inventoryId: string, quantity: number, _order
   );
 }
 
-export async function createAllocation(input: {
+async function createAllocation(input: {
   allocationId: string;
   poolId: string;
   orderId: string;

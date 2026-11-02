@@ -499,7 +499,15 @@ describe('Checkout Gap Tests', () => {
     const checkoutId = await createCheckout(client, customerToken, basketId);
     if (!checkoutId) return;
 
-    const addr = { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' };
+    const addr = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      addressLine1: '123 Main St',
+      city: 'Portland',
+      region: 'OR',
+      postalCode: '97201',
+      country: 'US',
+    };
     const setResp = await client.put(`/customer/checkout/${checkoutId}/shipping-address`, addr, {
       headers: { Authorization: `Bearer ${customerToken}` },
     });
@@ -548,7 +556,15 @@ describe('Checkout Gap Tests', () => {
 
     await client.put(
       `/customer/checkout/${checkoutId}/shipping-address`,
-      { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' },
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'Portland',
+        region: 'OR',
+        postalCode: '97201',
+        country: 'US',
+      },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
 
@@ -569,7 +585,15 @@ describe('Checkout Gap Tests', () => {
 
     await client.put(
       `/customer/checkout/${checkoutId}/shipping-address`,
-      { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' },
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'Portland',
+        region: 'OR',
+        postalCode: '97201',
+        country: 'US',
+      },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
 
@@ -649,7 +673,15 @@ describe('Checkout Gap Tests', () => {
     // Set up session to be ready for payment
     await client.put(
       `/customer/checkout/${checkoutId}/shipping-address`,
-      { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' },
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'Portland',
+        region: 'OR',
+        postalCode: '97201',
+        country: 'US',
+      },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
     const methodsResp = await client.get(`/customer/checkout/${checkoutId}/shipping-methods`, {
@@ -692,7 +724,15 @@ describe('Checkout Gap Tests', () => {
 
     await client.put(
       `/customer/checkout/${checkoutId}/shipping-address`,
-      { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' },
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'Portland',
+        region: 'OR',
+        postalCode: '97201',
+        country: 'US',
+      },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
     const methodsResp = await client.get(`/customer/checkout/${checkoutId}/shipping-methods`, {
@@ -731,7 +771,15 @@ describe('Checkout Gap Tests', () => {
 
     await client.put(
       `/customer/checkout/${checkoutId}/shipping-address`,
-      { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' },
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'Portland',
+        region: 'OR',
+        postalCode: '97201',
+        country: 'US',
+      },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
     const methodsResp = await client.get(`/customer/checkout/${checkoutId}/shipping-methods`, {
@@ -788,7 +836,15 @@ describe('Checkout Gap Tests', () => {
 
     const resp = await client.put(
       `/customer/checkout/${checkoutId}/shipping-address`,
-      { firstName: 'Jane', lastName: 'Doe', addressLine1: '123 Main St', city: 'Portland', region: 'OR', postalCode: '97201', country: 'US' },
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'Portland',
+        region: 'OR',
+        postalCode: '97201',
+        country: 'US',
+      },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
     expectStatus(resp, 400);

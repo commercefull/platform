@@ -5,7 +5,37 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import * as orderController from '../controllers/OrderBusinessController';
+import {
+  addOrderNote,
+  cancelOrder,
+  createFulfillmentPackage,
+  createOrder,
+  createOrderItem,
+  createOrderRefund,
+  deleteOrderItem,
+  deleteOrderNote,
+  getFulfillmentHistory,
+  getOrder,
+  getOrderByNumber,
+  getOrderDecisions,
+  getOrderHistory,
+  getOrderItemById,
+  getOrderItems,
+  getOrderStats,
+  getPaymentHistory,
+  getStatusHistory,
+  getStoreSalesSummary,
+  listFulfillmentPackages,
+  listOrderNotes,
+  listOrderRefunds,
+  listOrders,
+  processRefund,
+  trackFulfillmentPackage,
+  updateFulfillmentStatus,
+  updateOrderItem,
+  updateOrderStatus,
+  updatePaymentStatus,
+} from '../controllers/OrderBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
 const router = createHttpRouter();
@@ -21,111 +51,111 @@ router.use(isOrganizationLoggedIn);
  * Get order statistics
  * GET /business/orders/stats
  */
-router.get('/orders/stats', asyncHandler(orderController.getOrderStats));
+router.get('/orders/stats', asyncHandler(getOrderStats));
 
 /**
  * Get store sales summary
  * GET /business/orders/store-summary
  */
-router.get('/orders/store-summary', asyncHandler(orderController.getStoreSalesSummary));
+router.get('/orders/store-summary', asyncHandler(getStoreSalesSummary));
 
 /**
  * List all orders with filters
  * GET /business/orders
  */
-router.get('/orders', asyncHandler(orderController.listOrders));
+router.get('/orders', asyncHandler(listOrders));
 
 /**
  * Create an order on behalf of the organization (POS / manual orders)
  * POST /business/orders
  */
-router.post('/orders', asyncHandler(orderController.createOrder));
+router.post('/orders', asyncHandler(createOrder));
 
 /**
  * Get order by order number
  * GET /business/orders/number/:orderNumber
  */
-router.get('/orders/number/:orderNumber', asyncHandler(orderController.getOrderByNumber));
+router.get('/orders/number/:orderNumber', asyncHandler(getOrderByNumber));
 
 /**
  * Get order explainability — market context, version snapshot, decision log
  * GET /business/orders/:orderId/decisions
  */
-router.get('/orders/:orderId/decisions', asyncHandler(orderController.getOrderDecisions));
+router.get('/orders/:orderId/decisions', asyncHandler(getOrderDecisions));
 
 /**
  * Get order details
  * GET /business/orders/:orderId
  */
-router.get('/orders/:orderId', asyncHandler(orderController.getOrder));
+router.get('/orders/:orderId', asyncHandler(getOrder));
 
 /**
  * Get order status history
  * GET /business/orders/:orderId/history
  */
-router.get('/orders/:orderId/history', asyncHandler(orderController.getOrderHistory));
+router.get('/orders/:orderId/history', asyncHandler(getOrderHistory));
 
 /**
  * Update order status
  * PUT /business/orders/:orderId/status
  */
-router.put('/orders/:orderId/status', asyncHandler(orderController.updateOrderStatus));
+router.put('/orders/:orderId/status', asyncHandler(updateOrderStatus));
 
 /**
  * Cancel an order
  * POST /business/orders/:orderId/cancel
  */
-router.post('/orders/:orderId/cancel', asyncHandler(orderController.cancelOrder));
+router.post('/orders/:orderId/cancel', asyncHandler(cancelOrder));
 
 /**
  * Process refund
  * POST /business/orders/:orderId/refund
  */
-router.post('/orders/:orderId/refund', asyncHandler(orderController.processRefund));
+router.post('/orders/:orderId/refund', asyncHandler(processRefund));
 
 // ============================================================================
 // Order Notes
 // ============================================================================
 
-router.get('/orders/:orderId/notes', asyncHandler(orderController.listOrderNotes));
-router.post('/orders/:orderId/notes', asyncHandler(orderController.addOrderNote));
-router.delete('/orders/:orderId/notes/:noteId', asyncHandler(orderController.deleteOrderNote));
+router.get('/orders/:orderId/notes', asyncHandler(listOrderNotes));
+router.post('/orders/:orderId/notes', asyncHandler(addOrderNote));
+router.delete('/orders/:orderId/notes/:noteId', asyncHandler(deleteOrderNote));
 
 // ============================================================================
 // Order Refunds
 // ============================================================================
 
-router.get('/orders/:orderId/refunds', asyncHandler(orderController.listOrderRefunds));
-router.post('/orders/:orderId/refunds', asyncHandler(orderController.createOrderRefund));
+router.get('/orders/:orderId/refunds', asyncHandler(listOrderRefunds));
+router.post('/orders/:orderId/refunds', asyncHandler(createOrderRefund));
 
 // ============================================================================
 // Fulfillment Packages
 // ============================================================================
 
-router.get('/orders/:orderId/packages', asyncHandler(orderController.listFulfillmentPackages));
-router.post('/orders/:orderId/packages', asyncHandler(orderController.createFulfillmentPackage));
-router.post('/orders/:orderId/packages/:packageId/tracking', asyncHandler(orderController.trackFulfillmentPackage));
+router.get('/orders/:orderId/packages', asyncHandler(listFulfillmentPackages));
+router.post('/orders/:orderId/packages', asyncHandler(createFulfillmentPackage));
+router.post('/orders/:orderId/packages/:packageId/tracking', asyncHandler(trackFulfillmentPackage));
 
 // ============================================================================
 // Order Items
 // ============================================================================
-router.get('/orders/:orderId/items', asyncHandler(orderController.getOrderItems));
-router.get('/order-items/:orderItemId', asyncHandler(orderController.getOrderItemById));
-router.post('/order-items', asyncHandler(orderController.createOrderItem));
-router.put('/order-items/:orderItemId', asyncHandler(orderController.updateOrderItem));
-router.delete('/order-items/:orderItemId', asyncHandler(orderController.deleteOrderItem));
+router.get('/orders/:orderId/items', asyncHandler(getOrderItems));
+router.get('/order-items/:orderItemId', asyncHandler(getOrderItemById));
+router.post('/order-items', asyncHandler(createOrderItem));
+router.put('/order-items/:orderItemId', asyncHandler(updateOrderItem));
+router.delete('/order-items/:orderItemId', asyncHandler(deleteOrderItem));
 
 // ============================================================================
 // Payment & Fulfillment Status
 // ============================================================================
-router.put('/orders/:orderId/payment-status', asyncHandler(orderController.updatePaymentStatus));
-router.put('/orders/:orderId/fulfillment-status', asyncHandler(orderController.updateFulfillmentStatus));
+router.put('/orders/:orderId/payment-status', asyncHandler(updatePaymentStatus));
+router.put('/orders/:orderId/fulfillment-status', asyncHandler(updateFulfillmentStatus));
 
 // ============================================================================
 // Status History
 // ============================================================================
-router.get('/orders/:orderId/status-history', asyncHandler(orderController.getStatusHistory));
-router.get('/orders/:orderId/payment-history', asyncHandler(orderController.getPaymentHistory));
-router.get('/orders/:orderId/fulfillment-history', asyncHandler(orderController.getFulfillmentHistory));
+router.get('/orders/:orderId/status-history', asyncHandler(getStatusHistory));
+router.get('/orders/:orderId/payment-history', asyncHandler(getPaymentHistory));
+router.get('/orders/:orderId/fulfillment-history', asyncHandler(getFulfillmentHistory));
 
 export const orderBusinessRouter = router;

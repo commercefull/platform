@@ -34,7 +34,7 @@ export interface CreateRewardOutput {
   createdAt: string;
 }
 
-export interface CreatedRewardData {
+interface CreatedRewardData {
   rewardId: string;
   name: string;
   pointsCost: number;

@@ -6,7 +6,7 @@
 
 import { AppError } from '../../../../libs/errors';
 
-export abstract class BasketError extends AppError {
+abstract class BasketError extends AppError {
   constructor(message: string, statusCode: number, code: string) {
     super(message, statusCode, { code });
   }

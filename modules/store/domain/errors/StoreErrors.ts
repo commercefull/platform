@@ -75,11 +75,3 @@ export class MarketNotReadyForLaunchError extends AppError {
   }
 }
 
-export class MarketCapabilityNotSupportedError extends AppError {
-  constructor(capability: string, marketCode: string) {
-    super(`Market ${marketCode} does not support capability: ${capability}`, 400, {
-      code: 'store.market_capability_not_supported',
-      details: { capability, marketCode },
-    });
-  }
-}

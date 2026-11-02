@@ -6,7 +6,6 @@
 
 import { eventBus } from '../../../libs/events/eventBus';
 import { query } from '../../../libs/db';
-import { generateUUID } from '../../../libs/uuid';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn(), registerHandler: jest.fn() },
@@ -29,7 +28,6 @@ jest.mock('../../../libs/db', () => ({
 
 export const emitMock = jest.mocked(eventBus.emit);
 export const queryMock = jest.mocked(query);
-export const uuidMock = jest.mocked(generateUUID);
 
 export function lazyMock<T extends object>(): jest.Mocked<T> {
   const cache = new Map<string | symbol, jest.Mock>();
@@ -103,7 +101,6 @@ import type {
   ProductQa,
   ProductQaAnswer,
   ProductTypeRow,
-  ProductVariantRow,
 } from '../domain/repositories/ProductCatalogPorts';
 
 const ISO = new Date('2026-01-01T00:00:00.000Z');
@@ -189,23 +186,6 @@ export function createProductTypeRow(overrides: Partial<ProductTypeRow> = {}): P
   };
 }
 
-export function createProductVariantRow(overrides: Partial<ProductVariantRow> = {}): ProductVariantRow {
-  return {
-    variantId: 'v1',
-    productId: 'p1',
-    sku: 'SKU-1',
-    name: 'Default',
-    attributes: [],
-    stockQuantity: 10,
-    isDefault: true,
-    isActive: true,
-    position: 0,
-    isInStock: true,
-    isLowStock: false,
-    isOutOfStock: false,
-    ...overrides,
-  };
-}
 
 import type { ProductReview, ProductReviewMedia, ProductReviewVote, ProductLookupPort } from '../domain/repositories/ProductCatalogPorts';
 

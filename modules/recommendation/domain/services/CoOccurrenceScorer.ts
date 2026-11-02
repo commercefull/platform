@@ -38,7 +38,7 @@ export function scorePair(pair: CoPurchasePair, orderCountA: number, orderCountB
   return { ...pair, support: pair.coCount, confidence, lift };
 }
 
-export function passesThresholds(scored: ScoredPair, thresholds: CoOccurrenceThresholds): boolean {
+function passesThresholds(scored: ScoredPair, thresholds: CoOccurrenceThresholds): boolean {
   return scored.support >= thresholds.minSupport && scored.lift >= thresholds.minLift;
 }
 

@@ -6,9 +6,7 @@ import type {
   NotificationPreferenceUpsertParams,
 } from '../../domain/repositories/NotificationPreferenceRepository';
 export type {
-  NotificationPreference,
-  NotificationPreferenceUpsertParams,
-} from '../../domain/repositories/NotificationPreferenceRepository';
+  NotificationPreference} from '../../domain/repositories/NotificationPreferenceRepository';
 
 function mapToPreference(row: DbNotificationPreference): NotificationPreference {
   return {
@@ -20,7 +18,7 @@ function mapToPreference(row: DbNotificationPreference): NotificationPreference 
   };
 }
 
-export async function findByUser(userId: string, userType: string): Promise<NotificationPreference[]> {
+async function findByUser(userId: string, userType: string): Promise<NotificationPreference[]> {
   const rows = await query<DbNotificationPreference[]>(
     `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2 ORDER BY "updatedAt" DESC`,
     [userId, userType],
@@ -28,14 +26,14 @@ export async function findByUser(userId: string, userType: string): Promise<Noti
   return (rows || []).map(mapToPreference);
 }
 
-export async function findById(notificationPreferenceId: string): Promise<NotificationPreference | null> {
+async function findById(notificationPreferenceId: string): Promise<NotificationPreference | null> {
   const row = await queryOne<DbNotificationPreference>(`SELECT * FROM "notificationPreference" WHERE "notificationPreferenceId" = $1`, [
     notificationPreferenceId,
   ]);
   return row ? mapToPreference(row) : null;
 }
 
-export async function findByUserAndType(userId: string, userType: string, type: string): Promise<NotificationPreference | null> {
+async function findByUserAndType(userId: string, userType: string, type: string): Promise<NotificationPreference | null> {
   const row = await queryOne<DbNotificationPreference>(
     `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2 AND "type" = $3`,
     [userId, userType, type],
@@ -43,13 +41,13 @@ export async function findByUserAndType(userId: string, userType: string, type: 
   return row ? mapToPreference(row) : null;
 }
 
-export async function findAll(): Promise<NotificationPreference[]> {
+async function findAll(): Promise<NotificationPreference[]> {
   return ((await query<DbNotificationPreference[]>(`SELECT * FROM "notificationPreference" ORDER BY "updatedAt" DESC`)) || []).map(
     mapToPreference,
   );
 }
 
-export async function upsert(params: NotificationPreferenceUpsertParams): Promise<NotificationPreference | null> {
+async function upsert(params: NotificationPreferenceUpsertParams): Promise<NotificationPreference | null> {
   const now = new Date().toISOString();
   const row = await queryOne<DbNotificationPreference>(
     `INSERT INTO "notificationPreference" ("userId", "userType", "type", "channelPreferences", "isEnabled", "schedulePreferences", "metadata", "updatedAt")
@@ -75,7 +73,7 @@ export async function upsert(params: NotificationPreferenceUpsertParams): Promis
   return row ? mapToPreference(row) : null;
 }
 
-export async function update(
+async function update(
   notificationPreferenceId: string,
   params: Partial<Omit<NotificationPreference, 'notificationPreferenceId' | 'userId' | 'userType' | 'type' | 'updatedAt'>>,
 ): Promise<NotificationPreference | null> {
@@ -115,7 +113,7 @@ export async function update(
   return row ? mapToPreference(row) : null;
 }
 
-export async function deleteById(notificationPreferenceId: string): Promise<boolean> {
+async function deleteById(notificationPreferenceId: string): Promise<boolean> {
   const result = await queryOne<{ notificationPreferenceId: string }>(
     `DELETE FROM "notificationPreference" WHERE "notificationPreferenceId" = $1 RETURNING "notificationPreferenceId"`,
     [notificationPreferenceId],
@@ -123,11 +121,11 @@ export async function deleteById(notificationPreferenceId: string): Promise<bool
   return !!result;
 }
 
-export async function deleteByUser(userId: string): Promise<void> {
+async function deleteByUser(userId: string): Promise<void> {
   await query(`DELETE FROM "notificationPreference" WHERE "userId" = $1`, [userId]);
 }
 
-export async function bulkUpsert(
+async function bulkUpsert(
   userId: string,
   userType: string,
   updates: Array<{

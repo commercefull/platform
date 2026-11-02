@@ -23,13 +23,7 @@ import {
 import { resolveStackable, sortByPriority, type Stackability } from '../../../../libs/rules/stacking';
 import { logger } from '../../../../libs/logger';
 
-export type {
-  PromotionEvaluationContext,
-  PromotionEvaluationResult,
-  PromotionItemContext,
-  LineItemDiscount,
-  FreeItemAction,
-} from '../../domain/services/PromotionEvaluator';
+export type { PromotionEvaluationContext, PromotionEvaluationResult } from '../../domain/services/PromotionEvaluator';
 
 export class EvaluatePromotionsUseCase {
   constructor(

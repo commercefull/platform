@@ -35,18 +35,6 @@ export type LoyaltyTransaction = DbLoyaltyTransaction;
 export type LoyaltyReward = DbLoyaltyReward;
 export type LoyaltyRedemption = DbLoyaltyRedemption;
 
-// ============================================================================
-// Enums
-// ============================================================================
-
-export enum LoyaltyTierType {
-  BRONZE = 'bronze',
-  SILVER = 'silver',
-  GOLD = 'gold',
-  PLATINUM = 'platinum',
-  CUSTOM = 'custom',
-}
-
 export enum LoyaltyPointsAction {
   PURCHASE = 'purchase',
   REVIEW = 'review',

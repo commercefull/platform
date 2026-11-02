@@ -6,13 +6,13 @@ import { CustomerGroup as DbCustomerGroup } from '../../../../libs/db/types';
 import { FailedToCreateCustomerError, CustomerGroupAlreadyExistsError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
-export type CustomerGroup = DbCustomerGroup;
+type CustomerGroup = DbCustomerGroup;
 
 // Derived types for create/update operations
-export type CustomerGroupCreateParams = Omit<CustomerGroup, 'customerGroupId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-export type CustomerGroupUpdateParams = Partial<Omit<CustomerGroup, 'customerGroupId' | 'code' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
+type CustomerGroupCreateParams = Omit<CustomerGroup, 'customerGroupId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+type CustomerGroupUpdateParams = Partial<Omit<CustomerGroup, 'customerGroupId' | 'code' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
 
-export class CustomerGroupRepo {
+class CustomerGroupRepo {
   async findById(id: string): Promise<CustomerGroup | null> {
     return await queryOne<CustomerGroup>(`SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1 AND "deletedAt" IS NULL`, [id]);
   }

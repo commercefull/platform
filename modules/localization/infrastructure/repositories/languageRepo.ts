@@ -7,7 +7,7 @@ import { query, queryOne } from '../../../../libs/db';
 import type { Language as DbLanguage } from 'libs/db/types';
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 
-export type LanguageRecord = DbLanguage;
+type LanguageRecord = DbLanguage;
 
 export async function listLanguages(): Promise<LanguageRecord[]> {
   const rows = await query<LanguageRecord[]>(`SELECT * FROM "language" ORDER BY "name"`);
@@ -75,3 +75,4 @@ export async function updateLanguage(
 export async function deleteLanguage(languageId: string): Promise<void> {
   await query(`DELETE FROM "language" WHERE "languageId" = $1`, [languageId]);
 }
+

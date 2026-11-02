@@ -5,7 +5,7 @@
  * a quote in basket's vocabulary — not a coupon entity.
  */
 
-export interface DiscountQuote {
+interface DiscountQuote {
   code: string;
   type: string;
   /** Polymorphic operand: percentage points or integer cents depending on type. */

@@ -5,7 +5,7 @@ import type { BasketSnapshotPort } from '../ports/BasketSnapshotPort';
 import type { StockAvailabilityPort } from '../ports/StockAvailabilityPort';
 import { CheckoutSessionNotFoundError, PickupLocationNotFoundError } from '../../domain/errors/CheckoutErrors';
 
-export interface PickupInventoryWarning {
+interface PickupInventoryWarning {
   productId: string;
   available: number;
   requested: number;

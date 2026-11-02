@@ -8,14 +8,14 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 import type { TaxRule as DbTaxRule } from '../../../../libs/db/types';
 
-export type TaxRuleConditionType = 'product' | 'category' | 'brand';
+type TaxRuleConditionType = 'product' | 'category' | 'brand';
 
-export type TaxRule = DbTaxRule;
+type TaxRule = DbTaxRule;
 
-export type TaxRuleCreateParams = Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'updatedAt'>;
-export type TaxRuleUpdateParams = Partial<Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'updatedAt'>>;
+type TaxRuleCreateParams = Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'updatedAt'>;
+type TaxRuleUpdateParams = Partial<Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'updatedAt'>>;
 
-export class TaxRuleRepo {
+class TaxRuleRepo {
   async findById(id: string): Promise<TaxRule | null> {
     return await queryOne<TaxRule>(`SELECT * FROM "taxRule" WHERE "taxRuleId" = $1`, [id]);
   }

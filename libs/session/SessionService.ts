@@ -7,8 +7,6 @@
 import { createSessionBackend } from './createSessionBackend';
 import type { CreateSessionInput, SessionBackend, SessionData } from './types';
 
-export type { SessionData, CreateSessionInput } from './types';
-
 class SessionServiceClass {
   private readonly backend: SessionBackend = createSessionBackend();
 

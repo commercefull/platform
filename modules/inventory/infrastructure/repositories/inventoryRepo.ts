@@ -18,15 +18,15 @@ import { InventoryLocationNotFoundError, FailedToCreateInventoryError, Insuffici
 // ============================================================================
 
 export type InventoryLocation = DbInventoryLocation;
-export type InventoryTransaction = DbInventoryTransaction;
-export type InventoryLevel = DbInventoryLevel;
-export type InventoryTransactionType = DbInventoryTransactionType;
+type InventoryTransaction = DbInventoryTransaction;
+type InventoryLevel = DbInventoryLevel;
+type InventoryTransactionType = DbInventoryTransactionType;
 
 // ============================================================================
 // Input Types
 // ============================================================================
 
-export interface CreateInventoryLocationInput {
+interface CreateInventoryLocationInput {
   distributionWarehouseId: string;
   distributionWarehouseBinId?: string;
   productId: string;
@@ -41,7 +41,7 @@ export interface CreateInventoryLocationInput {
   status?: string;
 }
 
-export interface UpdateInventoryLocationInput {
+interface UpdateInventoryLocationInput {
   quantity?: number;
   reservedQuantity?: number;
   minimumStockLevel?: number;
@@ -49,7 +49,7 @@ export interface UpdateInventoryLocationInput {
   status?: string;
 }
 
-export interface CreateInventoryTransactionInput {
+interface CreateInventoryTransactionInput {
   typeId: string;
   distributionWarehouseId: string;
   distributionWarehouseBinId?: string;
@@ -67,7 +67,7 @@ export interface CreateInventoryTransactionInput {
   reason?: string;
 }
 
-export interface InventoryLocationFilter {
+interface InventoryLocationFilter {
   distributionWarehouseId?: string;
   productId?: string;
   sku?: string;
@@ -80,7 +80,7 @@ export interface InventoryLocationFilter {
 // Repository
 // ============================================================================
 
-export class InventoryRepo {
+class InventoryRepo {
   // ==========================================================================
   // Inventory Location Methods (Stock at specific warehouse locations)
   // ==========================================================================

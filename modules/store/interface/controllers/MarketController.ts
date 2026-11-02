@@ -2,11 +2,7 @@ import { jsonResponse } from '../../../../libs/apiResponse';
 import { AppError, getErrorStatusCode } from '../../../../libs/errors';
 import type { HttpRequest, HttpResponse } from '../../../../libs/http';
 import { logger } from '../../../../libs/logger';
-import {
-  evaluateMarketReadinessUseCase,
-  launchMarketUseCase,
-  manageMarketsUseCase,
-} from '../../application/useCases/wired';
+import { evaluateMarketReadinessUseCase, launchMarketUseCase, manageMarketsUseCase } from '../../application/useCases/wired';
 import {
   CreateMarketCommand,
   DeleteMarketCommand,
@@ -54,9 +50,7 @@ export async function createMarket(req: HttpRequest, res: HttpResponse): Promise
     return;
   }
   try {
-    const market = await manageMarketsUseCase.create(
-      new CreateMarketCommand(ownerId, req.body as MarketWriteData),
-    );
+    const market = await manageMarketsUseCase.create(new CreateMarketCommand(ownerId, req.body as MarketWriteData));
     jsonResponse(res, 201, { success: true, data: market });
   } catch (error) {
     handleError(res, error);
@@ -74,9 +68,7 @@ export async function getMarket(req: HttpRequest, res: HttpResponse): Promise<vo
 
 export async function updateMarket(req: HttpRequest, res: HttpResponse): Promise<void> {
   try {
-    const market = await manageMarketsUseCase.update(
-      new UpdateMarketCommand(req.params.marketId, req.body as Partial<MarketWriteData>),
-    );
+    const market = await manageMarketsUseCase.update(new UpdateMarketCommand(req.params.marketId, req.body as Partial<MarketWriteData>));
     jsonResponse(res, 200, { success: true, data: market });
   } catch (error) {
     handleError(res, error);
@@ -94,9 +86,7 @@ export async function deleteMarket(req: HttpRequest, res: HttpResponse): Promise
 
 export async function getMarketReadiness(req: HttpRequest, res: HttpResponse): Promise<void> {
   try {
-    const report = await evaluateMarketReadinessUseCase.execute(
-      new EvaluateMarketReadinessCommand(req.params.marketId),
-    );
+    const report = await evaluateMarketReadinessUseCase.execute(new EvaluateMarketReadinessCommand(req.params.marketId));
     jsonResponse(res, 200, { success: true, data: report });
   } catch (error) {
     handleError(res, error);
@@ -114,9 +104,7 @@ export async function launchMarket(req: HttpRequest, res: HttpResponse): Promise
 
 export async function disableMarket(req: HttpRequest, res: HttpResponse): Promise<void> {
   try {
-    const market = await manageMarketsUseCase.disable(
-      new SetMarketStatusCommand(req.params.marketId, 'disable'),
-    );
+    const market = await manageMarketsUseCase.disable(new SetMarketStatusCommand(req.params.marketId, 'disable'));
     jsonResponse(res, 200, { success: true, data: market });
   } catch (error) {
     handleError(res, error);

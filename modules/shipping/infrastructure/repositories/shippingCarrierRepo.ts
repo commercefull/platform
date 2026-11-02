@@ -18,21 +18,21 @@ const TABLE = Table.ShippingCarrier;
 /**
  * Find a shipping carrier by ID
  */
-export async function findById(id: string): Promise<ShippingCarrier | null> {
+async function findById(id: string): Promise<ShippingCarrier | null> {
   return queryOne<ShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`, [id]);
 }
 
 /**
  * Find a shipping carrier by code
  */
-export async function findByCode(code: string): Promise<ShippingCarrier | null> {
+async function findByCode(code: string): Promise<ShippingCarrier | null> {
   return queryOne<ShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 /**
  * Find all shipping carriers
  */
-export async function findAll(activeOnly = false): Promise<ShippingCarrier[]> {
+async function findAll(activeOnly = false): Promise<ShippingCarrier[]> {
   let sql = `SELECT * FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   sql += ` ORDER BY "name" ASC`;
@@ -42,7 +42,7 @@ export async function findAll(activeOnly = false): Promise<ShippingCarrier[]> {
 /**
  * Find carriers with API integration
  */
-export async function findWithApiIntegration(): Promise<ShippingCarrier[]> {
+async function findWithApiIntegration(): Promise<ShippingCarrier[]> {
   return (
     (await query<ShippingCarrier[]>(
       `SELECT * FROM "${TABLE}" WHERE "hasApiIntegration" = true AND "isActive" = true ORDER BY "name" ASC`,
@@ -53,7 +53,7 @@ export async function findWithApiIntegration(): Promise<ShippingCarrier[]> {
 /**
  * Find carriers by region
  */
-export async function findByRegion(region: string): Promise<ShippingCarrier[]> {
+async function findByRegion(region: string): Promise<ShippingCarrier[]> {
   return (
     (await query<ShippingCarrier[]>(
       `SELECT * FROM "${TABLE}" WHERE "supportedRegions" @> $1::jsonb AND "isActive" = true ORDER BY "name" ASC`,
@@ -65,7 +65,7 @@ export async function findByRegion(region: string): Promise<ShippingCarrier[]> {
 /**
  * Search carriers by name or code
  */
-export async function search(searchTerm: string): Promise<ShippingCarrier[]> {
+async function search(searchTerm: string): Promise<ShippingCarrier[]> {
   return (
     (await query<ShippingCarrier[]>(
       `SELECT * FROM "${TABLE}" WHERE ("name" ILIKE $1 OR "code" ILIKE $1) AND "isActive" = true ORDER BY "name" ASC`,
@@ -77,7 +77,7 @@ export async function search(searchTerm: string): Promise<ShippingCarrier[]> {
 /**
  * Create a new shipping carrier
  */
-export async function create(input: CreateShippingCarrierInput): Promise<ShippingCarrier> {
+async function create(input: CreateShippingCarrierInput): Promise<ShippingCarrier> {
   const existing = await findByCode(input.code);
   if (existing) {
     throw new ShippingCarrierAlreadyExistsError(input.code);
@@ -114,7 +114,7 @@ export async function create(input: CreateShippingCarrierInput): Promise<Shippin
 /**
  * Update a shipping carrier
  */
-export async function update(id: string, input: UpdateShippingCarrierInput): Promise<ShippingCarrier | null> {
+async function update(id: string, input: UpdateShippingCarrierInput): Promise<ShippingCarrier | null> {
   const updateFields: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -142,21 +142,21 @@ export async function update(id: string, input: UpdateShippingCarrierInput): Pro
 /**
  * Activate a shipping carrier
  */
-export async function activate(id: string): Promise<ShippingCarrier | null> {
+async function activate(id: string): Promise<ShippingCarrier | null> {
   return update(id, { isActive: true });
 }
 
 /**
  * Deactivate a shipping carrier
  */
-export async function deactivate(id: string): Promise<ShippingCarrier | null> {
+async function deactivate(id: string): Promise<ShippingCarrier | null> {
   return update(id, { isActive: false });
 }
 
 /**
  * Delete a shipping carrier
  */
-export async function deleteCarrier(id: string): Promise<boolean> {
+async function deleteCarrier(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingCarrierId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingCarrierId" = $1 RETURNING "shippingCarrierId"`,
     [id],
@@ -167,7 +167,7 @@ export async function deleteCarrier(id: string): Promise<boolean> {
 /**
  * Count shipping carriers
  */
-export async function count(activeOnly = false): Promise<number> {
+async function count(activeOnly = false): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   const result = await queryOne<{ count: string }>(sql);
@@ -177,7 +177,7 @@ export async function count(activeOnly = false): Promise<number> {
 /**
  * Get carrier statistics
  */
-export async function getStatistics(): Promise<{
+async function getStatistics(): Promise<{
   total: number;
   active: number;
   withApi: number;

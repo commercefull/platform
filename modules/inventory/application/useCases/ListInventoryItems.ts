@@ -14,7 +14,7 @@ export interface ListInventoryItemsInput {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface InventoryItemSummary {
+interface InventoryItemSummary {
   inventoryItemId: string;
   productId: string;
   variantId?: string;

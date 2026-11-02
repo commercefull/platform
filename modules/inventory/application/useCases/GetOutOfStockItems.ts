@@ -11,7 +11,7 @@ export interface GetOutOfStockItemsInput {
   limit?: number;
 }
 
-export interface OutOfStockItem {
+interface OutOfStockItem {
   inventoryItemId: string;
   productId: string;
   productName?: string;

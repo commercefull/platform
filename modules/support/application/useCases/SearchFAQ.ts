@@ -8,7 +8,7 @@ export interface SearchFAQInput {
   limit?: number;
 }
 
-export interface FAQItem {
+interface FAQItem {
   faqId: string;
   question: string;
   answer: string;

@@ -166,15 +166,3 @@ export async function findRecentLoyaltyTransactions(limit: number = 20): Promise
     )) || []
   );
 }
-
-export default {
-  getMembershipStats,
-  findMembershipTiersWithCounts,
-  findRecentMemberships,
-  getSubscriptionStats,
-  findSubscriptionPlansWithCounts,
-  findRecentSubscriptions,
-  getLoyaltyStats,
-  findLoyaltyRewardsWithCounts,
-  findRecentLoyaltyTransactions,
-};

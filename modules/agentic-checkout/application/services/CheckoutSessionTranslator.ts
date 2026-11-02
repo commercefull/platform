@@ -11,7 +11,7 @@ import type { ChannelBasketItem, ChannelCheckoutSnapshot, ChannelShippingOption 
 
 export const ACP_PROTOCOL_VERSION = '2026-04-17';
 
-export const ACP_CAPABILITIES = {
+const ACP_CAPABILITIES = {
   api_version: ACP_PROTOCOL_VERSION,
   payment_handlers: [{ id: 'stripe', version: 'spt.v1', credential_types: ['spt'] }],
   extensions: [] as string[],

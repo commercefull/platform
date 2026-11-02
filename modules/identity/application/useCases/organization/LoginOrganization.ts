@@ -20,7 +20,7 @@ export interface LoginOrganizationOutput {
   permissions: string[];
 }
 
-export interface OrganizationRecord {
+interface OrganizationRecord {
   organizationId: string;
   email: string;
   passwordHash: string;

@@ -2,9 +2,9 @@ import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 import type { ProductReviewMedia, ProductReviewMediaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
-export type { ProductReviewMedia, ProductReviewMediaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductReviewMedia } from '../../domain/repositories/ProductCatalogPorts';
 
-export class ProductReviewMediaRepo {
+class ProductReviewMediaRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewMedia[]> {
     return (
       (await query<ProductReviewMedia[]>(`SELECT * FROM "productReviewMedia" WHERE "reviewId" = $1 ORDER BY "createdAt" ASC`, [

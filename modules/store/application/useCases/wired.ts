@@ -43,7 +43,7 @@ export const evaluateMarketReadinessUseCase = new EvaluateMarketReadinessUseCase
 export const launchMarketUseCase = new LaunchMarketUseCase(storeDataRepository.markets, marketReadinessAdapter);
 export const resolveMarketContextUseCase = new ResolveMarketContextUseCase(storeDataRepository.markets);
 
-export class FindActiveStoresUseCase {
+class FindActiveStoresUseCase {
   async execute() {
     return storeRepo.findActive();
   }

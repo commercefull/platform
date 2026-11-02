@@ -5,7 +5,7 @@
  * needed for tax calculation — items and subtotal.
  */
 
-export interface TaxableBasketItem {
+interface TaxableBasketItem {
   productId: string;
   quantity: number;
   priceCents: number;

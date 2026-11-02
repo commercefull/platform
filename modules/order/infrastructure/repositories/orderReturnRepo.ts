@@ -2,14 +2,6 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateOrderReturnError } from '../../domain/errors/OrderErrors';
 
-export {
-  OrderReturnStatus,
-  OrderReturnType,
-  ReturnCarrier,
-  OrderReturn,
-  OrderReturnCreateParams,
-  OrderReturnUpdateParams,
-} from '../../domain/repositories/OrderReturnRepository';
 import type {
   OrderReturnStatus,
   OrderReturnType,
@@ -19,7 +11,7 @@ import type {
   OrderReturnUpdateParams,
 } from '../../domain/repositories/OrderReturnRepository';
 
-export class OrderReturnRepo {
+class OrderReturnRepo {
   /**
    * Generate unique return number
    */

@@ -8,7 +8,7 @@ import { ReturnRule, type ReturnRuleProps, type ReturnRuleScope, type RefundMeth
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
 import type { ReturnRule as DbReturnRule } from '../../../../libs/db/types';
 
-export type ReturnRuleRow = DbReturnRule;
+type ReturnRuleRow = DbReturnRule;
 
 function mapToEntity(row: ReturnRuleRow): ReturnRule {
   return new ReturnRule({
@@ -33,12 +33,12 @@ function mapToEntity(row: ReturnRuleRow): ReturnRule {
   });
 }
 
-export async function findActiveRules(): Promise<ReturnRule[]> {
+async function findActiveRules(): Promise<ReturnRule[]> {
   const rows = await query<ReturnRuleRow[]>(`SELECT * FROM "returnRule" WHERE "isActive" = true ORDER BY "priority" DESC`);
   return (rows || []).map(mapToEntity);
 }
 
-export async function findByScope(scope: ReturnRuleScope, activeOnly = true): Promise<ReturnRule[]> {
+async function findByScope(scope: ReturnRuleScope, activeOnly = true): Promise<ReturnRule[]> {
   let sql = `SELECT * FROM "returnRule" WHERE "scope" = $1`;
   const params: unknown[] = [scope];
   if (activeOnly) {
@@ -49,7 +49,7 @@ export async function findByScope(scope: ReturnRuleScope, activeOnly = true): Pr
   return (rows || []).map(mapToEntity);
 }
 
-export async function findByCategory(categoryId: string, activeOnly = true): Promise<ReturnRule[]> {
+async function findByCategory(categoryId: string, activeOnly = true): Promise<ReturnRule[]> {
   let sql = `SELECT * FROM "returnRule" WHERE "scope" = 'category' AND "categoryId" = $1`;
   const params: unknown[] = [categoryId];
   if (activeOnly) {
@@ -59,7 +59,7 @@ export async function findByCategory(categoryId: string, activeOnly = true): Pro
   return (rows || []).map(mapToEntity);
 }
 
-export async function findByProduct(productId: string, activeOnly = true): Promise<ReturnRule[]> {
+async function findByProduct(productId: string, activeOnly = true): Promise<ReturnRule[]> {
   let sql = `SELECT * FROM "returnRule" WHERE "scope" = 'product' AND "productId" = $1`;
   const params: unknown[] = [productId];
   if (activeOnly) {
@@ -69,14 +69,14 @@ export async function findByProduct(productId: string, activeOnly = true): Promi
   return (rows || []).map(mapToEntity);
 }
 
-export async function findById(returnRuleId: string): Promise<ReturnRule | null> {
+async function findById(returnRuleId: string): Promise<ReturnRule | null> {
   const row = await queryOne<ReturnRuleRow>(`SELECT * FROM "returnRule" WHERE "returnRuleId" = $1`, [returnRuleId]);
   return row ? mapToEntity(row) : null;
 }
 
-export type CreateReturnRuleInput = Omit<ReturnRuleProps, 'returnRuleId'>;
+type CreateReturnRuleInput = Omit<ReturnRuleProps, 'returnRuleId'>;
 
-export async function create(input: CreateReturnRuleInput): Promise<ReturnRule> {
+async function create(input: CreateReturnRuleInput): Promise<ReturnRule> {
   const row = await queryOne<ReturnRuleRow>(
     `INSERT INTO "returnRule" (
       "name", "description", "scope", "categoryId", "productId",

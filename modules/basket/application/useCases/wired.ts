@@ -63,4 +63,4 @@ export const applyCouponUseCase = new ApplyCouponUseCase(basketRepo, discountQuo
 export const applyCouponAdminOverrideUseCase = new ApplyCouponAdminOverrideUseCase(basketRepo, discountQuotePort, couponOverrideLookupPort);
 export const removeCouponUseCase = new RemoveCouponUseCase(basketRepo);
 export const repriceBasketUseCase = new RepriceBasketUseCase(basketRepo, productPricePort);
-export { basketRepo, discountQuotePort, productPricePort, productDetailsPort };
+export { basketRepo, productDetailsPort };

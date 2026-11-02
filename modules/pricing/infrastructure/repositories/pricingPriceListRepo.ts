@@ -17,7 +17,7 @@ export interface PriceList {
 export type PriceListCreateParams = Omit<PriceList, 'priceListId' | 'createdAt' | 'updatedAt'>;
 export type PriceListUpdateParams = Partial<Omit<PriceList, 'priceListId' | 'createdAt' | 'updatedAt'>>;
 
-export class PriceListRepo {
+class PriceListRepo {
   async findById(id: string): Promise<PriceList | null> {
     return await queryOne<PriceList>(`SELECT * FROM "pricingPriceList" WHERE "priceListId" = $1`, [id]);
   }

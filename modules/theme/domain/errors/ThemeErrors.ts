@@ -22,12 +22,6 @@ export class ThemeValidationError extends AppError {
   }
 }
 
-export class ThemeNotActiveError extends AppError {
-  constructor(slug: string) {
-    super(`Theme '${slug}' is not active`, 400, { code: 'theme.not_active' });
-  }
-}
-
 export class ThemeOverrideNotFoundError extends AppError {
   constructor(overrideId: string) {
     super(`Theme override not found: ${overrideId}`, 404, { code: 'theme.override_not_found' });

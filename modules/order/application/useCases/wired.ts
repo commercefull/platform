@@ -11,7 +11,7 @@ import { AddOrderNoteUseCase } from './AddOrderNote';
 import { CreateOrderUseCase } from './CreateOrder';
 import { CreateOrderRefundUseCase } from './CreateOrderRefund';
 import { GetFulfillmentPackagesUseCase } from './GetFulfillmentPackages';
-import { GetOrderDetailsUseCase } from './GetOrderDetails';
+
 import { GetOrderRefundsUseCase } from './GetOrderRefunds';
 import { GetOrdersByStoreUseCase } from './GetOrdersByStore';
 import { ManageOrderFulfillmentsUseCase } from './ManageOrderFulfillments';
@@ -20,7 +20,7 @@ import { ManageOrderNotesUseCase } from './ManageOrderNotes';
 import { ManageOrderItemsUseCase } from './ManageOrderItems';
 import { GetOrderHistoryUseCase } from './GetOrderHistory';
 import { GetOrderExplainabilityUseCase } from './GetOrderExplainability';
-import { ManageOrderReturnsUseCase } from './ManageOrderReturns';
+
 import { ManageStorefrontReturnsUseCase } from './ManageStorefrontReturns';
 import { TrackFulfillmentPackageUseCase } from './TrackFulfillmentPackage';
 import { GetOrderLinesUseCase } from './GetOrderLines';
@@ -43,7 +43,7 @@ export const addOrderNoteUseCase = new AddOrderNoteUseCase(orderRepo, orderQuery
 export const createOrderUseCase = new CreateOrderUseCase(orderRepo, orderQueryRepo);
 export const createOrderRefundUseCase = new CreateOrderRefundUseCase(orderQueryRepo);
 export const getFulfillmentPackagesUseCase = new GetFulfillmentPackagesUseCase(orderFulfillmentRepo);
-export const getOrderDetailsUseCase = new GetOrderDetailsUseCase(orderRepo, orderQueryRepo);
+
 export const getOrderRefundsUseCase = new GetOrderRefundsUseCase(orderQueryRepo);
 export const getOrdersByStoreUseCase = new GetOrdersByStoreUseCase(orderRepo);
 export const manageOrderFulfillmentsUseCase = new ManageOrderFulfillmentsUseCase(orderFulfillmentRepo, orderRepo);
@@ -52,7 +52,7 @@ export const manageOrderNotesUseCase = new ManageOrderNotesUseCase(orderQueryRep
 export const manageOrderItemsUseCase = new ManageOrderItemsUseCase(orderRepo);
 export const getOrderHistoryUseCase = new GetOrderHistoryUseCase(orderRepo);
 export const getOrderExplainabilityUseCase = new GetOrderExplainabilityUseCase(orderRepo, orderQueryRepo);
-export const manageOrderReturnsUseCase = new ManageOrderReturnsUseCase(orderReturnRepo);
+
 export const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase(orderReturnRepo);
 export const trackFulfillmentPackageUseCase = new TrackFulfillmentPackageUseCase(orderFulfillmentRepo);
 export const getOrderLinesUseCase = new GetOrderLinesUseCase(orderLineExportRepo);

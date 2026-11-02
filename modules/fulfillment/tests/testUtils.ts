@@ -5,7 +5,12 @@
 
 import { eventBus } from '../../../libs/events/eventBus';
 import { withTransaction, type TxClient } from '../../../libs/db';
-import * as fulfillmentEvents from '../domain/events/FulfillmentEvents';
+import {
+  emitFulfillmentCreated,
+  emitFulfillmentDelivered,
+  emitFulfillmentPickingStarted,
+  emitFulfillmentShipped,
+} from '../domain/events/FulfillmentEvents';
 import { Fulfillment, type FulfillmentStatus, type FulfillmentProps } from '../domain/entities/Fulfillment';
 import { FulfillmentItem, type FulfillmentItemProps } from '../domain/entities/FulfillmentItem';
 import type { IFulfillmentRepository } from '../domain/repositories/FulfillmentRepository';
@@ -35,10 +40,10 @@ jest.mock('../domain/events/FulfillmentEvents', () => ({
 
 export const emitMock = jest.mocked(eventBus.emit);
 export const withTransactionMock = jest.mocked(withTransaction);
-export const emitFulfillmentCreatedMock = jest.mocked(fulfillmentEvents.emitFulfillmentCreated);
-export const emitFulfillmentPickingStartedMock = jest.mocked(fulfillmentEvents.emitFulfillmentPickingStarted);
-export const emitFulfillmentShippedMock = jest.mocked(fulfillmentEvents.emitFulfillmentShipped);
-export const emitFulfillmentDeliveredMock = jest.mocked(fulfillmentEvents.emitFulfillmentDelivered);
+export const emitFulfillmentCreatedMock = jest.mocked(emitFulfillmentCreated);
+export const emitFulfillmentPickingStartedMock = jest.mocked(emitFulfillmentPickingStarted);
+export const emitFulfillmentShippedMock = jest.mocked(emitFulfillmentShipped);
+export const emitFulfillmentDeliveredMock = jest.mocked(emitFulfillmentDelivered);
 
 const txClientStub: TxClient = {
   query: jest.fn().mockResolvedValue(null),

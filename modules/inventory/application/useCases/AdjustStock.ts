@@ -11,9 +11,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 import type { InventoryLocation } from '../../../../libs/db/types';
 import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
-export type AdjustmentReason = 'correction' | 'count' | 'damage' | 'return' | 'shrinkage' | 'expired' | 'received' | 'manual' | 'other';
-
-export type StockAdjustmentType = 'set' | 'increment' | 'decrement';
+type StockAdjustmentType = 'set' | 'increment' | 'decrement';
 
 export interface AdjustStockInput {
   inventoryLocationId: string;

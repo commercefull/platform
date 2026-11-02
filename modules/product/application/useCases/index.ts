@@ -8,7 +8,7 @@
 export { CreateProductCommand } from './CreateProduct';
 export { UpdateProductCommand } from './UpdateProduct';
 export { ListProductsForContextCommand } from './ListProductsForContext';
-export { CreateProductVariantCommand } from './CreateProductVariant';
+
 
 // Query operations - import directly from files if needed
 // export * from './GetProduct';
@@ -24,14 +24,14 @@ export { VoteOnReviewCommand, VoteOnReviewUseCase } from './VoteOnReview';
 export type { VoteOnReviewResponse } from './VoteOnReview';
 
 export { GetProductCatalogEnrichmentCommand, GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
-export type { ProductCatalogEnrichmentResponse, QaWithAnswers } from './GetProductCatalogEnrichment';
+export type { ProductCatalogEnrichmentResponse } from './GetProductCatalogEnrichment';
 
 export { ManageAttributeSetsUseCase } from './ManageAttributeSets';
 export type { AttributeSetCreateInput, AttributeSetUpdateInput } from './ManageAttributeSets';
 
 export { ManageProductTypesUseCase } from './ManageProductTypes';
 export { ManageBundlesUseCase } from './ManageBundles';
-export type { ProductBundleRecord, BundleItemRecord, BundlePricing } from './ManageBundles';
+export type { ProductBundleRecord, BundleItemRecord } from './ManageBundles';
 
 export {
   ManageProductImagesUseCase,

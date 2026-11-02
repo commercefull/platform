@@ -9,7 +9,7 @@ import type {
 export type { ProductCategoryCreateParams, ProductCategoryUpdateParams } from '../../domain/repositories/ProductCatalogPorts';
 export type ProductCategory = ProductCategoryRow;
 
-export class ProductCategoryRepo {
+class ProductCategoryRepo {
   async findAll(includeDeleted = false): Promise<ProductCategory[]> {
     const sql = includeDeleted
       ? `SELECT * FROM "productCategory" ORDER BY "position" ASC, "name" ASC`

@@ -74,9 +74,9 @@ describe('LaunchMarketUseCase', () => {
     marketRepository.findById.mockResolvedValue(createMarket());
     const factsPort = createMarketReadinessFactsPort({ hasPaymentMethod: false, enabledPaymentMethods: [] });
 
-    await expect(
-      new LaunchMarketUseCase(marketRepository, factsPort).execute(new LaunchMarketCommand('market-1')),
-    ).rejects.toThrow(MarketNotReadyForLaunchError);
+    await expect(new LaunchMarketUseCase(marketRepository, factsPort).execute(new LaunchMarketCommand('market-1'))).rejects.toThrow(
+      MarketNotReadyForLaunchError,
+    );
     expect(marketRepository.update).not.toHaveBeenCalled();
   });
 

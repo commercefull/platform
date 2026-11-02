@@ -6,20 +6,22 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import * as controller from '../controllers/AssortmentCustomerController';
-
+import {
+  getCollectionBySlug,
+  listCollections,
+} from '../controllers/AssortmentCustomerController';
 const router = createHttpRouter();
 
 /**
  * List published collections
  * GET /customer/assortment/collections
  */
-router.get('/assortment/collections', asyncHandler(controller.listCollections));
+router.get('/assortment/collections', asyncHandler(listCollections));
 
 /**
  * Get collection page by slug (metadata + resolved products)
  * GET /customer/assortment/collections/:slug
  */
-router.get('/assortment/collections/:slug', asyncHandler(controller.getCollectionBySlug));
+router.get('/assortment/collections/:slug', asyncHandler(getCollectionBySlug));
 
 export const assortmentCustomerRouter = router;

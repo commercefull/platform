@@ -8,7 +8,7 @@ import { StoreRepository as IStoreRepository, StoreFilters } from '../../domain/
 import { Store, type StoreProps } from '../../domain/entities/Store';
 import { StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
-export class StoreRepo implements IStoreRepository {
+class StoreRepo implements IStoreRepository {
   async findById(storeId: string): Promise<Store | null> {
     const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToStore(row) : null;
