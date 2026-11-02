@@ -52,7 +52,7 @@ export interface SearchQuery {
   includeFacets?: boolean;
 }
 
-interface SearchAttributeFilter {
+export interface SearchAttributeFilter {
   attributeId?: string;
   attributeCode?: string;
   value?: string;

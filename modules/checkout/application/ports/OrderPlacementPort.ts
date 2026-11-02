@@ -8,7 +8,7 @@
  * to order's internal status values.
  */
 
-interface OrderAddressInput {
+export interface OrderAddressInput {
   firstName: string;
   lastName: string;
   company?: string;
@@ -30,7 +30,7 @@ interface OrderAddressInput {
   phone?: string;
 }
 
-interface OrderItemInput {
+export interface OrderItemInput {
   productId: string;
   productVariantId?: string;
   sku: string;

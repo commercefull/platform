@@ -4,6 +4,7 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware, ExpressContextFunctionArgument } from '@as-integrations/express5';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import type { GraphQLFormattedError } from 'graphql';
 import { SessionService } from '../libs/session';
 import { verifyAccessJwt } from '../libs/auth';
 import { logger } from '../libs/logger';
@@ -103,83 +104,114 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
   return context;
 }
 
+// Module GraphQL contributions — typeDefs + resolvers paired per module,
+// filtered by module enabled state before merging into the schema.
+const GRAPHQL_MODULES: { module: string; defs: string; res: unknown }[] = [
+  { module: 'product', defs: productTypeDefs, res: productResolvers },
+  { module: 'order', defs: orderTypeDefs, res: orderResolvers },
+  { module: 'customer', defs: customerTypeDefs, res: customerResolvers },
+  { module: 'basket', defs: basketTypeDefs, res: basketResolvers },
+  { module: 'checkout', defs: checkoutTypeDefs, res: checkoutResolvers },
+  { module: 'payment', defs: paymentTypeDefs, res: paymentResolvers },
+  { module: 'inventory', defs: inventoryTypeDefs, res: inventoryResolvers },
+  { module: 'fulfillment', defs: fulfillmentTypeDefs, res: fulfillmentResolvers },
+  { module: 'shipping', defs: shippingTypeDefs, res: shippingResolvers },
+  { module: 'promotion', defs: promotionTypeDefs, res: promotionResolvers },
+  { module: 'loyalty', defs: loyaltyTypeDefs, res: loyaltyResolvers },
+  { module: 'membership', defs: membershipTypeDefs, res: membershipResolvers },
+  { module: 'subscription', defs: subscriptionTypeDefs, res: subscriptionResolvers },
+  { module: 'coupon', defs: couponTypeDefs, res: couponResolvers },
+  { module: 'notification', defs: notificationTypeDefs, res: notificationResolvers },
+  { module: 'store', defs: storeTypeDefs, res: storeResolvers },
+  { module: 'tax', defs: taxTypeDefs, res: taxResolvers },
+  { module: 'pricing', defs: pricingTypeDefs, res: pricingResolvers },
+  { module: 'analytics', defs: analyticsTypeDefs, res: analyticsResolvers },
+  { module: 'content', defs: contentTypeDefs, res: contentResolvers },
+  { module: 'media', defs: mediaTypeDefs, res: mediaResolvers },
+  { module: 'localization', defs: localizationTypeDefs, res: localizationResolvers },
+  { module: 'configuration', defs: configurationTypeDefs, res: configurationResolvers },
+  { module: 'organization', defs: organizationTypeDefs, res: organizationResolvers },
+  { module: 'supplier', defs: supplierTypeDefs, res: supplierResolvers },
+  { module: 'gdpr', defs: gdprTypeDefs, res: gdprResolvers },
+  { module: 'identity', defs: identityTypeDefs, res: identityResolvers },
+  { module: 'reporting', defs: reportingTypeDefs, res: reportingResolvers },
+  { module: 'support', defs: supportTypeDefs, res: supportResolvers },
+  { module: 'warehouse', defs: warehouseTypeDefs, res: warehouseResolvers },
+  { module: 'webhook', defs: webhookTypeDefs, res: webhookResolvers },
+];
+
+function formatGraphQLError(formattedError: GraphQLFormattedError, error: unknown): GraphQLFormattedError {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const original = (error as Record<string, unknown>)?.originalError;
+
+  // If it's an AppError, enrich the GraphQL error with our code/status
+  if (original instanceof AppError) {
+    return {
+      message: isProduction && !original.isExpected ? 'An internal error occurred' : original.message,
+      extensions: {
+        code: original.code,
+        statusCode: original.statusCode,
+        isExpected: original.isExpected,
+        ...(original.details ? { details: original.details } : {}),
+      },
+    };
+  }
+
+  // Log unexpected errors
+  if (
+    formattedError.extensions?.code !== 'BAD_USER_INPUT' &&
+    formattedError.extensions?.code !== 'UNAUTHENTICATED' &&
+    formattedError.extensions?.code !== 'FORBIDDEN'
+  ) {
+    logger.error('GraphQL error', {
+      message: formattedError.message,
+      path: formattedError.path,
+      code: formattedError.extensions?.code,
+    });
+  }
+
+  // Hide internal details in production
+  if (isProduction) {
+    return {
+      message: 'An internal error occurred',
+      extensions: { code: 'INTERNAL_SERVER_ERROR' },
+    };
+  }
+
+  return formattedError;
+}
+
+// Persisted query enforcement: reject queries not in the allowlist.
+// Returns true when the request was handled (rejected).
+function rejectNonPersistedQuery(req: Parameters<RequestHandler>[0], res: Parameters<RequestHandler>[1]): boolean {
+  if (persistedQueryStore.isEnabled() && req.method === 'POST' && req.body?.query && !persistedQueryStore.isQueryAllowed(req.body.query)) {
+    res.status(403).json({
+      errors: [{ message: 'Query not in persisted query allowlist' }],
+    });
+    return true;
+  }
+  return false;
+}
+
+// Serve GraphiQL UI for browser GET requests in non-production.
+// Returns true when the request was handled.
+function serveGraphiQL(req: Parameters<RequestHandler>[0], res: Parameters<RequestHandler>[1]): boolean {
+  if (req.method !== 'GET' || process.env.NODE_ENV === 'production') return false;
+  const accept = req.headers.accept || '';
+  if (!accept.includes('text/html')) return false;
+
+  res.setHeader('Content-Type', 'text/html');
+  res.send(GRAPHIQL_HTML);
+  return true;
+}
+
 export function configureGraphQL(app: HttpApplication): void {
-  // Build arrays of typeDefs and resolvers, filtered by module enabled state
-  const allTypeDefs: { module: string; defs: string }[] = [
-    { module: 'product', defs: productTypeDefs },
-    { module: 'order', defs: orderTypeDefs },
-    { module: 'customer', defs: customerTypeDefs },
-    { module: 'basket', defs: basketTypeDefs },
-    { module: 'checkout', defs: checkoutTypeDefs },
-    { module: 'payment', defs: paymentTypeDefs },
-    { module: 'inventory', defs: inventoryTypeDefs },
-    { module: 'fulfillment', defs: fulfillmentTypeDefs },
-    { module: 'shipping', defs: shippingTypeDefs },
-    { module: 'promotion', defs: promotionTypeDefs },
-    { module: 'loyalty', defs: loyaltyTypeDefs },
-    { module: 'membership', defs: membershipTypeDefs },
-    { module: 'subscription', defs: subscriptionTypeDefs },
-    { module: 'coupon', defs: couponTypeDefs },
-    { module: 'notification', defs: notificationTypeDefs },
-    { module: 'store', defs: storeTypeDefs },
-    { module: 'tax', defs: taxTypeDefs },
-    { module: 'pricing', defs: pricingTypeDefs },
-    { module: 'analytics', defs: analyticsTypeDefs },
-    { module: 'content', defs: contentTypeDefs },
-    { module: 'media', defs: mediaTypeDefs },
-    { module: 'localization', defs: localizationTypeDefs },
-    { module: 'configuration', defs: configurationTypeDefs },
-    { module: 'organization', defs: organizationTypeDefs },
-    { module: 'supplier', defs: supplierTypeDefs },
-    { module: 'gdpr', defs: gdprTypeDefs },
-    { module: 'identity', defs: identityTypeDefs },
-    { module: 'reporting', defs: reportingTypeDefs },
-    { module: 'support', defs: supportTypeDefs },
-    { module: 'warehouse', defs: warehouseTypeDefs },
-    { module: 'webhook', defs: webhookTypeDefs },
-  ];
+  const enabledModules = GRAPHQL_MODULES.filter(m => moduleRegistry.shouldIncludeGraphQL(m.module));
 
-  const allResolvers: { module: string; res: unknown }[] = [
-    { module: 'product', res: productResolvers },
-    { module: 'order', res: orderResolvers },
-    { module: 'customer', res: customerResolvers },
-    { module: 'basket', res: basketResolvers },
-    { module: 'checkout', res: checkoutResolvers },
-    { module: 'payment', res: paymentResolvers },
-    { module: 'inventory', res: inventoryResolvers },
-    { module: 'fulfillment', res: fulfillmentResolvers },
-    { module: 'shipping', res: shippingResolvers },
-    { module: 'promotion', res: promotionResolvers },
-    { module: 'loyalty', res: loyaltyResolvers },
-    { module: 'membership', res: membershipResolvers },
-    { module: 'subscription', res: subscriptionResolvers },
-    { module: 'coupon', res: couponResolvers },
-    { module: 'notification', res: notificationResolvers },
-    { module: 'store', res: storeResolvers },
-    { module: 'tax', res: taxResolvers },
-    { module: 'pricing', res: pricingResolvers },
-    { module: 'analytics', res: analyticsResolvers },
-    { module: 'content', res: contentResolvers },
-    { module: 'media', res: mediaResolvers },
-    { module: 'localization', res: localizationResolvers },
-    { module: 'configuration', res: configurationResolvers },
-    { module: 'organization', res: organizationResolvers },
-    { module: 'supplier', res: supplierResolvers },
-    { module: 'gdpr', res: gdprResolvers },
-    { module: 'identity', res: identityResolvers },
-    { module: 'reporting', res: reportingResolvers },
-    { module: 'support', res: supportResolvers },
-    { module: 'warehouse', res: warehouseResolvers },
-    { module: 'webhook', res: webhookResolvers },
-  ];
-
-  const enabledTypeDefs = allTypeDefs.filter(t => moduleRegistry.shouldIncludeGraphQL(t.module)).map(t => t.defs);
-  const enabledResolvers = allResolvers.filter(r => moduleRegistry.shouldIncludeGraphQL(r.module)).map(r => r.res);
-
-  const typeDefs = mergeTypeDefs(enabledTypeDefs);
-  const resolvers = mergeResolvers(enabledResolvers as unknown as NonNullable<Parameters<typeof mergeResolvers>[0]>);
-
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const schema = makeExecutableSchema({
+    typeDefs: mergeTypeDefs(enabledModules.map(m => m.defs)),
+    resolvers: mergeResolvers(enabledModules.map(m => m.res) as unknown as NonNullable<Parameters<typeof mergeResolvers>[0]>),
+  });
 
   const apolloServer = new ApolloServer<GraphQLContext>({
     schema,
@@ -188,46 +220,7 @@ export function configureGraphQL(app: HttpApplication): void {
       parseInt(process.env.GRAPHQL_MAX_DEPTH ?? '10', 10),
       parseInt(process.env.GRAPHQL_MAX_COMPLEXITY ?? '1000', 10),
     ),
-    formatError: (formattedError, error) => {
-      const isProduction = process.env.NODE_ENV === 'production';
-      const original = (error as Record<string, unknown>)?.originalError;
-
-      // If it's an AppError, enrich the GraphQL error with our code/status
-      if (original instanceof AppError) {
-        return {
-          message: isProduction && !original.isExpected ? 'An internal error occurred' : original.message,
-          extensions: {
-            code: original.code,
-            statusCode: original.statusCode,
-            isExpected: original.isExpected,
-            ...(original.details ? { details: original.details } : {}),
-          },
-        };
-      }
-
-      // Log unexpected errors
-      if (
-        formattedError.extensions?.code !== 'BAD_USER_INPUT' &&
-        formattedError.extensions?.code !== 'UNAUTHENTICATED' &&
-        formattedError.extensions?.code !== 'FORBIDDEN'
-      ) {
-        logger.error('GraphQL error', {
-          message: formattedError.message,
-          path: formattedError.path,
-          code: formattedError.extensions?.code,
-        });
-      }
-
-      // Hide internal details in production
-      if (isProduction) {
-        return {
-          message: 'An internal error occurred',
-          extensions: { code: 'INTERNAL_SERVER_ERROR' },
-        };
-      }
-
-      return formattedError;
-    },
+    formatError: formatGraphQLError,
   });
 
   // Initialize persisted queries (if enabled via env)
@@ -238,22 +231,30 @@ export function configureGraphQL(app: HttpApplication): void {
   let graphqlHandler: RequestHandler | null = null;
 
   app.use('/graphql', (req, res, next) => {
-    // Persisted query enforcement: reject queries not in the allowlist
-    if (persistedQueryStore.isEnabled() && req.method === 'POST' && req.body?.query) {
-      if (!persistedQueryStore.isQueryAllowed(req.body.query)) {
-        res.status(403).json({
-          errors: [{ message: 'Query not in persisted query allowlist' }],
-        });
-        return;
-      }
-    }
+    if (rejectNonPersistedQuery(req, res)) return;
+    if (serveGraphiQL(req, res)) return;
 
-    // Serve GraphiQL UI for browser GET requests in non-production
-    if (req.method === 'GET' && process.env.NODE_ENV !== 'production') {
-      const accept = req.headers.accept || '';
-      if (accept.includes('text/html')) {
-        res.setHeader('Content-Type', 'text/html');
-        res.send(`<!DOCTYPE html>
+    if (graphqlHandler) {
+      graphqlHandler(req, res, next);
+    } else {
+      res.status(503).json({ error: 'GraphQL server is starting, please retry shortly.' });
+    }
+  });
+
+  apolloServer
+    .start()
+    .then(() => {
+      graphqlHandler = expressMiddleware<GraphQLContext>(apolloServer, {
+        context: async args => buildContext(args),
+      });
+      logger.info('GraphQL endpoint mounted at /graphql');
+    })
+    .catch(error => {
+      logger.error('Failed to start Apollo Server:', error);
+    });
+}
+
+const GRAPHIQL_HTML = `<!DOCTYPE html>
 <html>
   <head>
     <title>Commercefull GraphiQL</title>
@@ -287,26 +288,4 @@ export function configureGraphQL(app: HttpApplication): void {
       });
     </script>
   </body>
-</html>`);
-        return;
-      }
-    }
-    if (graphqlHandler) {
-      graphqlHandler(req, res, next);
-    } else {
-      res.status(503).json({ error: 'GraphQL server is starting, please retry shortly.' });
-    }
-  });
-
-  apolloServer
-    .start()
-    .then(() => {
-      graphqlHandler = expressMiddleware<GraphQLContext>(apolloServer, {
-        context: async args => buildContext(args),
-      });
-      logger.info('GraphQL endpoint mounted at /graphql');
-    })
-    .catch(error => {
-      logger.error('Failed to start Apollo Server:', error);
-    });
-}
+</html>`;

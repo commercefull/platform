@@ -174,6 +174,18 @@ export interface CalculateOrderTaxResponse {
 /** Version marker for the internal rule-based tax engine. */
 const TAX_POLICY_VERSION = 'internal-rules@1.0.0';
 
+interface LineTaxContext {
+  items: OrderLineItem[];
+  address: AddressInput;
+  pricesIncludeTax: boolean;
+  defaultTaxRate: number;
+  defaultRateInfo: TaxRateInfo | null;
+  reverseChargeApplied: boolean;
+  noNexusObligation: boolean;
+  exemptions: TaxExemption[];
+  subtotal: number;
+}
+
 // ============================================================================
 // Use Case
 // ============================================================================
@@ -227,128 +239,36 @@ export class CalculateOrderTaxUseCase {
       // Origin: per-fulfillment ship-from wins over the store-level originCountry.
       const originCountry = command.shipFromAddress?.country ?? command.originCountry;
 
-      // B2B reverse charge: valid customer VAT number for an EU destination
-      // different from the seller's origin — the customer self-accounts VAT.
       const destinationCountry = destinationAddress.country.toUpperCase();
-      let reverseChargeApplied = false;
-      if (
-        command.vatNumber &&
-        isInEuVatArea(destinationCountry) &&
-        originCountry &&
-        originCountry.toUpperCase() !== destinationCountry &&
-        this.taxQuery.validateCustomerVatNumber
-      ) {
-        const vatValid = await this.taxQuery.validateCustomerVatNumber(command.vatNumber, destinationCountry);
-        const sellerRegistered =
-          !command.organizationId || !this.taxQuery.hasActiveVatRegistration
-            ? true
-            : await this.taxQuery.hasActiveVatRegistration(command.organizationId);
-        reverseChargeApplied = vatValid && sellerRegistered;
-      }
-
-      // US-style nexus gating: when the organization maintains nexus
-      // records, tax is only collected where nexus covers the destination.
-      let noNexusObligation = false;
-      if (command.organizationId && this.taxQuery.hasNexusCoverage) {
-        const covered = await this.taxQuery.hasNexusCoverage(command.organizationId, address);
-        noNexusObligation = covered === false;
-      }
+      const reverseChargeApplied = await this.evaluateReverseCharge(command, destinationCountry, originCountry);
+      const noNexusObligation = await this.checkNexusObligation(command, address);
 
       // Get the default tax rate for the shipping address (backward compat)
       const defaultTaxRate = reverseChargeApplied || noNexusObligation ? 0 : await this.taxQuery.getTaxRateForAddress(address);
       const defaultRateInfo = this.taxQuery.getTaxRateInfoForAddress ? await this.taxQuery.getTaxRateInfoForAddress(address) : null;
 
-      // Load customer tax exemptions and convert to domain entities
-      let exemptions: TaxExemption[] = [];
-      if (command.customerId) {
-        const rawExemptions = await this.taxQuery.findCustomerTaxExemptions(command.customerId, 'approved');
-        exemptions = rawExemptions.map(e => this.toDomainEntity(e));
-      }
+      const exemptions = await this.loadCustomerExemptions(command.customerId);
 
       // Calculate subtotal first (needed for exemption amount-bounds checks)
       const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
 
-      // Calculate tax for each line item
-      const lineItems: TaxLineItem[] = [];
-      let hasAnyExemption = false;
-      let embeddedTaxCents = 0;
-      let addedTaxCents = 0;
-
-      for (const item of command.items) {
-        const itemSubtotal = item.quantity * item.unitPriceCents;
-
-        // Skip non-taxable items
-        if (item.taxable === false) {
-          lineItems.push({
-            productId: item.productId,
-            name: item.name,
-            subtotalCents: itemSubtotal,
-            taxAmountCents: 0,
-            taxRate: 0,
-          });
-          continue;
-        }
-
-        // Get the tax rate for this item's category (per-category lookup, Epic B5)
-        let itemTaxRate = defaultTaxRate;
-        let itemRateInfo = defaultRateInfo;
-        if (item.taxCategoryId && !reverseChargeApplied && !noNexusObligation) {
-          const categoryRate = await this.taxQuery.getTaxRateForAddressAndCategory(address, item.taxCategoryId);
-          // Only use the category rate if it's non-zero (zero means no specific rate found)
-          if (categoryRate > 0) {
-            itemTaxRate = categoryRate;
-            itemRateInfo = this.taxQuery.getTaxRateInfoForAddress
-              ? await this.taxQuery.getTaxRateInfoForAddress(address, item.taxCategoryId)
-              : null;
-          }
-        }
-        // The org-wide setting forces inclusion; otherwise the applied rate's
-        // own includeInPrice flag decides (UK/EU VAT zones are inclusive even
-        // when the org default is tax-exclusive).
-        const lineIncluded = command.pricesIncludeTax || itemRateInfo?.includeInPrice === true;
-
-        // Evaluate exemption for this line item (Epic B4)
-        let exemptionMultiplier = 1; // 1 = full tax, 0 = fully exempt
-        let exemptionVerdict: ExemptionVerdict | undefined;
-
-        if (exemptions.length > 0) {
-          // Find the best exemption for this line item (most specific: matching category)
-          const result = this.evaluateExemption(exemptions, item.taxCategoryId, subtotal);
-
-          if (result) {
-            exemptionMultiplier = result.multiplier;
-            exemptionVerdict = result.verdict;
-            if (exemptionMultiplier < 1) hasAnyExemption = true;
-          }
-        }
-
-        const effectiveRate = itemTaxRate * exemptionMultiplier;
-        const itemTaxAmount = lineIncluded ? itemSubtotal - itemSubtotal / (1 + effectiveRate / 100) : (itemSubtotal * effectiveRate) / 100;
-        const roundedItemTax = Math.round(itemTaxAmount);
-        if (lineIncluded) embeddedTaxCents += roundedItemTax;
-        else addedTaxCents += roundedItemTax;
-
-        lineItems.push({
-          productId: item.productId,
-          name: item.name,
-          subtotalCents: itemSubtotal,
-          taxAmountCents: roundedItemTax,
-          taxRate: exemptionMultiplier < 1 ? itemTaxRate * exemptionMultiplier : itemTaxRate,
-          exemptionVerdict,
-        });
-      }
+      const lineTaxes = await this.computeLineItemTaxes({
+        items: command.items,
+        address,
+        pricesIncludeTax: command.pricesIncludeTax,
+        defaultTaxRate,
+        defaultRateInfo,
+        reverseChargeApplied,
+        noNexusObligation,
+        exemptions,
+        subtotal,
+      });
+      const { lineItems, hasAnyExemption } = lineTaxes;
 
       // Calculate tax on shipping (if applicable and not fully exempt)
-      const shippingExemptionMultiplier = this.shippingExemptionMultiplier(exemptions, subtotal);
-      const effectiveShippingRate = defaultTaxRate * shippingExemptionMultiplier;
-      const shippingIncluded = command.pricesIncludeTax || defaultRateInfo?.includeInPrice === true;
-      const shippingTaxAmountCents = Math.round(
-        shippingIncluded
-          ? command.shippingAmountCents - command.shippingAmountCents / (1 + effectiveShippingRate / 100)
-          : (command.shippingAmountCents * effectiveShippingRate) / 100,
-      );
-      if (shippingIncluded) embeddedTaxCents += shippingTaxAmountCents;
-      else addedTaxCents += shippingTaxAmountCents;
+      const shippingTax = this.computeShippingTax(command, defaultTaxRate, defaultRateInfo, exemptions, subtotal);
+      const embeddedTaxCents = lineTaxes.embeddedTaxCents + (shippingTax.included ? shippingTax.amountCents : 0);
+      const addedTaxCents = lineTaxes.addedTaxCents + (shippingTax.included ? 0 : shippingTax.amountCents);
 
       // Calculate total tax
       const totalTaxAmountCents = embeddedTaxCents + addedTaxCents;
@@ -420,6 +340,168 @@ export class CalculateOrderTaxUseCase {
         message: (error as Error).message || 'Failed to calculate tax',
       };
     }
+  }
+
+  /**
+   * B2B reverse charge: valid customer VAT number for an EU destination
+   * different from the seller's origin — the customer self-accounts VAT.
+   */
+  private async evaluateReverseCharge(
+    command: CalculateOrderTaxCommand,
+    destinationCountry: string,
+    originCountry?: string,
+  ): Promise<boolean> {
+    if (
+      !command.vatNumber ||
+      !isInEuVatArea(destinationCountry) ||
+      !originCountry ||
+      originCountry.toUpperCase() === destinationCountry ||
+      !this.taxQuery.validateCustomerVatNumber
+    ) {
+      return false;
+    }
+    const vatValid = await this.taxQuery.validateCustomerVatNumber(command.vatNumber, destinationCountry);
+    const sellerRegistered =
+      !command.organizationId || !this.taxQuery.hasActiveVatRegistration
+        ? true
+        : await this.taxQuery.hasActiveVatRegistration(command.organizationId);
+    return vatValid && sellerRegistered;
+  }
+
+  /**
+   * US-style nexus gating: when the organization maintains nexus
+   * records, tax is only collected where nexus covers the destination.
+   */
+  private async checkNexusObligation(command: CalculateOrderTaxCommand, address: AddressInput): Promise<boolean> {
+    if (!command.organizationId || !this.taxQuery.hasNexusCoverage) return false;
+    const covered = await this.taxQuery.hasNexusCoverage(command.organizationId, address);
+    return covered === false;
+  }
+
+  /** Load customer tax exemptions and convert to domain entities. */
+  private async loadCustomerExemptions(customerId?: string): Promise<TaxExemption[]> {
+    if (!customerId) return [];
+    const rawExemptions = await this.taxQuery.findCustomerTaxExemptions(customerId, 'approved');
+    return rawExemptions.map(e => this.toDomainEntity(e));
+  }
+
+  /** Calculate tax for each line item and bucket it as embedded vs added. */
+  private async computeLineItemTaxes(ctx: LineTaxContext): Promise<{
+    lineItems: TaxLineItem[];
+    hasAnyExemption: boolean;
+    embeddedTaxCents: number;
+    addedTaxCents: number;
+  }> {
+    const lineItems: TaxLineItem[] = [];
+    let hasAnyExemption = false;
+    let embeddedTaxCents = 0;
+    let addedTaxCents = 0;
+
+    for (const item of ctx.items) {
+      const result = await this.computeItemTax(ctx, item);
+      lineItems.push(result.lineItem);
+      if (result.embedded) embeddedTaxCents += result.taxAmountCents;
+      else addedTaxCents += result.taxAmountCents;
+      hasAnyExemption = hasAnyExemption || result.exempted;
+    }
+
+    return { lineItems, hasAnyExemption, embeddedTaxCents, addedTaxCents };
+  }
+
+  private async computeItemTax(
+    ctx: LineTaxContext,
+    item: OrderLineItem,
+  ): Promise<{ lineItem: TaxLineItem; taxAmountCents: number; embedded: boolean; exempted: boolean }> {
+    const itemSubtotal = item.quantity * item.unitPriceCents;
+
+    // Skip non-taxable items
+    if (item.taxable === false) {
+      return {
+        lineItem: { productId: item.productId, name: item.name, subtotalCents: itemSubtotal, taxAmountCents: 0, taxRate: 0 },
+        taxAmountCents: 0,
+        embedded: false,
+        exempted: false,
+      };
+    }
+
+    // Get the tax rate for this item's category (per-category lookup, Epic B5)
+    const { itemTaxRate, itemRateInfo } = await this.resolveItemTaxRate(ctx, item);
+
+    // The org-wide setting forces inclusion; otherwise the applied rate's
+    // own includeInPrice flag decides (UK/EU VAT zones are inclusive even
+    // when the org default is tax-exclusive).
+    const lineIncluded = ctx.pricesIncludeTax || itemRateInfo?.includeInPrice === true;
+
+    // Evaluate exemption for this line item (Epic B4)
+    let exemptionMultiplier = 1; // 1 = full tax, 0 = fully exempt
+    let exemptionVerdict: ExemptionVerdict | undefined;
+
+    if (ctx.exemptions.length > 0) {
+      // Find the best exemption for this line item (most specific: matching category)
+      const result = this.evaluateExemption(ctx.exemptions, item.taxCategoryId, ctx.subtotal);
+      if (result) {
+        exemptionMultiplier = result.multiplier;
+        exemptionVerdict = result.verdict;
+      }
+    }
+
+    const effectiveRate = itemTaxRate * exemptionMultiplier;
+    const roundedItemTax = Math.round(
+      lineIncluded ? itemSubtotal - itemSubtotal / (1 + effectiveRate / 100) : (itemSubtotal * effectiveRate) / 100,
+    );
+
+    return {
+      lineItem: {
+        productId: item.productId,
+        name: item.name,
+        subtotalCents: itemSubtotal,
+        taxAmountCents: roundedItemTax,
+        taxRate: exemptionMultiplier < 1 ? itemTaxRate * exemptionMultiplier : itemTaxRate,
+        exemptionVerdict,
+      },
+      taxAmountCents: roundedItemTax,
+      embedded: lineIncluded,
+      exempted: exemptionMultiplier < 1,
+    };
+  }
+
+  private async resolveItemTaxRate(
+    ctx: LineTaxContext,
+    item: OrderLineItem,
+  ): Promise<{ itemTaxRate: number; itemRateInfo: TaxRateInfo | null }> {
+    let itemTaxRate = ctx.defaultTaxRate;
+    let itemRateInfo = ctx.defaultRateInfo;
+
+    if (item.taxCategoryId && !ctx.reverseChargeApplied && !ctx.noNexusObligation) {
+      const categoryRate = await this.taxQuery.getTaxRateForAddressAndCategory(ctx.address, item.taxCategoryId);
+      // Only use the category rate if it's non-zero (zero means no specific rate found)
+      if (categoryRate > 0) {
+        itemTaxRate = categoryRate;
+        itemRateInfo = this.taxQuery.getTaxRateInfoForAddress
+          ? await this.taxQuery.getTaxRateInfoForAddress(ctx.address, item.taxCategoryId)
+          : null;
+      }
+    }
+
+    return { itemTaxRate, itemRateInfo };
+  }
+
+  private computeShippingTax(
+    command: CalculateOrderTaxCommand,
+    defaultTaxRate: number,
+    defaultRateInfo: TaxRateInfo | null,
+    exemptions: TaxExemption[],
+    subtotal: number,
+  ): { amountCents: number; included: boolean } {
+    const shippingExemptionMultiplier = this.shippingExemptionMultiplier(exemptions, subtotal);
+    const effectiveShippingRate = defaultTaxRate * shippingExemptionMultiplier;
+    const included = command.pricesIncludeTax || defaultRateInfo?.includeInPrice === true;
+    const amountCents = Math.round(
+      included
+        ? command.shippingAmountCents - command.shippingAmountCents / (1 + effectiveShippingRate / 100)
+        : (command.shippingAmountCents * effectiveShippingRate) / 100,
+    );
+    return { amountCents, included };
   }
 
   /**

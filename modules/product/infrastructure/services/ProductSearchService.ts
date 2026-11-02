@@ -4,6 +4,7 @@ import type { Product as DbProduct } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
 import { createCache } from '../../../../libs/cache';
 import {
+  AttributeFilter,
   ProductSearchFilters,
   ProductSearchResult,
   ProductSearchRow,
@@ -15,6 +16,36 @@ import {
 } from '../../application/ports/ProductSearchPort';
 
 export type { ProductSearchRow } from '../../application/ports/ProductSearchPort';
+
+interface FilterArmBuilder {
+  joins: string[];
+  conditions: string[];
+  params: unknown[];
+  paramIndex: number;
+}
+
+type AttributeOperator = NonNullable<AttributeFilter['operator']>;
+
+// Each handler returns the WHERE fragment and its bound values for one
+// attribute-filter operator, or null when the filter has nothing to apply.
+const ATTRIBUTE_OPERATOR_CONDITIONS: Record<
+  AttributeOperator,
+  (attrAlias: string, paramIndex: number, f: AttributeFilter) => { sql: string; values: unknown[] } | null
+> = {
+  eq: (a, i, f) => (f.value ? { sql: `${a}."value" = $${i}`, values: [f.value] } : null),
+  neq: (a, i, f) => (f.value ? { sql: `${a}."value" != $${i}`, values: [f.value] } : null),
+  in: (a, i, f) => (f.values && f.values.length > 0 ? { sql: `${a}."value" = ANY($${i})`, values: [f.values] } : null),
+  nin: (a, i, f) => (f.values && f.values.length > 0 ? { sql: `${a}."value" != ALL($${i})`, values: [f.values] } : null),
+  gt: (a, i, f) => (f.minValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) > $${i}`, values: [f.minValue] } : null),
+  gte: (a, i, f) => (f.minValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) >= $${i}`, values: [f.minValue] } : null),
+  lt: (a, i, f) => (f.maxValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) < $${i}`, values: [f.maxValue] } : null),
+  lte: (a, i, f) => (f.maxValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) <= $${i}`, values: [f.maxValue] } : null),
+  between: (a, i, f) =>
+    f.minValue !== undefined && f.maxValue !== undefined
+      ? { sql: `CAST(${a}."value" AS NUMERIC) BETWEEN $${i} AND $${i + 1}`, values: [f.minValue, f.maxValue] }
+      : null,
+  like: (a, i, f) => (f.value ? { sql: `${a}."value" ILIKE $${i}`, values: [`%${f.value}%`] } : null),
+};
 
 const PRICE_COLUMNS_SQL = `
   bp."priceCents" AS "priceCents",
@@ -135,209 +166,152 @@ class ProductSearchService implements ProductSearchServicePort {
     searchMode: 'product' | 'variant' | 'none',
     startParamIndex: number,
   ): { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number } {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
-    let paramIndex = startParamIndex;
+    const b: FilterArmBuilder = { joins: [], conditions: [], params: [], paramIndex: startParamIndex };
 
-    const joins: string[] = [];
+    this.addTextSearchCondition(b, filters, searchMode);
+    this.addCategoryFilter(b, filters);
+    this.addScalarFilters(b, filters);
+    this.addAttributeFilters(b, filters);
 
-    // Text search — product columns only; variant columns are handled by a
-    // separate UNION arm so each side can use its own trigram indexes.
-    if (filters.query && searchMode === 'product') {
-      const searchTerm = `%${filters.query}%`;
-      conditions.push(`(
-        p."name" ILIKE $${paramIndex} OR
-        p."description" ILIKE $${paramIndex} OR
-        p."shortDescription" ILIKE $${paramIndex} OR
-        p."sku" ILIKE $${paramIndex} OR
-        p."slug" ILIKE $${paramIndex}
+    // Always exclude deleted products
+    b.conditions.push(`p."deletedAt" IS NULL`);
+
+    return { joins: b.joins, conditions: b.conditions, params: b.params, nextParamIndex: b.paramIndex };
+  }
+
+  // Text search — product columns only; variant columns are handled by a
+  // separate UNION arm so each side can use its own trigram indexes.
+  private addTextSearchCondition(b: FilterArmBuilder, filters: ProductSearchFilters, searchMode: 'product' | 'variant' | 'none'): void {
+    if (!filters.query) return;
+
+    const searchTerm = `%${filters.query}%`;
+    if (searchMode === 'product') {
+      b.conditions.push(`(
+        p."name" ILIKE $${b.paramIndex} OR
+        p."description" ILIKE $${b.paramIndex} OR
+        p."shortDescription" ILIKE $${b.paramIndex} OR
+        p."sku" ILIKE $${b.paramIndex} OR
+        p."slug" ILIKE $${b.paramIndex}
       )`);
-      params.push(searchTerm);
-      paramIndex++;
-    } else if (filters.query && searchMode === 'variant') {
-      const searchTerm = `%${filters.query}%`;
-      conditions.push(`EXISTS (
+      b.params.push(searchTerm);
+      b.paramIndex++;
+    } else if (searchMode === 'variant') {
+      b.conditions.push(`EXISTS (
         SELECT 1 FROM "productVariant" pv_search
         WHERE pv_search."productId" = p."productId"
-          AND (pv_search."sku" ILIKE $${paramIndex} OR pv_search."barcode" ILIKE $${paramIndex})
+          AND (pv_search."sku" ILIKE $${b.paramIndex} OR pv_search."barcode" ILIKE $${b.paramIndex})
       )`);
-      params.push(searchTerm);
-      paramIndex++;
+      b.params.push(searchTerm);
+      b.paramIndex++;
     }
+  }
 
-    // Category filter
+  private addCategoryFilter(b: FilterArmBuilder, filters: ProductSearchFilters): void {
     if (filters.categoryId) {
-      joins.push(`JOIN "${this.categoryMapTable}" pcm ON pcm."productId" = p."productId"`);
-      conditions.push(`pcm."productCategoryId" = $${paramIndex}`);
-      params.push(filters.categoryId);
-      paramIndex++;
+      b.joins.push(`JOIN "${this.categoryMapTable}" pcm ON pcm."productId" = p."productId"`);
+      b.conditions.push(`pcm."productCategoryId" = $${b.paramIndex}`);
+      b.params.push(filters.categoryId);
+      b.paramIndex++;
     } else if (filters.categoryIds && filters.categoryIds.length > 0) {
-      joins.push(`JOIN "${this.categoryMapTable}" pcm ON pcm."productId" = p."productId"`);
-      conditions.push(`pcm."productCategoryId" = ANY($${paramIndex})`);
-      params.push(filters.categoryIds);
-      paramIndex++;
+      b.joins.push(`JOIN "${this.categoryMapTable}" pcm ON pcm."productId" = p."productId"`);
+      b.conditions.push(`pcm."productCategoryId" = ANY($${b.paramIndex})`);
+      b.params.push(filters.categoryIds);
+      b.paramIndex++;
     }
+  }
 
-    // Product type filter
+  private addScalarFilters(b: FilterArmBuilder, filters: ProductSearchFilters): void {
     if (filters.productTypeId) {
-      conditions.push(`p."type" = $${paramIndex}`);
-      params.push(filters.productTypeId);
-      paramIndex++;
+      b.conditions.push(`p."type" = $${b.paramIndex}`);
+      b.params.push(filters.productTypeId);
+      b.paramIndex++;
     }
 
     // Price filters — effective catalog price (integer cents) from the
     // pricing-owned productBasePrice table.
     if (filters.minPriceCents !== undefined) {
-      conditions.push(`COALESCE(bp."salePriceCents", bp."priceCents") >= $${paramIndex}`);
-      params.push(filters.minPriceCents);
-      paramIndex++;
+      b.conditions.push(`COALESCE(bp."salePriceCents", bp."priceCents") >= $${b.paramIndex}`);
+      b.params.push(filters.minPriceCents);
+      b.paramIndex++;
     }
     if (filters.maxPriceCents !== undefined) {
-      conditions.push(`COALESCE(bp."salePriceCents", bp."priceCents") <= $${paramIndex}`);
-      params.push(filters.maxPriceCents);
-      paramIndex++;
+      b.conditions.push(`COALESCE(bp."salePriceCents", bp."priceCents") <= $${b.paramIndex}`);
+      b.params.push(filters.maxPriceCents);
+      b.paramIndex++;
     }
 
-    // Status filters
     if (filters.status) {
-      conditions.push(`p."status" = $${paramIndex}`);
-      params.push(filters.status);
-      paramIndex++;
+      b.conditions.push(`p."status" = $${b.paramIndex}`);
+      b.params.push(filters.status);
+      b.paramIndex++;
     }
     if (filters.visibility) {
-      conditions.push(`p."visibility" = $${paramIndex}`);
-      params.push(filters.visibility);
-      paramIndex++;
+      b.conditions.push(`p."visibility" = $${b.paramIndex}`);
+      b.params.push(filters.visibility);
+      b.paramIndex++;
     }
 
-    // Boolean filters
     if (filters.isFeatured !== undefined) {
-      conditions.push(`p."isFeatured" = $${paramIndex}`);
-      params.push(filters.isFeatured);
-      paramIndex++;
+      b.conditions.push(`p."isFeatured" = $${b.paramIndex}`);
+      b.params.push(filters.isFeatured);
+      b.paramIndex++;
     }
     if (filters.isNew !== undefined) {
-      conditions.push(`p."isNew" = $${paramIndex}`);
-      params.push(filters.isNew);
-      paramIndex++;
+      b.conditions.push(`p."isNew" = $${b.paramIndex}`);
+      b.params.push(filters.isNew);
+      b.paramIndex++;
     }
     if (filters.isBestseller !== undefined) {
-      conditions.push(`p."isBestseller" = $${paramIndex}`);
-      params.push(filters.isBestseller);
-      paramIndex++;
+      b.conditions.push(`p."isBestseller" = $${b.paramIndex}`);
+      b.params.push(filters.isBestseller);
+      b.paramIndex++;
     }
     if (filters.hasVariants !== undefined) {
-      conditions.push(`p."hasVariants" = $${paramIndex}`);
-      params.push(filters.hasVariants);
-      paramIndex++;
+      b.conditions.push(`p."hasVariants" = $${b.paramIndex}`);
+      b.params.push(filters.hasVariants);
+      b.paramIndex++;
     }
+  }
 
-    // Dynamic attribute filters
-    if (filters.attributes && filters.attributes.length > 0) {
-      for (const attrFilter of filters.attributes) {
-        const attrAlias = `pav_${paramIndex}`;
+  // Dynamic attribute filters
+  private addAttributeFilters(b: FilterArmBuilder, filters: ProductSearchFilters): void {
+    if (!filters.attributes || filters.attributes.length === 0) return;
 
-        // Join to attribute value map
-        let attrJoin = `JOIN "${this.attributeValueMapTable}" ${attrAlias} ON ${attrAlias}."productId" = p."productId"`;
+    for (const attrFilter of filters.attributes) {
+      const attrAlias = `pav_${b.paramIndex}`;
 
-        // Filter by attribute ID or code
-        if (attrFilter.attributeId) {
-          attrJoin += ` AND ${attrAlias}."attributeId" = $${paramIndex}`;
-          params.push(attrFilter.attributeId);
-          paramIndex++;
-        } else if (attrFilter.attributeCode) {
-          // Need to join to attribute table to filter by code
-          const attrTableAlias = `pa_${paramIndex}`;
-          joins.push(`JOIN "${this.attributeTable}" ${attrTableAlias} ON ${attrTableAlias}."code" = $${paramIndex}`);
-          params.push(attrFilter.attributeCode);
-          paramIndex++;
-          attrJoin += ` AND ${attrAlias}."attributeId" = ${attrTableAlias}."productAttributeId"`;
-        }
+      // Join to attribute value map
+      let attrJoin = `JOIN "${this.attributeValueMapTable}" ${attrAlias} ON ${attrAlias}."productId" = p."productId"`;
 
-        joins.push(attrJoin);
-
-        // Apply value filter based on operator
-        const operator = attrFilter.operator || 'eq';
-
-        switch (operator) {
-          case 'eq':
-            if (attrFilter.value) {
-              conditions.push(`${attrAlias}."value" = $${paramIndex}`);
-              params.push(attrFilter.value);
-              paramIndex++;
-            }
-            break;
-          case 'neq':
-            if (attrFilter.value) {
-              conditions.push(`${attrAlias}."value" != $${paramIndex}`);
-              params.push(attrFilter.value);
-              paramIndex++;
-            }
-            break;
-          case 'in':
-            if (attrFilter.values && attrFilter.values.length > 0) {
-              conditions.push(`${attrAlias}."value" = ANY($${paramIndex})`);
-              params.push(attrFilter.values);
-              paramIndex++;
-            }
-            break;
-          case 'nin':
-            if (attrFilter.values && attrFilter.values.length > 0) {
-              conditions.push(`${attrAlias}."value" != ALL($${paramIndex})`);
-              params.push(attrFilter.values);
-              paramIndex++;
-            }
-            break;
-          case 'gt':
-            if (attrFilter.minValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) > $${paramIndex}`);
-              params.push(attrFilter.minValue);
-              paramIndex++;
-            }
-            break;
-          case 'gte':
-            if (attrFilter.minValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) >= $${paramIndex}`);
-              params.push(attrFilter.minValue);
-              paramIndex++;
-            }
-            break;
-          case 'lt':
-            if (attrFilter.maxValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) < $${paramIndex}`);
-              params.push(attrFilter.maxValue);
-              paramIndex++;
-            }
-            break;
-          case 'lte':
-            if (attrFilter.maxValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) <= $${paramIndex}`);
-              params.push(attrFilter.maxValue);
-              paramIndex++;
-            }
-            break;
-          case 'between':
-            if (attrFilter.minValue !== undefined && attrFilter.maxValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
-              params.push(attrFilter.minValue, attrFilter.maxValue);
-              paramIndex += 2;
-            }
-            break;
-          case 'like':
-            if (attrFilter.value) {
-              conditions.push(`${attrAlias}."value" ILIKE $${paramIndex}`);
-              params.push(`%${attrFilter.value}%`);
-              paramIndex++;
-            }
-            break;
-        }
+      // Filter by attribute ID or code
+      if (attrFilter.attributeId) {
+        attrJoin += ` AND ${attrAlias}."attributeId" = $${b.paramIndex}`;
+        b.params.push(attrFilter.attributeId);
+        b.paramIndex++;
+      } else if (attrFilter.attributeCode) {
+        // Need to join to attribute table to filter by code
+        const attrTableAlias = `pa_${b.paramIndex}`;
+        b.joins.push(`JOIN "${this.attributeTable}" ${attrTableAlias} ON ${attrTableAlias}."code" = $${b.paramIndex}`);
+        b.params.push(attrFilter.attributeCode);
+        b.paramIndex++;
+        attrJoin += ` AND ${attrAlias}."attributeId" = ${attrTableAlias}."productAttributeId"`;
       }
+
+      b.joins.push(attrJoin);
+
+      this.addAttributeValueCondition(b, attrAlias, attrFilter);
     }
+  }
 
-    // Always exclude deleted products
-    conditions.push(`p."deletedAt" IS NULL`);
+  private addAttributeValueCondition(b: FilterArmBuilder, attrAlias: string, attrFilter: AttributeFilter): void {
+    // Apply value filter based on operator
+    const operator = attrFilter.operator || 'eq';
+    const result = ATTRIBUTE_OPERATOR_CONDITIONS[operator](attrAlias, b.paramIndex, attrFilter);
+    if (!result) return;
 
-    return { joins, conditions, params, nextParamIndex: paramIndex };
+    b.conditions.push(result.sql);
+    b.params.push(...result.values);
+    b.paramIndex += result.values.length;
   }
 
   /**

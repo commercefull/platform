@@ -25,6 +25,7 @@ import type {
   SearchFacetValue,
   SearchPriceRangeFacet,
   SearchAttributeFacet,
+  SearchAttributeFilter,
   AutocompleteSuggestion,
   MerchandisingContext,
   ManualOrderingContext,
@@ -36,6 +37,45 @@ const ATTRIBUTE_VALUE_MAP_TABLE = Table.ProductAttributeValueMap;
 const ATTRIBUTE_TABLE = Table.ProductAttribute;
 const ATTRIBUTE_VALUE_TABLE = Table.ProductAttributeValue;
 const CATEGORY_TABLE = Table.ProductCategory;
+
+// Product-level base price (integer cents) from the pricing-owned store
+const BASE_PRICE_JOIN = `LEFT JOIN LATERAL (
+        SELECT "priceCents" FROM "productBasePrice"
+        WHERE "productId" = p."productId" AND "productVariantId" IS NULL
+        ORDER BY "priceCents" ASC LIMIT 1
+      ) bp ON true`;
+
+const TSVECTOR_EXPR = `to_tsvector('english', coalesce(p."name", '') || ' ' || coalesce(p."description", '') || ' ' || coalesce(p."shortDescription", ''))`;
+
+interface FtsQueryBuilder {
+  joins: string[];
+  conditions: string[];
+  params: unknown[];
+  paramIndex: number;
+}
+
+type AttributeOperator = NonNullable<SearchAttributeFilter['operator']>;
+
+// Each handler returns the WHERE fragment and its bound values for one
+// attribute-filter operator, or null when the filter has nothing to apply.
+const ATTRIBUTE_OPERATOR_CONDITIONS: Record<
+  AttributeOperator,
+  (attrAlias: string, paramIndex: number, f: SearchAttributeFilter) => { sql: string; values: unknown[] } | null
+> = {
+  eq: (a, i, f) => (f.value ? { sql: `${a}."value" = $${i}`, values: [f.value] } : null),
+  neq: (a, i, f) => (f.value ? { sql: `${a}."value" != $${i}`, values: [f.value] } : null),
+  in: (a, i, f) => (f.values && f.values.length > 0 ? { sql: `${a}."value" = ANY($${i})`, values: [f.values] } : null),
+  nin: (a, i, f) => (f.values && f.values.length > 0 ? { sql: `${a}."value" != ALL($${i})`, values: [f.values] } : null),
+  gt: (a, i, f) => (f.minValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) > $${i}`, values: [f.minValue] } : null),
+  gte: (a, i, f) => (f.minValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) >= $${i}`, values: [f.minValue] } : null),
+  lt: (a, i, f) => (f.maxValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) < $${i}`, values: [f.maxValue] } : null),
+  lte: (a, i, f) => (f.maxValue !== undefined ? { sql: `CAST(${a}."value" AS NUMERIC) <= $${i}`, values: [f.maxValue] } : null),
+  between: (a, i, f) =>
+    f.minValue !== undefined && f.maxValue !== undefined
+      ? { sql: `CAST(${a}."value" AS NUMERIC) BETWEEN $${i} AND $${i + 1}`, values: [f.minValue, f.maxValue] }
+      : null,
+  like: (a, i, f) => (f.value ? { sql: `${a}."value" ILIKE $${i}`, values: [`%${f.value}%`] } : null),
+};
 
 export class PostgresFtsAdapter implements SearchAdapter {
   /**
@@ -171,248 +211,26 @@ export class PostgresFtsAdapter implements SearchAdapter {
     limit: number,
     offset: number,
   ): { sql: string; countSql: string; params: unknown[]; countParams: unknown[] } {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
-    let paramIndex = 1;
+    const b: FtsQueryBuilder = {
+      joins: [BASE_PRICE_JOIN],
+      conditions: [],
+      params: [],
+      paramIndex: 1,
+    };
 
-    const joins: string[] = [
-      // Product-level base price (integer cents) from the pricing-owned store
-      `LEFT JOIN LATERAL (
-        SELECT "priceCents" FROM "productBasePrice"
-        WHERE "productId" = p."productId" AND "productVariantId" IS NULL
-        ORDER BY "priceCents" ASC LIMIT 1
-      ) bp ON true`,
-    ];
-
-    // Full-text search using tsvector
-    if (searchQuery.query) {
-      joins.push(`LEFT JOIN "productVariant" pv_search ON pv_search."productId" = p."productId"`);
-      conditions.push(`(
-        to_tsvector('english', coalesce(p."name", '') || ' ' || coalesce(p."description", '') || ' ' || coalesce(p."shortDescription", '') || ' ' || coalesce(p."sku", ''))
-        @@ plainto_tsquery('english', $${paramIndex})
-        OR p."name" ILIKE $${paramIndex + 1}
-        OR p."sku" ILIKE $${paramIndex + 1}
-        OR pv_search."sku" ILIKE $${paramIndex + 1}
-        OR pv_search."barcode" ILIKE $${paramIndex + 1}
-      )`);
-      params.push(searchQuery.query, `%${searchQuery.query}%`);
-      paramIndex += 2;
-    }
-
-    // Category filter
-    if (searchQuery.categoryId) {
-      joins.push(`JOIN "${CATEGORY_MAP_TABLE}" pcm ON pcm."productId" = p."productId"`);
-      conditions.push(`pcm."productCategoryId" = $${paramIndex}`);
-      params.push(searchQuery.categoryId);
-      paramIndex++;
-    } else if (searchQuery.categoryIds && searchQuery.categoryIds.length > 0) {
-      joins.push(`JOIN "${CATEGORY_MAP_TABLE}" pcm ON pcm."productId" = p."productId"`);
-      conditions.push(`pcm."productCategoryId" = ANY($${paramIndex})`);
-      params.push(searchQuery.categoryIds);
-      paramIndex++;
-    }
-
-    // Product type
-    if (searchQuery.productTypeId) {
-      conditions.push(`p."type" = $${paramIndex}`);
-      params.push(searchQuery.productTypeId);
-      paramIndex++;
-    }
-
-    // Price range
-    if (searchQuery.minPriceCents !== undefined) {
-      conditions.push(`bp."priceCents" >= $${paramIndex}`);
-      params.push(searchQuery.minPriceCents);
-      paramIndex++;
-    }
-    if (searchQuery.maxPriceCents !== undefined) {
-      conditions.push(`bp."priceCents" <= $${paramIndex}`);
-      params.push(searchQuery.maxPriceCents);
-      paramIndex++;
-    }
-
-    // Status
-    if (searchQuery.status) {
-      conditions.push(`p."status" = $${paramIndex}`);
-      params.push(searchQuery.status);
-      paramIndex++;
-    }
-    if (searchQuery.visibility) {
-      conditions.push(`p."visibility" = $${paramIndex}`);
-      params.push(searchQuery.visibility);
-      paramIndex++;
-    }
-
-    // Boolean filters
-    if (searchQuery.isFeatured !== undefined) {
-      conditions.push(`p."isFeatured" = $${paramIndex}`);
-      params.push(searchQuery.isFeatured);
-      paramIndex++;
-    }
-    if (searchQuery.isNew !== undefined) {
-      conditions.push(`p."isNew" = $${paramIndex}`);
-      params.push(searchQuery.isNew);
-      paramIndex++;
-    }
-    if (searchQuery.isBestseller !== undefined) {
-      conditions.push(`p."isBestseller" = $${paramIndex}`);
-      params.push(searchQuery.isBestseller);
-      paramIndex++;
-    }
-    if (searchQuery.hasVariants !== undefined) {
-      conditions.push(`p."hasVariants" = $${paramIndex}`);
-      params.push(searchQuery.hasVariants);
-      paramIndex++;
-    }
-
-    // Attribute filters
-    if (searchQuery.attributes && searchQuery.attributes.length > 0) {
-      for (const attrFilter of searchQuery.attributes) {
-        const attrAlias = `pav_${paramIndex}`;
-        let attrJoin = `JOIN "${ATTRIBUTE_VALUE_MAP_TABLE}" ${attrAlias} ON ${attrAlias}."productId" = p."productId"`;
-
-        if (attrFilter.attributeId) {
-          attrJoin += ` AND ${attrAlias}."attributeId" = $${paramIndex}`;
-          params.push(attrFilter.attributeId);
-          paramIndex++;
-        } else if (attrFilter.attributeCode) {
-          const attrTableAlias = `pa_${paramIndex}`;
-          joins.push(`JOIN "${ATTRIBUTE_TABLE}" ${attrTableAlias} ON ${attrTableAlias}."code" = $${paramIndex}`);
-          params.push(attrFilter.attributeCode);
-          paramIndex++;
-          attrJoin += ` AND ${attrAlias}."attributeId" = ${attrTableAlias}."productAttributeId"`;
-        }
-
-        joins.push(attrJoin);
-
-        const operator = attrFilter.operator || 'eq';
-        switch (operator) {
-          case 'eq':
-            if (attrFilter.value) {
-              conditions.push(`${attrAlias}."value" = $${paramIndex}`);
-              params.push(attrFilter.value);
-              paramIndex++;
-            }
-            break;
-          case 'neq':
-            if (attrFilter.value) {
-              conditions.push(`${attrAlias}."value" != $${paramIndex}`);
-              params.push(attrFilter.value);
-              paramIndex++;
-            }
-            break;
-          case 'in':
-            if (attrFilter.values && attrFilter.values.length > 0) {
-              conditions.push(`${attrAlias}."value" = ANY($${paramIndex})`);
-              params.push(attrFilter.values);
-              paramIndex++;
-            }
-            break;
-          case 'nin':
-            if (attrFilter.values && attrFilter.values.length > 0) {
-              conditions.push(`${attrAlias}."value" != ALL($${paramIndex})`);
-              params.push(attrFilter.values);
-              paramIndex++;
-            }
-            break;
-          case 'gt':
-            if (attrFilter.minValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) > $${paramIndex}`);
-              params.push(attrFilter.minValue);
-              paramIndex++;
-            }
-            break;
-          case 'gte':
-            if (attrFilter.minValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) >= $${paramIndex}`);
-              params.push(attrFilter.minValue);
-              paramIndex++;
-            }
-            break;
-          case 'lt':
-            if (attrFilter.maxValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) < $${paramIndex}`);
-              params.push(attrFilter.maxValue);
-              paramIndex++;
-            }
-            break;
-          case 'lte':
-            if (attrFilter.maxValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) <= $${paramIndex}`);
-              params.push(attrFilter.maxValue);
-              paramIndex++;
-            }
-            break;
-          case 'between':
-            if (attrFilter.minValue !== undefined && attrFilter.maxValue !== undefined) {
-              conditions.push(`CAST(${attrAlias}."value" AS NUMERIC) BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
-              params.push(attrFilter.minValue, attrFilter.maxValue);
-              paramIndex += 2;
-            }
-            break;
-          case 'like':
-            if (attrFilter.value) {
-              conditions.push(`${attrAlias}."value" ILIKE $${paramIndex}`);
-              params.push(`%${attrFilter.value}%`);
-              paramIndex++;
-            }
-            break;
-        }
-      }
-    }
+    this.addTextSearchCondition(b, searchQuery);
+    this.addCategoryFilter(b, searchQuery);
+    this.addScalarFilters(b, searchQuery);
+    this.addAttributeFilters(b, searchQuery);
 
     // Always exclude deleted
-    conditions.push(`p."deletedAt" IS NULL`);
+    b.conditions.push(`p."deletedAt" IS NULL`);
 
-    const whereClause = `WHERE ${conditions.join(' AND ')}`;
-    const joinClause = joins.join(' ');
+    const whereClause = `WHERE ${b.conditions.join(' AND ')}`;
+    const joinClause = b.joins.join(' ');
 
-    // Build ORDER BY with relevance scoring
-    let orderBy = 'p."createdAt" DESC';
-    const sortOrder = searchQuery.sortOrder || 'desc';
-
-    switch (searchQuery.sortBy) {
-      case 'name':
-        orderBy = `p."name" ${sortOrder.toUpperCase()}`;
-        break;
-      case 'price':
-        orderBy = `bp."priceCents" ${sortOrder.toUpperCase()}`;
-        break;
-      case 'createdAt':
-        orderBy = `p."createdAt" ${sortOrder.toUpperCase()}`;
-        break;
-      case 'popularity':
-        orderBy = `p."reviewCount" ${sortOrder.toUpperCase()}, p."averageRating" ${sortOrder.toUpperCase()}`;
-        break;
-      case 'rating':
-        orderBy = `p."averageRating" ${sortOrder.toUpperCase()} NULLS LAST`;
-        break;
-      case 'relevance':
-        if (searchQuery.query) {
-          // Use ts_rank_cd for relevance scoring
-          const tsvectorExpr = `to_tsvector('english', coalesce(p."name", '') || ' ' || coalesce(p."description", '') || ' ' || coalesce(p."shortDescription", ''))`;
-          const tsqueryParam = paramIndex;
-          orderBy = `ts_rank_cd(${tsvectorExpr}, plainto_tsquery('english', $${tsqueryParam})) DESC, p."isFeatured" DESC, p."createdAt" DESC`;
-          params.push(searchQuery.query);
-          paramIndex++;
-        } else {
-          orderBy = `p."isFeatured" DESC, p."createdAt" DESC`;
-        }
-        break;
-      case 'manual':
-        // Manual ordering is applied post-query in applyManualOrdering()
-        orderBy = `p."createdAt" DESC`;
-        break;
-    }
-
-    // Build SELECT with score for relevance
-    let scoreExpr = '';
-    if (searchQuery.query && searchQuery.sortBy === 'relevance') {
-      const tsvectorExpr = `to_tsvector('english', coalesce(p."name", '') || ' ' || coalesce(p."description", '') || ' ' || coalesce(p."shortDescription", ''))`;
-      scoreExpr = `, ts_rank_cd(${tsvectorExpr}, plainto_tsquery('english', $${paramIndex})) as score`;
-      params.push(searchQuery.query);
-      paramIndex++;
-    }
+    const orderBy = this.buildOrderBy(b, searchQuery);
+    const scoreExpr = this.buildScoreExpr(b, searchQuery);
 
     const sql = `
       SELECT DISTINCT
@@ -435,13 +253,13 @@ export class PostgresFtsAdapter implements SearchAdapter {
       ${joinClause}
       ${whereClause}
       ORDER BY ${orderBy}
-      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      LIMIT $${b.paramIndex} OFFSET $${b.paramIndex + 1}
     `;
 
-    params.push(limit, offset);
+    b.params.push(limit, offset);
 
     // Count query (no limit/offset, no score)
-    const countParams = params.slice(0, paramIndex - 1);
+    const countParams = b.params.slice(0, b.paramIndex - 1);
     const countSql = `
       SELECT COUNT(DISTINCT p."productId") as count
       FROM "${PRODUCT_TABLE}" p
@@ -449,7 +267,137 @@ export class PostgresFtsAdapter implements SearchAdapter {
       ${whereClause}
     `;
 
-    return { sql, countSql, params, countParams };
+    return { sql, countSql, params: b.params, countParams };
+  }
+
+  // Full-text search using tsvector + ILIKE fallback on SKU/barcode
+  private addTextSearchCondition(b: FtsQueryBuilder, searchQuery: SearchQuery): void {
+    if (!searchQuery.query) return;
+
+    b.joins.push(`LEFT JOIN "productVariant" pv_search ON pv_search."productId" = p."productId"`);
+    b.conditions.push(`(
+        to_tsvector('english', coalesce(p."name", '') || ' ' || coalesce(p."description", '') || ' ' || coalesce(p."shortDescription", '') || ' ' || coalesce(p."sku", ''))
+        @@ plainto_tsquery('english', $${b.paramIndex})
+        OR p."name" ILIKE $${b.paramIndex + 1}
+        OR p."sku" ILIKE $${b.paramIndex + 1}
+        OR pv_search."sku" ILIKE $${b.paramIndex + 1}
+        OR pv_search."barcode" ILIKE $${b.paramIndex + 1}
+      )`);
+    b.params.push(searchQuery.query, `%${searchQuery.query}%`);
+    b.paramIndex += 2;
+  }
+
+  // Category filter — single id or list
+  private addCategoryFilter(b: FtsQueryBuilder, searchQuery: SearchQuery): void {
+    if (searchQuery.categoryId) {
+      b.joins.push(`JOIN "${CATEGORY_MAP_TABLE}" pcm ON pcm."productId" = p."productId"`);
+      b.conditions.push(`pcm."productCategoryId" = $${b.paramIndex}`);
+      b.params.push(searchQuery.categoryId);
+      b.paramIndex++;
+    } else if (searchQuery.categoryIds && searchQuery.categoryIds.length > 0) {
+      b.joins.push(`JOIN "${CATEGORY_MAP_TABLE}" pcm ON pcm."productId" = p."productId"`);
+      b.conditions.push(`pcm."productCategoryId" = ANY($${b.paramIndex})`);
+      b.params.push(searchQuery.categoryIds);
+      b.paramIndex++;
+    }
+  }
+
+  // Product type, price range, status/visibility and boolean flags
+  private addScalarFilters(b: FtsQueryBuilder, searchQuery: SearchQuery): void {
+    const clauses: [unknown, string][] = [
+      [searchQuery.productTypeId, `p."type" =`],
+      [searchQuery.minPriceCents, `bp."priceCents" >=`],
+      [searchQuery.maxPriceCents, `bp."priceCents" <=`],
+      [searchQuery.status, `p."status" =`],
+      [searchQuery.visibility, `p."visibility" =`],
+      [searchQuery.isFeatured, `p."isFeatured" =`],
+      [searchQuery.isNew, `p."isNew" =`],
+      [searchQuery.isBestseller, `p."isBestseller" =`],
+      [searchQuery.hasVariants, `p."hasVariants" =`],
+    ];
+
+    for (const [value, clause] of clauses) {
+      if (value === undefined) continue;
+      b.conditions.push(`${clause} $${b.paramIndex}`);
+      b.params.push(value);
+      b.paramIndex++;
+    }
+  }
+
+  // Dynamic attribute filters — one join per filter
+  private addAttributeFilters(b: FtsQueryBuilder, searchQuery: SearchQuery): void {
+    if (!searchQuery.attributes || searchQuery.attributes.length === 0) return;
+
+    for (const attrFilter of searchQuery.attributes) {
+      const attrAlias = `pav_${b.paramIndex}`;
+      let attrJoin = `JOIN "${ATTRIBUTE_VALUE_MAP_TABLE}" ${attrAlias} ON ${attrAlias}."productId" = p."productId"`;
+
+      if (attrFilter.attributeId) {
+        attrJoin += ` AND ${attrAlias}."attributeId" = $${b.paramIndex}`;
+        b.params.push(attrFilter.attributeId);
+        b.paramIndex++;
+      } else if (attrFilter.attributeCode) {
+        const attrTableAlias = `pa_${b.paramIndex}`;
+        b.joins.push(`JOIN "${ATTRIBUTE_TABLE}" ${attrTableAlias} ON ${attrTableAlias}."code" = $${b.paramIndex}`);
+        b.params.push(attrFilter.attributeCode);
+        b.paramIndex++;
+        attrJoin += ` AND ${attrAlias}."attributeId" = ${attrTableAlias}."productAttributeId"`;
+      }
+
+      b.joins.push(attrJoin);
+      this.addAttributeValueCondition(b, attrAlias, attrFilter);
+    }
+  }
+
+  private addAttributeValueCondition(b: FtsQueryBuilder, attrAlias: string, attrFilter: SearchAttributeFilter): void {
+    const operator = attrFilter.operator || 'eq';
+    const result = ATTRIBUTE_OPERATOR_CONDITIONS[operator](attrAlias, b.paramIndex, attrFilter);
+    if (!result) return;
+
+    b.conditions.push(result.sql);
+    b.params.push(...result.values);
+    b.paramIndex += result.values.length;
+  }
+
+  // ORDER BY — relevance pushes an extra tsquery param onto the builder
+  private buildOrderBy(b: FtsQueryBuilder, searchQuery: SearchQuery): string {
+    const sortOrder = (searchQuery.sortOrder || 'desc').toUpperCase();
+
+    switch (searchQuery.sortBy) {
+      case 'name':
+        return `p."name" ${sortOrder}`;
+      case 'price':
+        return `bp."priceCents" ${sortOrder}`;
+      case 'createdAt':
+        return `p."createdAt" ${sortOrder}`;
+      case 'popularity':
+        return `p."reviewCount" ${sortOrder}, p."averageRating" ${sortOrder}`;
+      case 'rating':
+        return `p."averageRating" ${sortOrder} NULLS LAST`;
+      case 'relevance':
+        if (searchQuery.query) {
+          // Use ts_rank_cd for relevance scoring
+          const tsqueryParam = b.paramIndex;
+          b.params.push(searchQuery.query);
+          b.paramIndex++;
+          return `ts_rank_cd(${TSVECTOR_EXPR}, plainto_tsquery('english', $${tsqueryParam})) DESC, p."isFeatured" DESC, p."createdAt" DESC`;
+        }
+        return `p."isFeatured" DESC, p."createdAt" DESC`;
+      case 'manual':
+      default:
+        // Manual ordering is applied post-query in applyManualOrdering()
+        return `p."createdAt" DESC`;
+    }
+  }
+
+  // SELECT score expression for relevance sort — pushes another tsquery param
+  private buildScoreExpr(b: FtsQueryBuilder, searchQuery: SearchQuery): string {
+    if (!searchQuery.query || searchQuery.sortBy !== 'relevance') return '';
+
+    const expr = `, ts_rank_cd(${TSVECTOR_EXPR}, plainto_tsquery('english', $${b.paramIndex})) as score`;
+    b.params.push(searchQuery.query);
+    b.paramIndex++;
+    return expr;
   }
 
   // ===========================================================================

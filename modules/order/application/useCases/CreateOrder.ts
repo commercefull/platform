@@ -302,8 +302,41 @@ export class CreateOrderUseCase {
     const orderId = generateUUID();
     const currency = command.currencyCode || 'USD';
 
-    // Create order
-    const order = Order.create({
+    const order = this.buildOrder(command, orderId, currency);
+    this.addOrderItems(order, command, orderId, currency);
+    this.applyTotalsAndContext(order, command, currency);
+    this.setOrderAddresses(order, command, orderId);
+
+    // Save order and record initial status history in a single transaction
+    const savedOrder = await this.persistOrder(order, command);
+
+    // Emit event
+    eventBus.emit('order.created', {
+      orderId: savedOrder.orderId,
+      orderNumber: savedOrder.orderNumber,
+      customerId: savedOrder.customerId,
+      totalAmountCents: savedOrder.totalAmount.cents,
+      discountTotalCents: savedOrder.discountTotal.cents,
+      taxTotalCents: savedOrder.taxTotal.cents,
+      shippingTotalCents: savedOrder.shippingTotal.cents,
+      itemCount: savedOrder.totalQuantity,
+      currency: savedOrder.currencyCode,
+      storeId: savedOrder.storeId,
+      channelId: savedOrder.channelId,
+      items: savedOrder.items.map(i => ({
+        productId: i.productId,
+        productVariantId: i.productVariantId,
+        quantity: i.quantity,
+        unitPriceCents: i.unitPrice.cents,
+        lineTotalCents: i.lineTotal.cents,
+      })),
+    });
+
+    return this.mapToResponse(savedOrder);
+  }
+
+  private buildOrder(command: CreateOrderCommand, orderId: string, currency: string): Order {
+    return Order.create({
       orderId,
       customerId: command.customerId,
       basketId: command.basketId,
@@ -327,8 +360,9 @@ export class CreateOrderUseCase {
       localeCode: command.localeCode,
       contractingEntityId: command.contractingEntityId,
     });
+  }
 
-    // Add items
+  private addOrderItems(order: Order, command: CreateOrderCommand, orderId: string, currency: string): void {
     for (const itemInput of command.items) {
       const item = OrderItem.create({
         orderItemId: generateUUID(),
@@ -350,7 +384,9 @@ export class CreateOrderUseCase {
       });
       order.addItem(item);
     }
+  }
 
+  private applyTotalsAndContext(order: Order, command: CreateOrderCommand, currency: string): void {
     // Set shipping total
     if (command.shippingTotalCents) {
       order.setShippingTotal(Money.fromCents(command.shippingTotalCents, currency));
@@ -375,7 +411,9 @@ export class CreateOrderUseCase {
     for (const record of command.decisionLog ?? []) {
       order.recordDecision(record as Parameters<Order['recordDecision']>[0]);
     }
+  }
 
+  private setOrderAddresses(order: Order, command: CreateOrderCommand, orderId: string): void {
     // Create shipping address
     if (command.shippingAddress) {
       const shippingAddress = OrderAddress.create({
@@ -398,9 +436,10 @@ export class CreateOrderUseCase {
       });
       order.setBillingAddress(billingAddress);
     }
+  }
 
-    // Save order and record initial status history in a single transaction
-    const savedOrder = await withTransaction(async () => {
+  private async persistOrder(order: Order, command: CreateOrderCommand): Promise<Order> {
+    return withTransaction(async () => {
       const saved = await this.orderRepository.save(order);
 
       await this.orderRepository.recordStatusChange(saved.orderId, saved.status, 'Initial status', 'pending');
@@ -444,30 +483,6 @@ export class CreateOrderUseCase {
 
       return saved;
     });
-
-    // Emit event
-    eventBus.emit('order.created', {
-      orderId: savedOrder.orderId,
-      orderNumber: savedOrder.orderNumber,
-      customerId: savedOrder.customerId,
-      totalAmountCents: savedOrder.totalAmount.cents,
-      discountTotalCents: savedOrder.discountTotal.cents,
-      taxTotalCents: savedOrder.taxTotal.cents,
-      shippingTotalCents: savedOrder.shippingTotal.cents,
-      itemCount: savedOrder.totalQuantity,
-      currency: savedOrder.currencyCode,
-      storeId: savedOrder.storeId,
-      channelId: savedOrder.channelId,
-      items: savedOrder.items.map(i => ({
-        productId: i.productId,
-        productVariantId: i.productVariantId,
-        quantity: i.quantity,
-        unitPriceCents: i.unitPrice.cents,
-        lineTotalCents: i.lineTotal.cents,
-      })),
-    });
-
-    return this.mapToResponse(savedOrder);
   }
 
   private mapToResponse(order: Order): OrderResponse {
