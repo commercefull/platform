@@ -5,12 +5,7 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import {
-  calculateRates,
-  estimateDelivery,
-  getMethods,
-  getPackagingTypes,
-} from '../controllers/shippingController';
+import { calculateRates, estimateDelivery, getMethods, getPackagingTypes } from '../controllers/shippingController';
 const router = createHttpRouter();
 
 // Get available shipping methods (for checkout)

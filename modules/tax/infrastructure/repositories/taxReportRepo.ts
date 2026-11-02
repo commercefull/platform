@@ -18,7 +18,7 @@ type TaxReportUpdateParams = Partial<Omit<TaxReport, 'taxReportId' | 'organizati
 
 class TaxReportRepo {
   async findById(id: string): Promise<TaxReport | null> {
-    return await queryOne<TaxReport>(`SELECT * FROM "taxReport" WHERE "taxReportId" = $1`, [id]);
+    return await queryOne<DbTaxReport>(`SELECT * FROM "taxReport" WHERE "taxReportId" = $1`, [id]);
   }
 
   async findByMerchant(organizationId: string, reportType?: TaxReportType, limit = 100): Promise<TaxReport[]> {
@@ -30,12 +30,12 @@ class TaxReportRepo {
     }
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1}`;
     params.push(limit);
-    return (await query<TaxReport[]>(sql, params)) || [];
+    return (await query<DbTaxReport[]>(sql, params)) || [];
   }
 
   async findByStatus(organizationId: string, status: TaxReportStatus): Promise<TaxReport[]> {
     return (
-      (await query<TaxReport[]>(`SELECT * FROM "taxReport" WHERE "organizationId" = $1 AND "status" = $2 ORDER BY "createdAt" DESC`, [
+      (await query<DbTaxReport[]>(`SELECT * FROM "taxReport" WHERE "organizationId" = $1 AND "status" = $2 ORDER BY "createdAt" DESC`, [
         organizationId,
         status,
       ])) || []
@@ -44,7 +44,7 @@ class TaxReportRepo {
 
   async findByDateRange(organizationId: string, dateFrom: string, dateTo: string): Promise<TaxReport[]> {
     return (
-      (await query<TaxReport[]>(
+      (await query<DbTaxReport[]>(
         `SELECT * FROM "taxReport" WHERE "organizationId" = $1 AND "dateFrom" >= $2 AND "dateTo" <= $3 ORDER BY "createdAt" DESC`,
         [organizationId, dateFrom, dateTo],
       )) || []
@@ -53,7 +53,7 @@ class TaxReportRepo {
 
   async create(params: TaxReportCreateParams): Promise<TaxReport> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxReport>(
+    const result = await queryOne<DbTaxReport>(
       `INSERT INTO "taxReport" (
         "organizationId", "name", "reportType", "dateFrom", "dateTo", "taxJurisdictions",
         "fileUrl", "fileFormat", "status", "generatedBy", "parameters", "results",
@@ -102,7 +102,7 @@ class TaxReportRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxReport>(
+    return await queryOne<DbTaxReport>(
       `UPDATE "taxReport" SET ${updateFields.join(', ')} WHERE "taxReportId" = $${paramIndex} RETURNING *`,
       values,
     );

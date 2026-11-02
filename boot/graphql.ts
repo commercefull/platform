@@ -31,46 +31,16 @@ import { pricingResolvers, pricingTypeDefs } from '../modules/pricing';
 import { organizationResolvers, organizationTypeDefs } from '../modules/organization';
 import { analyticsResolvers, analyticsTypeDefs } from '../modules/analytics';
 import { contentResolvers, contentTypeDefs } from '../modules/content';
-import {
-  mediaResolvers,
-  mediaTypeDefs,
-} from '../modules/media';
-import {
-  localizationResolvers,
-  localizationTypeDefs,
-} from '../modules/localization';
-import {
-  configurationResolvers,
-  configurationTypeDefs,
-} from '../modules/configuration';
-import {
-  supplierResolvers,
-  supplierTypeDefs,
-} from '../modules/supplier';
-import {
-  gdprResolvers,
-  gdprTypeDefs,
-} from '../modules/gdpr';
-import {
-  identityResolvers,
-  identityTypeDefs,
-} from '../modules/identity';
-import {
-  reportingResolvers,
-  reportingTypeDefs,
-} from '../modules/reporting';
-import {
-  supportResolvers,
-  supportTypeDefs,
-} from '../modules/support';
-import {
-  warehouseResolvers,
-  warehouseTypeDefs,
-} from '../modules/warehouse';
-import {
-  webhookResolvers,
-  webhookTypeDefs,
-} from '../modules/webhook';
+import { mediaResolvers, mediaTypeDefs } from '../modules/media';
+import { localizationResolvers, localizationTypeDefs } from '../modules/localization';
+import { configurationResolvers, configurationTypeDefs } from '../modules/configuration';
+import { supplierResolvers, supplierTypeDefs } from '../modules/supplier';
+import { gdprResolvers, gdprTypeDefs } from '../modules/gdpr';
+import { identityResolvers, identityTypeDefs } from '../modules/identity';
+import { reportingResolvers, reportingTypeDefs } from '../modules/reporting';
+import { supportResolvers, supportTypeDefs } from '../modules/support';
+import { warehouseResolvers, warehouseTypeDefs } from '../modules/warehouse';
+import { webhookResolvers, webhookTypeDefs } from '../modules/webhook';
 import { moduleRegistry } from './moduleManifests';
 import { getGraphQLValidationRules } from '../libs/graphqlSecurity';
 import { persistedQueryStore, initPersistedQueries } from '../libs/persistedQueries';

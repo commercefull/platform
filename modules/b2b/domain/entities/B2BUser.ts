@@ -10,7 +10,6 @@ export interface SpendingLimit {
   annualLimit?: number;
 }
 
-
 export interface B2BUserProps {
   userId: string;
   companyId: string;

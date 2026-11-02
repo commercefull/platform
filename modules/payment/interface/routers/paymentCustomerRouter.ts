@@ -4,17 +4,8 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import {
-  getMyTransactions,
-  getPaymentMethods,
-  getTransactionByOrder,
-} from '../controllers/PaymentController';
-import {
-  deleteStoredMethod,
-  listStoredMethods,
-  saveStoredMethod,
-  setDefaultMethod,
-} from '../controllers/paymentCustomerController';
+import { getMyTransactions, getPaymentMethods, getTransactionByOrder } from '../controllers/PaymentController';
+import { deleteStoredMethod, listStoredMethods, saveStoredMethod, setDefaultMethod } from '../controllers/paymentCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
 const router = createHttpRouter();

@@ -9,6 +9,7 @@ import { FulfillmentLocation } from '../../../../libs/db/types';
 import { FailedToCreateFulfillmentLocationError } from '../../domain/errors/FulfillmentErrors';
 
 import { generateUUID } from '../../../../libs/uuid';
+import type { FulfillmentLocation as DbFulfillmentLocation } from '../../../../libs/db/types';
 
 export interface CreateFulfillmentLocationParams {
   organizationId: string;
@@ -53,7 +54,7 @@ async function create(params: CreateFulfillmentLocationParams): Promise<Fulfillm
     RETURNING *
   `;
 
-  const result = await query<FulfillmentLocation[]>(sql, [
+  const result = await query<DbFulfillmentLocation[]>(sql, [
     locationId,
     params.organizationId,
     params.type,
@@ -78,17 +79,14 @@ async function create(params: CreateFulfillmentLocationParams): Promise<Fulfillm
 }
 
 async function findById(locationId: string): Promise<FulfillmentLocation | null> {
-  return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "fulfillmentLocationId" = $1', [locationId]);
+  return queryOne<DbFulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "fulfillmentLocationId" = $1', [locationId]);
 }
 
 async function findByCode(code: string): Promise<FulfillmentLocation | null> {
-  return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "code" = $1', [code]);
+  return queryOne<DbFulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "code" = $1', [code]);
 }
 
-async function findByOrganization(
-  organizationId: string,
-  options?: { type?: string; isActive?: boolean },
-): Promise<FulfillmentLocation[]> {
+async function findByOrganization(organizationId: string, options?: { type?: string; isActive?: boolean }): Promise<FulfillmentLocation[]> {
   let sql = 'SELECT * FROM "fulfillmentLocation" WHERE "organizationId" = $1';
   const params: unknown[] = [organizationId];
   let paramIndex = 2;
@@ -104,12 +102,12 @@ async function findByOrganization(
 
   sql += ' ORDER BY "name" ASC';
 
-  const result = await query<FulfillmentLocation[]>(sql, params);
+  const result = await query<DbFulfillmentLocation[]>(sql, params);
   return result ?? [];
 }
 
 async function findBySeller(sellerId: string): Promise<FulfillmentLocation[]> {
-  const result = await query<FulfillmentLocation[]>(
+  const result = await query<DbFulfillmentLocation[]>(
     'SELECT * FROM "fulfillmentLocation" WHERE "sellerId" = $1 AND "isActive" = true ORDER BY "name" ASC',
     [sellerId],
   );
@@ -146,12 +144,12 @@ async function update(locationId: string, params: UpdateFulfillmentLocationParam
     RETURNING *
   `;
 
-  const result = await query<FulfillmentLocation[]>(sql, values);
+  const result = await query<DbFulfillmentLocation[]>(sql, values);
   return result?.[0] ?? null;
 }
 
 async function activate(locationId: string): Promise<boolean> {
-  const result = await queryOne<FulfillmentLocation>(
+  const result = await queryOne<DbFulfillmentLocation>(
     'UPDATE "fulfillmentLocation" SET "isActive" = true, "updatedAt" = $1 WHERE "fulfillmentLocationId" = $2 RETURNING *',
     [new Date(), locationId],
   );
@@ -159,7 +157,7 @@ async function activate(locationId: string): Promise<boolean> {
 }
 
 async function deactivate(locationId: string): Promise<boolean> {
-  const result = await queryOne<FulfillmentLocation>(
+  const result = await queryOne<DbFulfillmentLocation>(
     'UPDATE "fulfillmentLocation" SET "isActive" = false, "updatedAt" = $1 WHERE "fulfillmentLocationId" = $2 RETURNING *',
     [new Date(), locationId],
   );

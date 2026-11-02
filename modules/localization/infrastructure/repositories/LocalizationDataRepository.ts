@@ -17,13 +17,7 @@ import {
   createExchangeRateHistory,
   deleteCurrency,
 } from './currencyRepo';
-import {
-  listLanguages,
-  findLanguageById,
-  createLanguage,
-  updateLanguage,
-  deleteLanguage,
-} from './languageRepo';
+import { listLanguages, findLanguageById, createLanguage, updateLanguage, deleteLanguage } from './languageRepo';
 import localeRepo from './localeRepo';
 import {
   getProductTranslation,

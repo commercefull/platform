@@ -19,17 +19,17 @@ export class ProductTypeRepository {
 
   async findById(id: string): Promise<ProductType | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "productTypeId" = $1`;
-    return await queryOne<ProductType>(sql, [id]);
+    return await queryOne<DbProductType>(sql, [id]);
   }
 
   async findBySlug(slug: string): Promise<ProductType | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "slug" = $1`;
-    return await queryOne<ProductType>(sql, [slug]);
+    return await queryOne<DbProductType>(sql, [slug]);
   }
 
   async findAll(): Promise<ProductType[]> {
     const sql = `SELECT * FROM "${this.tableName}" ORDER BY "name" ASC`;
-    return (await query<ProductType[]>(sql)) || [];
+    return (await query<DbProductType[]>(sql)) || [];
   }
 
   async findActive(): Promise<ProductType[]> {
@@ -46,7 +46,7 @@ export class ProductTypeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductType>(sql, [input.name, slug]);
+    const result = await queryOne<DbProductType>(sql, [input.name, slug]);
 
     if (!result) {
       throw new FailedToCreateProductError();
@@ -76,7 +76,7 @@ export class ProductTypeRepository {
       RETURNING *
     `;
 
-    return await queryOne<ProductType>(sql, values);
+    return await queryOne<DbProductType>(sql, values);
   }
 
   async delete(id: string): Promise<boolean> {

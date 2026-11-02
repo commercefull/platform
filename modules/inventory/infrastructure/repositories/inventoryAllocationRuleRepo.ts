@@ -39,7 +39,7 @@ function mapToEntity(row: InventoryAllocationRuleRow): InventoryAllocationRule {
 }
 
 async function findActiveRules(): Promise<InventoryAllocationRule[]> {
-  const rows = await query<InventoryAllocationRuleRow[]>(
+  const rows = await query<DbInventoryAllocationRule[]>(
     `SELECT * FROM "inventoryAllocationRule" WHERE "isActive" = true ORDER BY "priority" DESC`,
   );
   return (rows || []).map(mapToEntity);
@@ -77,7 +77,7 @@ async function findByProduct(productId: string, activeOnly = true): Promise<Inve
 }
 
 async function findById(inventoryAllocationRuleId: string): Promise<InventoryAllocationRule | null> {
-  const row = await queryOne<InventoryAllocationRuleRow>(`SELECT * FROM "inventoryAllocationRule" WHERE "inventoryAllocationRuleId" = $1`, [
+  const row = await queryOne<DbInventoryAllocationRule>(`SELECT * FROM "inventoryAllocationRule" WHERE "inventoryAllocationRuleId" = $1`, [
     inventoryAllocationRuleId,
   ]);
   return row ? mapToEntity(row) : null;
@@ -86,7 +86,7 @@ async function findById(inventoryAllocationRuleId: string): Promise<InventoryAll
 type CreateInventoryAllocationRuleInput = Omit<InventoryAllocationRuleProps, 'inventoryAllocationRuleId'>;
 
 async function create(input: CreateInventoryAllocationRuleInput): Promise<InventoryAllocationRule> {
-  const row = await queryOne<InventoryAllocationRuleRow>(
+  const row = await queryOne<DbInventoryAllocationRule>(
     `INSERT INTO "inventoryAllocationRule" (
       "name", "description", "scope", "poolId", "categoryId", "productId",
       "allocationStrategy", "reservationPolicy", "lowStockThreshold", "oversellBuffer",

@@ -16,5 +16,3 @@ export interface StoredPaymentMethod {
 }
 
 export type StoredPaymentMethodCreateParams = Omit<StoredPaymentMethod, 'storedPaymentMethodId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-
-

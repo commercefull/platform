@@ -20,10 +20,6 @@ export const testBenefit: Partial<MembershipBenefit> = {
   isActive: true,
 };
 
-
-
-
-
 // Seeded membership fixtures (seeds/20240805002205_seedMembershipOpsData.js)
 export const SEEDED_TIER_ID = '0193f002-0000-7000-8000-000000000001';
 export const SEEDED_BENEFIT_ID = '0193f003-0000-7000-8000-000000000001';

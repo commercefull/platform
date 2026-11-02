@@ -9,18 +9,19 @@ import { CustomerRepository as ICustomerRepository, CustomerFilters } from '../.
 import { Customer, CustomerAddress } from '../../../../libs/db/types';
 import { CustomerAddressNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
+import type { Customer as DbCustomer, CustomerAddress as DbCustomerAddress } from '../../../../libs/db/types';
 
 export class CustomerRepo implements ICustomerRepository {
   async findById(customerId: string): Promise<Customer | null> {
-    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "customerId" = $1 AND "deletedAt" IS NULL', [customerId]);
+    return await queryOne<DbCustomer>('SELECT * FROM "customer" WHERE "customerId" = $1 AND "deletedAt" IS NULL', [customerId]);
   }
 
   async findByEmail(email: string): Promise<Customer | null> {
-    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL', [email]);
+    return await queryOne<DbCustomer>('SELECT * FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL', [email]);
   }
 
   async findByPhone(phone: string): Promise<Customer | null> {
-    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "phone" = $1 AND "deletedAt" IS NULL', [phone]);
+    return await queryOne<DbCustomer>('SELECT * FROM "customer" WHERE "phone" = $1 AND "deletedAt" IS NULL', [phone]);
   }
 
   async findAll(filters?: CustomerFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Customer>> {
@@ -34,7 +35,7 @@ export class CustomerRepo implements ICustomerRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "customer" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Customer[]>(
+    const rows = await query<DbCustomer[]>(
       `SELECT * FROM "customer" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -154,7 +155,7 @@ export class CustomerRepo implements ICustomerRepository {
 
   // Address methods
   async getAddresses(customerId: string): Promise<CustomerAddress[]> {
-    const rows = await query<CustomerAddress[]>(
+    const rows = await query<DbCustomerAddress[]>(
       'SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" ASC',
       [customerId],
     );
@@ -162,14 +163,14 @@ export class CustomerRepo implements ICustomerRepository {
   }
 
   async getDefaultShippingAddress(customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
+    return await queryOne<DbCustomerAddress>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "addressType" = 'shipping' AND "isDefault" = true`,
       [customerId],
     );
   }
 
   async getDefaultBillingAddress(customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
+    return await queryOne<DbCustomerAddress>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "addressType" = 'billing' AND "isDefault" = true`,
       [customerId],
     );
@@ -261,7 +262,7 @@ export class CustomerRepo implements ICustomerRepository {
   }
 
   async updateAddress(addressId: string, updates: Partial<CustomerAddress>): Promise<CustomerAddress> {
-    const existing = await queryOne<CustomerAddress>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
+    const existing = await queryOne<DbCustomerAddress>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
     if (!existing) throw new CustomerAddressNotFoundError(addressId);
 
     const merged = { ...existing, ...updates };

@@ -2,6 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 import type { ProductQaStatus, ProductQa, ProductQaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+import type { ProductQa as DbProductQa } from '../../../../libs/db/types';
 export type { ProductQaStatus, ProductQa } from '../../domain/repositories/ProductCatalogPorts';
 
 class ProductQaRepo {
@@ -15,16 +16,16 @@ class ProductQaRepo {
     }
 
     sql += ` ORDER BY "createdAt" DESC`;
-    return (await query<ProductQa[]>(sql, params)) || [];
+    return (await query<DbProductQa[]>(sql, params)) || [];
   }
 
   async findById(productQaId: string): Promise<ProductQa | null> {
-    return queryOne<ProductQa>(`SELECT * FROM "productQa" WHERE "productQaId" = $1`, [productQaId]);
+    return queryOne<DbProductQa>(`SELECT * FROM "productQa" WHERE "productQaId" = $1`, [productQaId]);
   }
 
   async create(params: ProductQaCreateParams): Promise<ProductQa> {
     const now = new Date();
-    const result = await queryOne<ProductQa>(
+    const result = await queryOne<DbProductQa>(
       `INSERT INTO "productQa" ("productId", "customerId", "question", "status", "askerName", "askerEmail", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
@@ -43,7 +44,7 @@ class ProductQaRepo {
   }
 
   async updateStatus(productQaId: string, status: ProductQaStatus): Promise<ProductQa | null> {
-    return queryOne<ProductQa>(`UPDATE "productQa" SET "status" = $1, "updatedAt" = $2 WHERE "productQaId" = $3 RETURNING *`, [
+    return queryOne<DbProductQa>(`UPDATE "productQa" SET "status" = $1, "updatedAt" = $2 WHERE "productQaId" = $3 RETURNING *`, [
       status,
       new Date(),
       productQaId,

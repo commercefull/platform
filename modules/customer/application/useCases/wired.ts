@@ -37,4 +37,3 @@ export const manageAddressesUseCase = new ManageAddressesUseCase(customerRepo);
 export const authenticateCustomerUseCase = new AuthenticateCustomerUseCase(customerRepo);
 export const registerCustomerUseCase = new RegisterCustomerUseCase(customerRepo);
 export const changePasswordUseCase = new ChangePasswordUseCase(customerRepo);
-

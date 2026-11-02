@@ -8,173 +8,51 @@ import swaggerUi from 'swagger-ui-express';
 import { storefrontCustomerRouter } from '../web/storefront/storefrontRouter';
 
 // Module barrels — all routers imported from module barrels only
-import {
-  identityBusinessRouter,
-  identityCustomerRouter,
-  identitySocialRouter,
-  scimRouter,
-  ssoRouter,
-} from '../modules/identity';
-import {
-  customerBusinessRouter,
-  customerRouter,
-} from '../modules/customer';
-import {
-  taxBusinessRouter,
-  taxCustomerRouter,
-} from '../modules/tax';
-import {
-  gdprBusinessRouter,
-  gdprCustomerRouter,
-} from '../modules/gdpr';
-import {
-  orderBusinessRouter,
-  orderCustomerRouter,
-} from '../modules/order';
-import {
-  basketBusinessRouter,
-  basketCustomerRouter,
-} from '../modules/basket';
-import {
-  attributeBusinessRouter,
-  categoryCustomerRouter,
-  productBusinessRouter,
-  productCustomerRouter,
-} from '../modules/product';
-import {
-  loyaltyCustomerRouter,
-  loyaltyMerchantRouter,
-} from '../modules/loyalty';
-import {
-  handleGatewayWebhook,
-  paymentBusinessRouter,
-  paymentCustomerRouter,
-} from '../modules/payment';
-import {
-  supportBusinessRouter,
-  supportCustomerRouter,
-} from '../modules/support';
-import {
-  checkoutCustomerRouter,
-} from '../modules/checkout';
-import {
-  inventoryBusinessRouter,
-  inventoryCustomerRouter,
-} from '../modules/inventory';
-import {
-  warehouseCustomerRouter,
-  warehouseMerchantRouter,
-} from '../modules/warehouse';
-import {
-  membershipBusinessRouter,
-  membershipCustomerRouter,
-} from '../modules/membership';
-import {
-  subscriptionBusinessRouter,
-  subscriptionCustomerRouter,
-} from '../modules/subscription';
-import {
-  localizationCustomerRouter,
-  localizationMerchantRouter,
-} from '../modules/localization';
-import {
-  shippingBusinessRouter,
-  shippingCustomerRouter,
-} from '../modules/shipping';
-import {
-  notificationCustomerRouter,
-  notificationMerchantRouter,
-} from '../modules/notification';
-import {
-  couponBusinessRouter,
-  couponCustomerRouter,
-} from '../modules/coupon';
-import {
-  promotionBusinessRouter,
-  promotionCustomerRouter,
-} from '../modules/promotion';
-import {
-  storeCustomerRouter,
-  storeRouter,
-} from '../modules/store';
-import {
-  fulfillmentBusinessRouter,
-  fulfillmentCustomerRouter,
-  fulfillmentLocationRouter,
-} from '../modules/fulfillment';
-import {
-  contentCustomerRouter,
-  contentRouterAdmin,
-} from '../modules/content';
-import {
-  mediaRouter,
-} from '../modules/media';
-import {
-  systemConfigurationRouter,
-} from '../modules/configuration';
-import {
-  webhookBusinessRouter,
-} from '../modules/webhook';
-import {
-  reportingBusinessRouter,
-} from '../modules/reporting';
-import {
-  auditAdminRouter,
-  auditMiddleware,
-} from '../modules/audit';
-import {
-  segmentBusinessRouter,
-} from '../modules/segment';
-import {
-  automationBusinessRouter,
-} from '../modules/automation';
-import {
-  returnBusinessRouter,
-} from '../modules/returns';
-import {
-  themeBusinessRouter,
-} from '../modules/theme';
-import {
-  pageBuilderBusinessRouter,
-} from '../modules/pagebuilder';
-import {
-  trackingBusinessRouter,
-} from '../modules/tracking';
-import {
-  b2bBusinessRouter,
-} from '../modules/b2b';
-import {
-  marketplaceBusinessRouter,
-} from '../modules/marketplace';
-import {
-  migrationBusinessRouter,
-} from '../modules/migration';
-import {
-  integrationBusinessRouter,
-} from '../modules/integration';
-import {
-  organizationBusinessRouter,
-} from '../modules/organization';
-import {
-  supplierMerchantRouter,
-} from '../modules/supplier';
-import {
-  recommendationBusinessRouter,
-  recommendationCustomerRouter,
-} from '../modules/recommendation';
-import {
-  pricingMerchantRouter,
-} from '../modules/pricing';
-import {
-  analyticsBusinessRouter,
-} from '../modules/analytics';
-import {
-  assortmentBusinessRouter,
-  assortmentCustomerRouter,
-} from '../modules/assortment';
-import {
-  agenticCheckoutRouter,
-} from '../modules/agentic-checkout';
+import { identityBusinessRouter, identityCustomerRouter, identitySocialRouter, scimRouter, ssoRouter } from '../modules/identity';
+import { customerBusinessRouter, customerRouter } from '../modules/customer';
+import { taxBusinessRouter, taxCustomerRouter } from '../modules/tax';
+import { gdprBusinessRouter, gdprCustomerRouter } from '../modules/gdpr';
+import { orderBusinessRouter, orderCustomerRouter } from '../modules/order';
+import { basketBusinessRouter, basketCustomerRouter } from '../modules/basket';
+import { attributeBusinessRouter, categoryCustomerRouter, productBusinessRouter, productCustomerRouter } from '../modules/product';
+import { loyaltyCustomerRouter, loyaltyMerchantRouter } from '../modules/loyalty';
+import { handleGatewayWebhook, paymentBusinessRouter, paymentCustomerRouter } from '../modules/payment';
+import { supportBusinessRouter, supportCustomerRouter } from '../modules/support';
+import { checkoutCustomerRouter } from '../modules/checkout';
+import { inventoryBusinessRouter, inventoryCustomerRouter } from '../modules/inventory';
+import { warehouseCustomerRouter, warehouseMerchantRouter } from '../modules/warehouse';
+import { membershipBusinessRouter, membershipCustomerRouter } from '../modules/membership';
+import { subscriptionBusinessRouter, subscriptionCustomerRouter } from '../modules/subscription';
+import { localizationCustomerRouter, localizationMerchantRouter } from '../modules/localization';
+import { shippingBusinessRouter, shippingCustomerRouter } from '../modules/shipping';
+import { notificationCustomerRouter, notificationMerchantRouter } from '../modules/notification';
+import { couponBusinessRouter, couponCustomerRouter } from '../modules/coupon';
+import { promotionBusinessRouter, promotionCustomerRouter } from '../modules/promotion';
+import { storeCustomerRouter, storeRouter } from '../modules/store';
+import { fulfillmentBusinessRouter, fulfillmentCustomerRouter, fulfillmentLocationRouter } from '../modules/fulfillment';
+import { contentCustomerRouter, contentRouterAdmin } from '../modules/content';
+import { mediaRouter } from '../modules/media';
+import { systemConfigurationRouter } from '../modules/configuration';
+import { webhookBusinessRouter } from '../modules/webhook';
+import { reportingBusinessRouter } from '../modules/reporting';
+import { auditAdminRouter, auditMiddleware } from '../modules/audit';
+import { segmentBusinessRouter } from '../modules/segment';
+import { automationBusinessRouter } from '../modules/automation';
+import { returnBusinessRouter } from '../modules/returns';
+import { themeBusinessRouter } from '../modules/theme';
+import { pageBuilderBusinessRouter } from '../modules/pagebuilder';
+import { trackingBusinessRouter } from '../modules/tracking';
+import { b2bBusinessRouter } from '../modules/b2b';
+import { marketplaceBusinessRouter } from '../modules/marketplace';
+import { migrationBusinessRouter } from '../modules/migration';
+import { integrationBusinessRouter } from '../modules/integration';
+import { organizationBusinessRouter } from '../modules/organization';
+import { supplierMerchantRouter } from '../modules/supplier';
+import { recommendationBusinessRouter, recommendationCustomerRouter } from '../modules/recommendation';
+import { pricingMerchantRouter } from '../modules/pricing';
+import { analyticsBusinessRouter } from '../modules/analytics';
+import { assortmentBusinessRouter, assortmentCustomerRouter } from '../modules/assortment';
+import { agenticCheckoutRouter } from '../modules/agentic-checkout';
 import { adminRouter } from '../web/admin/adminRouters';
 import { searchCustomerRouter, searchBusinessRouter } from '../libs/search/searchRouter';
 import { initSearchAdapter } from '../libs/search/init';

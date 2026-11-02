@@ -4,6 +4,7 @@ import { unixTimestamp } from '../../../../libs/date';
 // Import types from generated DB types - single source of truth
 import { InventoryStockReservation as DbStockReservation } from '../../../../libs/db/types';
 import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
+import type { InventoryStockReservation as DbInventoryStockReservation } from '../../../../libs/db/types';
 
 // Re-export DB type
 type StockReservation = DbStockReservation;
@@ -14,7 +15,7 @@ type StockReservationUpdateParams = Partial<Omit<StockReservation, 'stockReserva
 
 class StockReservationRepo {
   async findById(id: string): Promise<StockReservation | null> {
-    return await queryOne<StockReservation>(`SELECT * FROM "inventoryStockReservation" WHERE "stockReservationId" = $1`, [id]);
+    return await queryOne<DbInventoryStockReservation>(`SELECT * FROM "inventoryStockReservation" WHERE "stockReservationId" = $1`, [id]);
   }
 
   async findByProduct(productId: string, warehouseId?: string): Promise<StockReservation[]> {
@@ -25,12 +26,12 @@ class StockReservationRepo {
       params.push(warehouseId);
     }
     sql += ` ORDER BY "createdAt" DESC`;
-    return (await query<StockReservation[]>(sql, params)) || [];
+    return (await query<DbInventoryStockReservation[]>(sql, params)) || [];
   }
 
   async findByReference(referenceType: string, referenceId: string): Promise<StockReservation[]> {
     return (
-      (await query<StockReservation[]>(
+      (await query<DbInventoryStockReservation[]>(
         `SELECT * FROM "inventoryStockReservation" WHERE "referenceType" = $1 AND "referenceId" = $2 ORDER BY "createdAt" DESC`,
         [referenceType, referenceId],
       )) || []
@@ -39,7 +40,7 @@ class StockReservationRepo {
 
   async findExpired(): Promise<StockReservation[]> {
     return (
-      (await query<StockReservation[]>(
+      (await query<DbInventoryStockReservation[]>(
         `SELECT * FROM "inventoryStockReservation" WHERE "expiresAt" IS NOT NULL AND "expiresAt" < $1 ORDER BY "expiresAt" ASC`,
         [unixTimestamp()],
       )) || []
@@ -48,7 +49,7 @@ class StockReservationRepo {
 
   async create(params: StockReservationCreateParams): Promise<StockReservation> {
     const now = unixTimestamp();
-    const result = await queryOne<StockReservation>(
+    const result = await queryOne<DbInventoryStockReservation>(
       `INSERT INTO "inventoryStockReservation" (
         "productId", "productVariantId", "distributionWarehouseId", "quantity", "reservationType",
         "referenceId", "referenceType", "expiresAt", "createdBy", "createdAt", "updatedAt"
@@ -88,7 +89,7 @@ class StockReservationRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<StockReservation>(
+    return await queryOne<DbInventoryStockReservation>(
       `UPDATE "inventoryStockReservation" SET ${updateFields.join(', ')} WHERE "stockReservationId" = $${paramIndex} RETURNING *`,
       values,
     );

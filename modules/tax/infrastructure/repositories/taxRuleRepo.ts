@@ -17,26 +17,26 @@ type TaxRuleUpdateParams = Partial<Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'up
 
 class TaxRuleRepo {
   async findById(id: string): Promise<TaxRule | null> {
-    return await queryOne<TaxRule>(`SELECT * FROM "taxRule" WHERE "taxRuleId" = $1`, [id]);
+    return await queryOne<DbTaxRule>(`SELECT * FROM "taxRule" WHERE "taxRuleId" = $1`, [id]);
   }
 
   async findByTaxRate(taxRateId: string, activeOnly = false): Promise<TaxRule[]> {
     let sql = `SELECT * FROM "taxRule" WHERE "taxRateId" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "sortOrder" ASC`;
-    return (await query<TaxRule[]>(sql, [taxRateId])) || [];
+    return (await query<DbTaxRule[]>(sql, [taxRateId])) || [];
   }
 
   async findByConditionType(conditionType: TaxRuleConditionType, activeOnly = false): Promise<TaxRule[]> {
     let sql = `SELECT * FROM "taxRule" WHERE "conditionType" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "sortOrder" ASC`;
-    return (await query<TaxRule[]>(sql, [conditionType])) || [];
+    return (await query<DbTaxRule[]>(sql, [conditionType])) || [];
   }
 
   async create(params: TaxRuleCreateParams): Promise<TaxRule> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxRule>(
+    const result = await queryOne<DbTaxRule>(
       `INSERT INTO "taxRule" (
         "taxRateId", "name", "description", "conditionType", "conditionValue", 
         "sortOrder", "isActive", "createdAt", "updatedAt"
@@ -74,7 +74,7 @@ class TaxRuleRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxRule>(
+    return await queryOne<DbTaxRule>(
       `UPDATE "taxRule" SET ${updateFields.join(', ')} WHERE "taxRuleId" = $${paramIndex} RETURNING *`,
       values,
     );

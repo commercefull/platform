@@ -5,6 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingSurcharge } from '../../../../libs/db/types';
+import type { ShippingSurcharge as DbShippingSurcharge } from '../../../../libs/db/types';
 
 export { ShippingSurcharge };
 
@@ -20,7 +21,7 @@ async function findByRateId(shippingRateId: string, activeOnly = true): Promise<
     sql += ` AND "isActive" = true`;
   }
   sql += ` ORDER BY "type" ASC`;
-  return (await query<ShippingSurcharge[]>(sql, params)) || [];
+  return (await query<DbShippingSurcharge[]>(sql, params)) || [];
 }
 
 /**
@@ -36,14 +37,14 @@ async function findByRateIdAndType(
   if (activeOnly) {
     sql += ` AND "isActive" = true`;
   }
-  return (await query<ShippingSurcharge[]>(sql, params)) || [];
+  return (await query<DbShippingSurcharge[]>(sql, params)) || [];
 }
 
 /**
  * Find a single surcharge by id.
  */
 async function findById(shippingSurchargeId: string): Promise<ShippingSurcharge | null> {
-  return queryOne<ShippingSurcharge>(`SELECT * FROM "${TABLE}" WHERE "shippingSurchargeId" = $1`, [shippingSurchargeId]);
+  return queryOne<DbShippingSurcharge>(`SELECT * FROM "${TABLE}" WHERE "shippingSurchargeId" = $1`, [shippingSurchargeId]);
 }
 
 /**
@@ -52,7 +53,7 @@ async function findById(shippingSurchargeId: string): Promise<ShippingSurcharge 
 export type CreateShippingSurchargeInput = Omit<ShippingSurcharge, 'shippingSurchargeId' | 'createdAt' | 'updatedAt'>;
 
 async function create(input: CreateShippingSurchargeInput): Promise<ShippingSurcharge> {
-  const result = await queryOne<ShippingSurcharge>(
+  const result = await queryOne<DbShippingSurcharge>(
     `INSERT INTO "${TABLE}" (
       "shippingRateId", "type", "calculationType", "value", "conditions", "isActive"
     ) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -104,7 +105,7 @@ async function update(shippingSurchargeId: string, input: UpdateShippingSurcharg
 
   sets.push(`"updatedAt" = NOW()`);
 
-  return queryOne<ShippingSurcharge>(`UPDATE "${TABLE}" SET ${sets.join(', ')} WHERE "shippingSurchargeId" = $1 RETURNING *`, params);
+  return queryOne<DbShippingSurcharge>(`UPDATE "${TABLE}" SET ${sets.join(', ')} WHERE "shippingSurchargeId" = $1 RETURNING *`, params);
 }
 
 /**

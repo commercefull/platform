@@ -58,11 +58,7 @@ import { calculateOrderTaxUseCase } from '../../tax/application/wired';
 import taxSettingsRepo from '../../tax/infrastructure/repositories/taxSettingsRepo';
 import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
 import { getStoreUseCase } from '../../store/application/useCases/wired';
-import {
-  getLocations,
-  getLocation,
-  findNearestLocations,
-} from '../../store/infrastructure/repositories/pickupLocationRepo';
+import { getLocations, getLocation, findNearestLocations } from '../../store/infrastructure/repositories/pickupLocationRepo';
 import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
 import { reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase } from '../../inventory/application/wired';
 import { repriceBasketUseCase } from '../../basket/application/useCases/wired';

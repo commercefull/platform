@@ -8,6 +8,24 @@ import {
   CurrencyRegionNotFoundError,
   CurrencyRegionAlreadyExistsError,
 } from '../../domain/errors/PricingErrors';
+import type { Currency as DbCurrency } from '../../../../libs/db/types';
+import type { CurrencyRegion as DbCurrencyRegion } from '../../../../libs/db/types';
+
+function rowToCurrencyRegion(row: DbCurrencyRegion): CurrencyRegion {
+  return {
+    currencyRegionId: row.currencyRegionId,
+    id: row.currencyRegionId,
+    code: row.code,
+    regionCode: row.code,
+    name: row.name,
+    regionName: row.name,
+    currencyCode: row.currencyCode,
+    countries: row.countries ?? undefined,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
 /**
  * Currency Repository
@@ -31,7 +49,7 @@ class CurrencyRepo {
 
     sql += ' ORDER BY "isDefault" DESC, "name" ASC';
 
-    const result = await query<Currency[]>(sql);
+    const result = await query<DbCurrency[]>(sql);
     return result || [];
   }
 
@@ -40,7 +58,7 @@ class CurrencyRepo {
    */
   async getCurrencyByCode(code: string): Promise<Currency | null> {
     const sql = `SELECT * FROM "${this.currencyTable}" WHERE "code" = $1`;
-    return await queryOne<Currency>(sql, [code]);
+    return await queryOne<DbCurrency>(sql, [code]);
   }
 
   /**
@@ -67,7 +85,7 @@ class CurrencyRepo {
         RETURNING *
       `;
 
-      const result = await queryOne<Currency>(sql, [
+      const result = await queryOne<DbCurrency>(sql, [
         currency.name,
         currency.symbol,
         currency.decimalPlaces || currency.decimals || 2,
@@ -95,7 +113,7 @@ class CurrencyRepo {
         RETURNING *
       `;
 
-      const result = await queryOne<Currency>(sql, [
+      const result = await queryOne<DbCurrency>(sql, [
         currency.code,
         currency.name,
         currency.symbol,
@@ -154,12 +172,12 @@ class CurrencyRepo {
    */
   async getDefaultCurrency(): Promise<Currency | null> {
     const sql = `SELECT * FROM "${this.currencyTable}" WHERE "isDefault" = true`;
-    const result = await queryOne<Currency>(sql);
+    const result = await queryOne<DbCurrency>(sql);
 
     if (!result) {
       // No default currency found, get the first active one
       const fallbackSql = `SELECT * FROM "${this.currencyTable}" WHERE "isActive" = true LIMIT 1`;
-      return await queryOne<Currency>(fallbackSql);
+      return await queryOne<DbCurrency>(fallbackSql);
     }
 
     return result;
@@ -211,8 +229,8 @@ class CurrencyRepo {
 
     sql += ' ORDER BY "name" ASC';
 
-    const result = await query<CurrencyRegion[]>(sql);
-    return result || [];
+    const result = await query<DbCurrencyRegion[]>(sql);
+    return (result || []).map(rowToCurrencyRegion);
   }
 
   /**
@@ -220,7 +238,8 @@ class CurrencyRepo {
    */
   async getCurrencyRegionByCode(regionCode: string): Promise<CurrencyRegion | null> {
     const sql = `SELECT * FROM "${this.currencyRegionTable}" WHERE "code" = $1`;
-    return await queryOne<CurrencyRegion>(sql, [regionCode]);
+    const row = await queryOne<DbCurrencyRegion>(sql, [regionCode]);
+    return row ? rowToCurrencyRegion(row) : null;
   }
 
   /**
@@ -228,7 +247,8 @@ class CurrencyRepo {
    */
   async getCurrencyRegionById(id: string): Promise<CurrencyRegion | null> {
     const sql = `SELECT * FROM "${this.currencyRegionTable}" WHERE "currencyRegionId" = $1`;
-    return await queryOne<CurrencyRegion>(sql, [id]);
+    const row = await queryOne<DbCurrencyRegion>(sql, [id]);
+    return row ? rowToCurrencyRegion(row) : null;
   }
 
   /**
@@ -249,7 +269,7 @@ class CurrencyRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<CurrencyRegion>(sql, [
+    const result = await queryOne<DbCurrencyRegion>(sql, [
       code,
       name,
       region.currencyCode,
@@ -261,7 +281,7 @@ class CurrencyRepo {
       throw new FailedToCreatePricingError('Failed to create currency region');
     }
 
-    return result;
+    return rowToCurrencyRegion(result);
   }
 
   /**
@@ -291,13 +311,13 @@ class CurrencyRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<CurrencyRegion>(sql, values);
+    const result = await queryOne<DbCurrencyRegion>(sql, values);
 
     if (!result) {
       throw new FailedToCreatePricingError('Failed to update currency region');
     }
 
-    return result;
+    return rowToCurrencyRegion(result);
   }
 
   /**

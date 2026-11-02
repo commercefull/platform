@@ -11,23 +11,13 @@ import { logger } from '../logger';
 import type { RolePolicy, PermissionRule } from './types';
 import { DEFAULT_ROLE_POLICIES } from './defaultRoles';
 import { setOrgPolicyCache, clearOrgPolicyCache } from './checkPermission';
+import type { IdentityRolePolicy as DbIdentityRolePolicy } from '../db/types';
 
-interface RolePolicyRow {
-  rolePolicyId: string;
-  roleName: string;
-  description: string | null;
-  permissions: PermissionRule[];
-  isSystem: boolean;
-  isActive: boolean;
-  organizationId: string | null;
-  storeId: string | null;
-}
-
-function rowToPolicy(row: RolePolicyRow): RolePolicy {
+function rowToPolicy(row: DbIdentityRolePolicy): RolePolicy {
   return {
     roleName: row.roleName,
     description: row.description ?? undefined,
-    permissions: Array.isArray(row.permissions) ? row.permissions : [],
+    permissions: Array.isArray(row.permissions) ? (row.permissions as PermissionRule[]) : [],
     isSystem: row.isSystem,
     isActive: row.isActive,
   };
@@ -39,7 +29,7 @@ function rowToPolicy(row: RolePolicyRow): RolePolicy {
  */
 export async function loadOrgRolePolicies(): Promise<void> {
   try {
-    const rows = await query<RolePolicyRow[]>(
+    const rows = await query<DbIdentityRolePolicy[]>(
       'SELECT * FROM "identityRolePolicy" WHERE "isActive" = true AND "organizationId" IS NOT NULL',
     );
 
@@ -68,7 +58,7 @@ export async function loadOrgRolePolicies(): Promise<void> {
  * Combines org-specific overrides with system defaults.
  */
 async function getRolePoliciesForOrg(organizationId: string): Promise<RolePolicy[]> {
-  const rows = await query<RolePolicyRow[]>('SELECT * FROM "identityRolePolicy" WHERE "organizationId" = $1 AND "isActive" = true', [
+  const rows = await query<DbIdentityRolePolicy[]>('SELECT * FROM "identityRolePolicy" WHERE "organizationId" = $1 AND "isActive" = true', [
     organizationId,
   ]);
 
@@ -102,7 +92,7 @@ async function upsertOrgRolePolicy(
   );
 
   if (existing) {
-    const row = await queryOne<RolePolicyRow>(
+    const row = await queryOne<DbIdentityRolePolicy>(
       `UPDATE "identityRolePolicy" SET "permissions" = $1, "description" = $2, "updatedAt" = NOW()
        WHERE "rolePolicyId" = $3 RETURNING *`,
       [JSON.stringify(permissions), description ?? null, existing.rolePolicyId],
@@ -111,7 +101,7 @@ async function upsertOrgRolePolicy(
     return rowToPolicy(row!);
   }
 
-  const row = await queryOne<RolePolicyRow>(
+  const row = await queryOne<DbIdentityRolePolicy>(
     `INSERT INTO "identityRolePolicy" ("organizationId", "roleName", "description", "permissions", "isSystem", "isActive")
      VALUES ($1, $2, $3, $4, false, true) RETURNING *`,
     [organizationId, roleName, description ?? null, JSON.stringify(permissions)],

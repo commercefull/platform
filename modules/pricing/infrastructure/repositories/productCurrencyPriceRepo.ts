@@ -2,6 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { ProductCurrencyPrice, Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
+import type { ProductCurrencyPrice as DbProductCurrencyPrice } from '../../../../libs/db/types';
 
 /**
  * Currency-specific price override for a product/variant.
@@ -43,9 +44,10 @@ export class ProductCurrencyPriceRepo {
    * Find price by ID
    */
   async findById(productCurrencyPriceId: string): Promise<CurrencyPriceEntry | null> {
-    const row = await queryOne<ProductCurrencyPrice>(`SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`, [
-      productCurrencyPriceId,
-    ]);
+    const row = await queryOne<DbProductCurrencyPrice>(
+      `SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`,
+      [productCurrencyPriceId],
+    );
     return row ? mapRow(row) : null;
   }
 
@@ -54,12 +56,12 @@ export class ProductCurrencyPriceRepo {
    */
   async findByProductAndCurrency(productId: string, currencyId: string, productVariantId?: string): Promise<CurrencyPriceEntry | null> {
     const row = productVariantId
-      ? await queryOne<ProductCurrencyPrice>(
+      ? await queryOne<DbProductCurrencyPrice>(
           `SELECT * FROM "${Table.ProductCurrencyPrice}"
            WHERE "productId" = $1 AND "productVariantId" = $2 AND "currencyId" = $3`,
           [productId, productVariantId, currencyId],
         )
-      : await queryOne<ProductCurrencyPrice>(
+      : await queryOne<DbProductCurrencyPrice>(
           `SELECT * FROM "${Table.ProductCurrencyPrice}"
            WHERE "productId" = $1 AND "productVariantId" IS NULL AND "currencyId" = $2`,
           [productId, currencyId],
@@ -72,13 +74,13 @@ export class ProductCurrencyPriceRepo {
    */
   async findByProduct(productId: string, productVariantId?: string): Promise<CurrencyPriceEntry[]> {
     const results = productVariantId
-      ? await query<ProductCurrencyPrice[]>(
+      ? await query<DbProductCurrencyPrice[]>(
           `SELECT * FROM "${Table.ProductCurrencyPrice}"
            WHERE "productId" = $1 AND "productVariantId" = $2
            ORDER BY "currencyId" ASC`,
           [productId, productVariantId],
         )
-      : await query<ProductCurrencyPrice[]>(
+      : await query<DbProductCurrencyPrice[]>(
           `SELECT * FROM "${Table.ProductCurrencyPrice}"
            WHERE "productId" = $1 AND "productVariantId" IS NULL
            ORDER BY "currencyId" ASC`,
@@ -91,7 +93,7 @@ export class ProductCurrencyPriceRepo {
    * Find all prices for variant
    */
   async findByVariant(productVariantId: string): Promise<CurrencyPriceEntry[]> {
-    const results = await query<ProductCurrencyPrice[]>(
+    const results = await query<DbProductCurrencyPrice[]>(
       `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "productVariantId" = $1
        ORDER BY "currencyId" ASC`,
@@ -104,7 +106,7 @@ export class ProductCurrencyPriceRepo {
    * Find all prices in specific currency
    */
   async findByCurrency(currencyId: string, limit: number = 100, offset: number = 0): Promise<CurrencyPriceEntry[]> {
-    const results = await query<ProductCurrencyPrice[]>(
+    const results = await query<DbProductCurrencyPrice[]>(
       `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "currencyId" = $1
        ORDER BY "productId" ASC
@@ -118,7 +120,7 @@ export class ProductCurrencyPriceRepo {
    * Find manual prices
    */
   async findManualPrices(limit: number = 100, offset: number = 0): Promise<CurrencyPriceEntry[]> {
-    const results = await query<ProductCurrencyPrice[]>(
+    const results = await query<DbProductCurrencyPrice[]>(
       `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "isManual" = true
        ORDER BY "updatedAt" DESC
@@ -132,7 +134,7 @@ export class ProductCurrencyPriceRepo {
    * Find auto-calculated prices
    */
   async findAutoPrices(limit: number = 100, offset: number = 0): Promise<CurrencyPriceEntry[]> {
-    const results = await query<ProductCurrencyPrice[]>(
+    const results = await query<DbProductCurrencyPrice[]>(
       `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "isManual" = false
        ORDER BY "updatedAt" DESC
@@ -155,7 +157,7 @@ export class ProductCurrencyPriceRepo {
       throw new PricingValidationError('Price already exists for this product/variant and currency combination');
     }
 
-    const result = await queryOne<ProductCurrencyPrice>(
+    const result = await queryOne<DbProductCurrencyPrice>(
       `INSERT INTO "${Table.ProductCurrencyPrice}" (
         "productId", "productVariantId", "currencyId", "priceCents", "compareAtPriceCents",
         "isManual", "updatedBy", "createdAt", "updatedAt"
@@ -228,7 +230,7 @@ export class ProductCurrencyPriceRepo {
     values.push(unixTimestamp());
     values.push(productCurrencyPriceId);
 
-    const result = await queryOne<ProductCurrencyPrice>(
+    const result = await queryOne<DbProductCurrencyPrice>(
       `UPDATE "${Table.ProductCurrencyPrice}"
        SET ${updateFields.join(', ')}
        WHERE "productCurrencyPriceId" = $${paramIndex}

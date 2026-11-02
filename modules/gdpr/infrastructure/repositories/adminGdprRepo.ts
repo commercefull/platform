@@ -11,7 +11,6 @@ import { generateUUID } from '../../../../libs/uuid';
 // Types
 // ============================================================================
 
-
 interface GdprStats {
   pendingRequests: number;
   completedRequests: number;

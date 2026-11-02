@@ -7,9 +7,7 @@
  * Aggregate: Reporting (report generation, schedules, executions)
  */
 
-import {
-  generateReport,
-} from './reportDataProvider';
+import { generateReport } from './reportDataProvider';
 const reportDataProvider = {
   generateReport,
 };

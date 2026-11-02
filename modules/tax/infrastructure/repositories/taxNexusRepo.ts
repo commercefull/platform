@@ -15,7 +15,7 @@ type TaxNexusUpdateParams = Partial<Omit<TaxNexus, 'taxNexusId' | 'organizationI
 
 class TaxNexusRepo {
   async findById(id: string): Promise<TaxNexus | null> {
-    return await queryOne<TaxNexus>(`SELECT * FROM "taxNexus" WHERE "taxNexusId" = $1`, [id]);
+    return await queryOne<DbTaxNexus>(`SELECT * FROM "taxNexus" WHERE "taxNexusId" = $1`, [id]);
   }
 
   async findByMerchant(organizationId: string, activeOnly = false): Promise<TaxNexus[]> {
@@ -23,7 +23,7 @@ class TaxNexusRepo {
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $2 AND ("endDate" IS NULL OR "endDate" >= $2)`;
     sql += ` ORDER BY "isDefault" DESC, "name" ASC`;
     const params = activeOnly ? [organizationId, unixTimestamp()] : [organizationId];
-    return (await query<TaxNexus[]>(sql, params)) || [];
+    return (await query<DbTaxNexus[]>(sql, params)) || [];
   }
 
   async findByCountry(organizationId: string, country: string, activeOnly = false): Promise<TaxNexus[]> {
@@ -31,11 +31,11 @@ class TaxNexusRepo {
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $3 AND ("endDate" IS NULL OR "endDate" >= $3)`;
     sql += ` ORDER BY "name" ASC`;
     const params = activeOnly ? [organizationId, country, unixTimestamp()] : [organizationId, country];
-    return (await query<TaxNexus[]>(sql, params)) || [];
+    return (await query<DbTaxNexus[]>(sql, params)) || [];
   }
 
   async findDefault(organizationId: string): Promise<TaxNexus | null> {
-    return await queryOne<TaxNexus>(
+    return await queryOne<DbTaxNexus>(
       `SELECT * FROM "taxNexus" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true LIMIT 1`,
       [organizationId],
     );
@@ -51,7 +51,7 @@ class TaxNexusRepo {
       ]);
     }
 
-    const result = await queryOne<TaxNexus>(
+    const result = await queryOne<DbTaxNexus>(
       `INSERT INTO "taxNexus" (
         "organizationId", "name", "country", "region", "regionCode", "city", "postalCode",
         "streetAddress", "taxId", "registrationNumber", "isDefault", "startDate", 
@@ -108,7 +108,7 @@ class TaxNexusRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxNexus>(
+    return await queryOne<DbTaxNexus>(
       `UPDATE "taxNexus" SET ${updateFields.join(', ')} WHERE "taxNexusId" = $${paramIndex} RETURNING *`,
       values,
     );

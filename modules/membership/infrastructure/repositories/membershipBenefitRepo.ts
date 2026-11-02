@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
-import { MembershipBenefit as DbMembershipBenefit } from '../../../../libs/db/types';
+import type { MembershipBenefit as DbMembershipBenefit } from '../../../../libs/db/types';
 import { MembershipBenefitAlreadyExistsError, FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 // Re-export DB type
@@ -12,8 +12,7 @@ export type MembershipBenefit = DbMembershipBenefit;
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 
 // Type aliases for benefit and value types (used in application logic)
-type BenefitType =
-  'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
+type BenefitType = 'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
 
 // Derived types for create/update operations
 type MembershipBenefitCreateParams = Omit<MembershipBenefit, 'membershipBenefitId' | 'createdAt' | 'updatedAt'>;
@@ -21,7 +20,7 @@ type MembershipBenefitUpdateParams = Partial<Omit<MembershipBenefit, 'membership
 
 class MembershipBenefitRepo {
   async findById(id: string): Promise<MembershipBenefit | null> {
-    return await queryOne<MembershipBenefit>(`SELECT * FROM "membershipBenefit" WHERE "membershipBenefitId" = $1`, [id]);
+    return await queryOne<DbMembershipBenefit>(`SELECT * FROM "membershipBenefit" WHERE "membershipBenefitId" = $1`, [id]);
   }
 
   async findByPlanId(planId: string, activeOnly = false): Promise<MembershipBenefit[]> {
@@ -41,21 +40,21 @@ class MembershipBenefitRepo {
   }
 
   async findByCode(code: string): Promise<MembershipBenefit | null> {
-    return await queryOne<MembershipBenefit>(`SELECT * FROM "membershipBenefit" WHERE "code" = $1`, [code]);
+    return await queryOne<DbMembershipBenefit>(`SELECT * FROM "membershipBenefit" WHERE "code" = $1`, [code]);
   }
 
   async findAll(activeOnly = false): Promise<MembershipBenefit[]> {
     let sql = `SELECT * FROM "membershipBenefit"`;
     if (activeOnly) sql += ` WHERE "isActive" = true`;
     sql += ` ORDER BY "priority" DESC, "name" ASC`;
-    return (await query<MembershipBenefit[]>(sql)) || [];
+    return (await query<DbMembershipBenefit[]>(sql)) || [];
   }
 
   async findByType(benefitType: BenefitType, activeOnly = true): Promise<MembershipBenefit[]> {
     let sql = `SELECT * FROM "membershipBenefit" WHERE "benefitType" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "priority" DESC`;
-    return (await query<MembershipBenefit[]>(sql, [benefitType])) || [];
+    return (await query<DbMembershipBenefit[]>(sql, [benefitType])) || [];
   }
 
   async create(params: MembershipBenefitCreateParams): Promise<MembershipBenefit> {
@@ -63,7 +62,7 @@ class MembershipBenefitRepo {
     const existing = await this.findByCode(params.code);
     if (existing) throw new MembershipBenefitAlreadyExistsError(params.code);
 
-    const result = await queryOne<MembershipBenefit>(
+    const result = await queryOne<DbMembershipBenefit>(
       `INSERT INTO "membershipBenefit" (
         "name", "code", "description", "shortDescription", "isActive", "priority", "benefitType",
         "valueType", "value", "icon", "rules", "createdBy", "createdAt", "updatedAt"
@@ -108,7 +107,7 @@ class MembershipBenefitRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<MembershipBenefit>(
+    return await queryOne<DbMembershipBenefit>(
       `UPDATE "membershipBenefit" SET ${updateFields.join(', ')} WHERE "membershipBenefitId" = $${paramIndex} RETURNING *`,
       values,
     );

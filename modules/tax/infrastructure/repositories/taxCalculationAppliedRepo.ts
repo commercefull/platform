@@ -19,12 +19,12 @@ type TaxCalculationAppliedUpdateParams = Partial<
 
 class TaxCalculationAppliedRepo {
   async findById(id: string): Promise<TaxCalculationApplied | null> {
-    return await queryOne<TaxCalculationApplied>(`SELECT * FROM "taxCalculationApplied" WHERE "taxCalculationAppliedId" = $1`, [id]);
+    return await queryOne<DbTaxCalculationApplied>(`SELECT * FROM "taxCalculationApplied" WHERE "taxCalculationAppliedId" = $1`, [id]);
   }
 
   async findByCalculation(calculationId: string): Promise<TaxCalculationApplied[]> {
     return (
-      (await query<TaxCalculationApplied[]>(
+      (await query<DbTaxCalculationApplied[]>(
         `SELECT * FROM "taxCalculationApplied" WHERE "calculationId" = $1 ORDER BY "jurisdictionLevel" ASC`,
         [calculationId],
       )) || []
@@ -33,7 +33,7 @@ class TaxCalculationAppliedRepo {
 
   async findByCalculationLine(calculationLineId: string): Promise<TaxCalculationApplied[]> {
     return (
-      (await query<TaxCalculationApplied[]>(
+      (await query<DbTaxCalculationApplied[]>(
         `SELECT * FROM "taxCalculationApplied" WHERE "calculationLineId" = $1 ORDER BY "jurisdictionLevel" ASC`,
         [calculationLineId],
       )) || []
@@ -42,7 +42,7 @@ class TaxCalculationAppliedRepo {
 
   async findByJurisdiction(calculationId: string, jurisdictionLevel: TaxJurisdictionLevel): Promise<TaxCalculationApplied[]> {
     return (
-      (await query<TaxCalculationApplied[]>(
+      (await query<DbTaxCalculationApplied[]>(
         `SELECT * FROM "taxCalculationApplied" WHERE "calculationId" = $1 AND "jurisdictionLevel" = $2`,
         [calculationId, jurisdictionLevel],
       )) || []
@@ -51,7 +51,7 @@ class TaxCalculationAppliedRepo {
 
   async create(params: TaxCalculationAppliedCreateParams): Promise<TaxCalculationApplied> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxCalculationApplied>(
+    const result = await queryOne<DbTaxCalculationApplied>(
       `INSERT INTO "taxCalculationApplied" (
         "calculationId", "calculationLineId", "taxRateId", "taxRateName", "taxZoneId", "taxZoneName",
         "taxCategoryId", "taxCategoryName", "jurisdictionLevel", "jurisdictionName", "rate",
@@ -97,7 +97,7 @@ class TaxCalculationAppliedRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxCalculationApplied>(
+    return await queryOne<DbTaxCalculationApplied>(
       `UPDATE "taxCalculationApplied" SET ${updateFields.join(', ')} WHERE "taxCalculationAppliedId" = $${paramIndex} RETURNING *`,
       values,
     );

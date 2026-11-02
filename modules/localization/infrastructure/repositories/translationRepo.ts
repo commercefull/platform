@@ -397,4 +397,3 @@ export async function bulkApproveTranslations(
 
   return (result as { rowCount?: number } | null)?.rowCount || 0;
 }
-

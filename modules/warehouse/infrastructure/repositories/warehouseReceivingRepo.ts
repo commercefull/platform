@@ -8,7 +8,6 @@ import { FailedToCreateWarehouseEntityError } from '../../domain/errors/Warehous
 import type { WarehouseReceiving as DbWarehouseReceiving } from '../../../../libs/db/types';
 import type { WarehouseReceiving, CreateReceivingInput } from '../../domain/repositories/WarehouseRepository';
 
-
 const optDate = (d: Date | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 
 function mapToReceiving(row: DbWarehouseReceiving): WarehouseReceiving {
@@ -105,11 +104,7 @@ async function updateStatus(id: string, status: string, receivedBy?: string): Pr
   return row ? mapToReceiving(row) : null;
 }
 
-async function updateItems(
-  id: string,
-  items: Record<string, unknown>[],
-  hasDiscrepancies: boolean,
-): Promise<WarehouseReceiving | null> {
+async function updateItems(id: string, items: Record<string, unknown>[], hasDiscrepancies: boolean): Promise<WarehouseReceiving | null> {
   const now = new Date();
   const row = await queryOne<DbWarehouseReceiving>(
     `UPDATE "warehouseReceiving" SET "items" = $1, "hasDiscrepancies" = $2, "updatedAt" = $3 WHERE "warehouseReceivingId" = $4 RETURNING *`,

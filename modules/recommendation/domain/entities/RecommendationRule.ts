@@ -36,5 +36,3 @@ export interface RecommendationRuleProps {
 
 export type RecommendationRuleCreateProps = Omit<RecommendationRuleProps, 'recommendationRuleId' | 'createdAt' | 'updatedAt'>;
 export type RecommendationRuleUpdateProps = Partial<Omit<RecommendationRuleCreateProps, 'organizationId'>>;
-
-

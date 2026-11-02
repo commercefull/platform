@@ -195,8 +195,59 @@ function extractSql(src: string): { sql: string; index: number }[] {
   return stmts;
 }
 
+// ---------- full-row typing check ----------
+// SELECT * / RETURNING * results must be typed with generated Db* row types
+// (or Pick<Omit<DbX>, *Row projection contracts), never domain/hand-rolled types.
+
+const QUERY_HELPERS = '(?:query|queryOne|queryOneOrThrow|txQuery|txQueryOne)';
+const ROW_GENERIC_OK =
+  /^(Db\w*|Pick<Db|Omit<Db|Partial<Db|\w*Row(?:\[\])?$|\w*Db(?:\[\])?$|Record|unknown|\{|Array<\s*(\{|Db|Record|unknown)|void\b|any\b|T\b|U\b)/;
+
+function resolveSqlVar(src: string, varName: string, before: number): string | null {
+  // Find the last `let|const <name> = <expr>;` assignment before the call and
+  // concatenate every template literal inside the expression (covers ternaries),
+  // plus `<name> += `...`` appends between assignment and call.
+  const assignRe = new RegExp(`(?:let|const)\\s+${varName}\\s*=\\s*([^;]+);`, 'g');
+  let base: { expr: string; index: number } | null = null;
+  for (const m of src.matchAll(assignRe)) {
+    if (m.index < before) base = { expr: m[1], index: m.index };
+  }
+  if (!base) return null;
+  const literals = [...base.expr.matchAll(/`([^`]*)`/g)].map(l => l[1]);
+  if (literals.length === 0) return null;
+  let combined = literals.join('\n');
+  const appendRe = new RegExp(`${varName}\\s*\\+=\\s*\`([^\`]*)\``, 'g');
+  for (const m of src.matchAll(appendRe)) {
+    if (m.index > base.index && m.index < before) combined += '\n' + m[1];
+  }
+  return combined;
+}
+
+function extractFullRowFindings(src: string): { generic: string; index: number }[] {
+  const findings: { generic: string; index: number }[] = [];
+  const callRe = new RegExp(
+    `(?<![.\\w$])${QUERY_HELPERS}\\s*(?:<([^;()]*(?:<[^<>]*>)?[^;()]*)>)?\\s*\\(\\s*(\`([^\`]*)\`|([A-Za-z_$][\\w$]*))`,
+    'g',
+  );
+  for (const m of src.matchAll(callRe)) {
+    const generic = (m[1] ?? '').trim();
+    let sql: string | undefined = m[3];
+    const sqlVar = m[4];
+    if (sql === undefined && sqlVar && /sql$/i.test(sqlVar)) {
+      sql = resolveSqlVar(src, sqlVar, m.index) ?? undefined;
+    }
+    if (!sql || /\$\{/.test(sql)) continue;
+    if (!/\b(SELECT\s+\*|RETURNING\s+\*)/i.test(sql)) continue;
+    if (!generic || !ROW_GENERIC_OK.test(generic)) {
+      findings.push({ generic: generic || '(untyped)', index: m.index });
+    }
+  }
+  return findings;
+}
+
 const tableCols = loadTableColumns();
 const findings: Finding[] = [];
+const rowFindings: { file: string; line: number; generic: string }[] = [];
 
 for (const dir of SCAN_DIRS) {
   const abs = path.join(ROOT, dir);
@@ -213,6 +264,13 @@ for (const dir of SCAN_DIRS) {
         });
       }
     }
+    for (const f of extractFullRowFindings(src)) {
+      rowFindings.push({
+        file: path.relative(ROOT, file),
+        line: src.slice(0, f.index).split('\n').length,
+        generic: f.generic,
+      });
+    }
   }
 }
 
@@ -225,10 +283,22 @@ const unique = findings.filter(f => {
   return true;
 });
 
+let failed = false;
 if (unique.length) {
   console.error(`✗ check-sql-schema: ${unique.length} queries reference columns missing from libs/db/types.ts\n`);
   for (const f of unique) console.error(`  ${f.file}:${f.line}  [${f.table}] ${f.columns.join(', ')}`);
   console.error('\nFix the query or run `yarn db:types` if types are stale.');
-  process.exit(1);
+  failed = true;
 }
+if (rowFindings.length) {
+  console.error(
+    `\n✗ check-sql-schema: ${rowFindings.length} full-row queries (SELECT */RETURNING *) are not typed with generated Db* row types\n`,
+  );
+  for (const f of rowFindings) console.error(`  ${f.file}:${f.line}  query<${f.generic}>`);
+  console.error(
+    '\nUse `Db{Table}` from libs/db/types for SELECT */RETURNING *; projections use `*Row` or `Pick<Db*, ...>` types. Map rows to domain types before returning.',
+  );
+  failed = true;
+}
+if (failed) process.exit(1);
 console.log(`✓ check-sql-schema: all static SQL columns match generated types`);

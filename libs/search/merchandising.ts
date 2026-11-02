@@ -8,6 +8,10 @@
 import { query } from '../db';
 import { logger } from '../logger';
 import type { MerchandisingContext, ManualOrderingContext, PinnedProduct } from './types';
+import type {
+  AssortmentCategoryManualOrder as DbAssortmentCategoryManualOrder,
+  AssortmentMerchandisingRule as DbAssortmentMerchandisingRule,
+} from '../db/types';
 
 // ============================================================================
 // Types
@@ -16,6 +20,7 @@ import type { MerchandisingContext, ManualOrderingContext, PinnedProduct } from 
 export interface MerchandisingRule {
   assortmentMerchandisingRuleId: string;
   ruleType: 'boost' | 'bury' | 'pin';
+
   productId: string;
   position?: number;
   searchTerm?: string;
@@ -31,6 +36,16 @@ export interface CategoryManualOrder {
   productId: string;
   position: number;
   isActive: boolean;
+}
+
+function rowToRule(row: DbAssortmentMerchandisingRule): MerchandisingRule {
+  return {
+    ...row,
+    ruleType: row.ruleType as MerchandisingRule['ruleType'],
+    position: row.position ?? undefined,
+    searchTerm: row.searchTerm ?? undefined,
+    categoryId: row.categoryId ?? undefined,
+  };
 }
 
 // ============================================================================
@@ -57,7 +72,7 @@ export async function getMerchandisingRules(searchTerm?: string, categoryId?: st
       paramIndex++;
     }
 
-    const results = await query<MerchandisingRule[]>(
+    const results = await query<DbAssortmentMerchandisingRule[]>(
       `SELECT * FROM "assortmentMerchandisingRule" WHERE ${conditions.join(' AND ')} ORDER BY "position" ASC`,
       params,
     );
@@ -101,7 +116,7 @@ export async function getMerchandisingRules(searchTerm?: string, categoryId?: st
  */
 export async function getCategoryManualOrder(categoryId: string): Promise<ManualOrderingContext | undefined> {
   try {
-    const results = await query<CategoryManualOrder[]>(
+    const results = await query<DbAssortmentCategoryManualOrder[]>(
       `SELECT * FROM "assortmentCategoryManualOrder" WHERE "categoryId" = $1 AND "isActive" = true ORDER BY "position" ASC`,
       [categoryId],
     );
@@ -125,14 +140,14 @@ export async function getCategoryManualOrder(categoryId: string): Promise<Manual
 export async function createMerchandisingRule(
   rule: Omit<MerchandisingRule, 'assortmentMerchandisingRuleId' | 'createdAt' | 'updatedAt'>,
 ): Promise<MerchandisingRule> {
-  const results = await query<MerchandisingRule[]>(
+  const results = await query<DbAssortmentMerchandisingRule[]>(
     `INSERT INTO "assortmentMerchandisingRule" ("ruleType", "productId", "position", "searchTerm", "categoryId", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
      RETURNING *`,
     [rule.ruleType, rule.productId, rule.position ?? null, rule.searchTerm ?? null, rule.categoryId ?? null, rule.isActive ?? true],
   );
 
-  return results![0];
+  return rowToRule(results![0]);
 }
 
 export async function updateMerchandisingRule(
@@ -170,12 +185,12 @@ export async function updateMerchandisingRule(
 
   setClauses.push(`"updatedAt" = NOW()`);
 
-  const results = await query<MerchandisingRule[]>(
+  const results = await query<DbAssortmentMerchandisingRule[]>(
     `UPDATE "assortmentMerchandisingRule" SET ${setClauses.join(', ')} WHERE "assortmentMerchandisingRuleId" = $1 RETURNING *`,
     params,
   );
 
-  return results?.[0] ?? null;
+  return results?.[0] ? rowToRule(results[0]) : null;
 }
 
 export async function deleteMerchandisingRule(assortmentMerchandisingRuleId: string): Promise<boolean> {
@@ -206,12 +221,12 @@ export async function listMerchandisingRules(filters?: {
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-  const results = await query<MerchandisingRule[]>(
+  const results = await query<DbAssortmentMerchandisingRule[]>(
     `SELECT * FROM "assortmentMerchandisingRule" ${whereClause} ORDER BY "createdAt" DESC`,
     params,
   );
 
-  return results || [];
+  return (results || []).map(rowToRule);
 }
 
 // ============================================================================
@@ -233,7 +248,7 @@ export async function setCategoryManualOrder(categoryId: string, productIds: str
 }
 
 export async function getCategoryManualOrderList(categoryId: string): Promise<CategoryManualOrder[]> {
-  const results = await query<CategoryManualOrder[]>(
+  const results = await query<DbAssortmentCategoryManualOrder[]>(
     `SELECT * FROM "assortmentCategoryManualOrder" WHERE "categoryId" = $1 ORDER BY "position" ASC`,
     [categoryId],
   );

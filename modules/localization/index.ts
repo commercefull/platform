@@ -13,4 +13,3 @@ export { localizationMerchantRouter } from './interface/routers/localizationBusi
 export { localizationTypeDefs } from './interface/graphql/typeDefs';
 export { localizationResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

@@ -1,19 +1,23 @@
 import { query, queryOne } from '../../../../libs/db';
+import type { NotificationBatch as DbNotificationBatch } from '../../../../libs/db/types';
+import type { NotificationBatch } from '../../domain/repositories/NotificationBatchRepository';
 
-interface NotificationBatch {
-  notificationBatchId: string;
-  name: string;
-  type: string;
-  channel: string;
-  status: string;
-  targetCount: number;
-  sentCount: number;
-  failedCount: number;
-  scheduledAt?: Date;
-  startedAt?: Date;
-  completedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+function rowToBatch(row: DbNotificationBatch): NotificationBatch {
+  return {
+    notificationBatchId: row.notificationBatchId,
+    name: row.name,
+    type: row.type,
+    channel: row.channel,
+    status: row.status,
+    targetCount: row.targetCount ?? 0,
+    sentCount: row.sentCount ?? 0,
+    failedCount: row.failedCount ?? 0,
+    scheduledAt: row.scheduledAt ?? undefined,
+    startedAt: row.startedAt ?? undefined,
+    completedAt: row.completedAt ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
 async function create(
@@ -43,15 +47,18 @@ async function create(
             params.type === 'abandoned_cart'
           ? 'accountAlert'
           : params.type;
-  return queryOne<NotificationBatch>(
+  return queryOne<DbNotificationBatch>(
     `INSERT INTO "notificationBatch" (name, type, channel, status, "targetCount", "sentCount", "failedCount", "scheduledAt", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, 'draft', $4, 0, 0, $5, $6, $7) RETURNING *`,
     [params.name, mappedType, mappedChannel, params.targetCount, params.scheduledAt || null, now, now],
-  );
+  ).then(row => (row ? rowToBatch(row) : null));
 }
 
 async function findById(notificationBatchId: string): Promise<NotificationBatch | null> {
-  return queryOne<NotificationBatch>(`SELECT * FROM "notificationBatch" WHERE "notificationBatchId" = $1`, [notificationBatchId]);
+  const row = await queryOne<DbNotificationBatch>(`SELECT * FROM "notificationBatch" WHERE "notificationBatchId" = $1`, [
+    notificationBatchId,
+  ]);
+  return row ? rowToBatch(row) : null;
 }
 
 async function updateProgress(notificationBatchId: string, sentCount: number, failedCount: number): Promise<void> {
@@ -72,10 +79,11 @@ async function complete(notificationBatchId: string): Promise<void> {
 }
 
 async function findAll(limit: number = 50, offset: number = 0): Promise<NotificationBatch[]> {
-  return (
-    (await query<NotificationBatch[]>(`SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset])) ||
-    []
-  );
+  const rows = await query<DbNotificationBatch[]>(`SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [
+    limit,
+    offset,
+  ]);
+  return (rows || []).map(rowToBatch);
 }
 
 async function count(): Promise<number> {

@@ -2,6 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table, CurrencyExchangeRate } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
+import type { CurrencyExchangeRate as DbCurrencyExchangeRate } from '../../../../libs/db/types';
 
 export type CurrencyExchangeRateCreateParams = Omit<
   CurrencyExchangeRate,
@@ -17,7 +18,7 @@ class CurrencyExchangeRateRepo {
    * Find exchange rate by ID
    */
   async findById(currencyExchangeRateId: string): Promise<CurrencyExchangeRate | null> {
-    return await queryOne<CurrencyExchangeRate>(`SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1`, [
+    return await queryOne<DbCurrencyExchangeRate>(`SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1`, [
       currencyExchangeRateId,
     ]);
   }
@@ -28,7 +29,7 @@ class CurrencyExchangeRateRepo {
   async findCurrentRate(sourceCurrencyId: string, targetCurrencyId: string): Promise<CurrencyExchangeRate | null> {
     const now = unixTimestamp();
 
-    return await queryOne<CurrencyExchangeRate>(
+    return await queryOne<DbCurrencyExchangeRate>(
       `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "sourceCurrencyId" = $1 
        AND "targetCurrencyId" = $2 
@@ -54,7 +55,7 @@ class CurrencyExchangeRateRepo {
 
     sql += ` ORDER BY "targetCurrencyId" ASC, "effectiveFrom" DESC`;
 
-    const results = await query<CurrencyExchangeRate[]>(sql, params);
+    const results = await query<DbCurrencyExchangeRate[]>(sql, params);
     return results || [];
   }
 
@@ -71,7 +72,7 @@ class CurrencyExchangeRateRepo {
 
     sql += ` ORDER BY "sourceCurrencyId" ASC, "effectiveFrom" DESC`;
 
-    const results = await query<CurrencyExchangeRate[]>(sql, params);
+    const results = await query<DbCurrencyExchangeRate[]>(sql, params);
     return results || [];
   }
 
@@ -88,7 +89,7 @@ class CurrencyExchangeRateRepo {
 
     sql += ` ORDER BY "lastUpdated" DESC`;
 
-    const results = await query<CurrencyExchangeRate[]>(sql, params);
+    const results = await query<DbCurrencyExchangeRate[]>(sql, params);
     return results || [];
   }
 
@@ -98,7 +99,7 @@ class CurrencyExchangeRateRepo {
   async findExpired(): Promise<CurrencyExchangeRate[]> {
     const now = unixTimestamp();
 
-    const results = await query<CurrencyExchangeRate[]>(
+    const results = await query<DbCurrencyExchangeRate[]>(
       `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "effectiveTo" IS NOT NULL 
        AND "effectiveTo" < $1
@@ -113,7 +114,7 @@ class CurrencyExchangeRateRepo {
    * Find rates effective at specific date
    */
   async findEffectiveAt(effectiveDate: string): Promise<CurrencyExchangeRate[]> {
-    const results = await query<CurrencyExchangeRate[]>(
+    const results = await query<DbCurrencyExchangeRate[]>(
       `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "effectiveFrom" <= $1
        AND ("effectiveTo" IS NULL OR "effectiveTo" >= $1)
@@ -139,7 +140,7 @@ class CurrencyExchangeRateRepo {
     const rateNum = typeof params.rate === 'string' ? parseFloat(params.rate) : params.rate;
     const inverseRate = (1 / rateNum).toString();
 
-    const result = await queryOne<CurrencyExchangeRate>(
+    const result = await queryOne<DbCurrencyExchangeRate>(
       `INSERT INTO "${Table.CurrencyExchangeRate}" (
         "sourceCurrencyId", "targetCurrencyId", "rate", "inverseRate",
         "provider", "providerReference", "effectiveFrom", "effectiveTo",
@@ -206,7 +207,7 @@ class CurrencyExchangeRateRepo {
     values.push(now, now);
     values.push(currencyExchangeRateId);
 
-    const result = await queryOne<CurrencyExchangeRate>(
+    const result = await queryOne<DbCurrencyExchangeRate>(
       `UPDATE "${Table.CurrencyExchangeRate}" 
        SET ${updateFields.join(', ')}
        WHERE "currencyExchangeRateId" = $${paramIndex}

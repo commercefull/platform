@@ -3,8 +3,3 @@
  *
  * Domain interface for admin user and role management.
  */
-
-
-
-
-

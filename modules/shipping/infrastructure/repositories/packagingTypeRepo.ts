@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingPackagingType } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
+import type { ShippingPackagingType as DbShippingPackagingType } from '../../../../libs/db/types';
 
 export { ShippingPackagingType };
 
@@ -15,27 +16,27 @@ export type UpdateShippingPackagingTypeInput = Partial<Omit<ShippingPackagingTyp
 const TABLE = Table.ShippingPackagingType;
 
 async function findById(id: string): Promise<ShippingPackagingType | null> {
-  return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1`, [id]);
+  return queryOne<DbShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1`, [id]);
 }
 
 async function findByCode(code: string): Promise<ShippingPackagingType | null> {
-  return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
+  return queryOne<DbShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 async function findAll(activeOnly = false): Promise<ShippingPackagingType[]> {
   let sql = `SELECT * FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   sql += ` ORDER BY "volume" ASC`;
-  return (await query<ShippingPackagingType[]>(sql)) || [];
+  return (await query<DbShippingPackagingType[]>(sql)) || [];
 }
 
 async function findDefault(): Promise<ShippingPackagingType | null> {
-  return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+  return queryOne<DbShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
 async function findByMaxWeight(weight: number): Promise<ShippingPackagingType[]> {
   return (
-    (await query<ShippingPackagingType[]>(
+    (await query<DbShippingPackagingType[]>(
       `SELECT * FROM "${TABLE}" WHERE "isActive" = true AND ("maxWeight" IS NULL OR "maxWeight" >= $1) ORDER BY "volume" ASC`,
       [weight],
     )) || []
@@ -47,7 +48,7 @@ async function create(input: CreateShippingPackagingTypeInput): Promise<Shipping
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
   }
 
-  const result = await queryOne<ShippingPackagingType>(
+  const result = await queryOne<DbShippingPackagingType>(
     `INSERT INTO "${TABLE}" (
       "name", "code", "description", "isActive", "isDefault", "weight", "length", "width",
       "height", "volume", "maxWeight", "maxItems", "costCents", "currencyCode", "recyclable",
@@ -103,7 +104,7 @@ async function update(id: string, input: UpdateShippingPackagingTypeInput): Prom
   updateFields.push(`"updatedAt" = NOW()`);
   values.push(id);
 
-  return queryOne<ShippingPackagingType>(
+  return queryOne<DbShippingPackagingType>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingPackagingTypeId" = $${paramIndex} RETURNING *`,
     values,
   );

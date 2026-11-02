@@ -14,4 +14,3 @@ export { supportBusinessRouter } from './interface/routers/supportBusinessRouter
 export { supportTypeDefs } from './interface/graphql/typeDefs';
 export { supportResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

@@ -127,4 +127,3 @@ export async function createExchangeRateHistory(data: {
 export async function deleteCurrency(currencyId: string): Promise<void> {
   await query(`DELETE FROM "currency" WHERE "currencyId" = $1`, [currencyId]);
 }
-

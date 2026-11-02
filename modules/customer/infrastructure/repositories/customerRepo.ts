@@ -3,7 +3,7 @@ import { compareString, hashString } from '../../../../libs/hash';
 import crypto from 'crypto';
 
 // Import types from generated DB types - single source of truth
-import {
+import type {
   Customer as DbCustomer,
   CustomerAddress as DbCustomerAddress,
   CustomerGroup as DbCustomerGroup,
@@ -44,7 +44,7 @@ export interface CustomerAuthResult {
 export class CustomerRepo {
   // Customer methods
   async findAllCustomers(limit: number = 100, offset: number = 0): Promise<Customer[]> {
-    const customers = await query<Customer[]>('SELECT * FROM "customer" ORDER BY "lastName", "firstName" LIMIT $1 OFFSET $2', [
+    const customers = await query<DbCustomer[]>('SELECT * FROM "customer" ORDER BY "lastName", "firstName" LIMIT $1 OFFSET $2', [
       limit,
       offset,
     ]);
@@ -52,11 +52,11 @@ export class CustomerRepo {
   }
 
   async findCustomerById(customerId: string): Promise<Customer | null> {
-    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "customerId" = $1', [customerId]);
+    return await queryOne<DbCustomer>('SELECT * FROM "customer" WHERE "customerId" = $1', [customerId]);
   }
 
   async findCustomerByEmail(email: string): Promise<Customer | null> {
-    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "email" = $1', [email]);
+    return await queryOne<DbCustomer>('SELECT * FROM "customer" WHERE "email" = $1', [email]);
   }
 
   async authenticateCustomer(credentials: CustomerAuthCredentials): Promise<CustomerAuthResult | null> {
@@ -89,7 +89,7 @@ export class CustomerRepo {
   }
 
   async searchCustomers(searchTerm: string, limit: number = 100): Promise<Customer[]> {
-    const customers = await query<Customer[]>(
+    const customers = await query<DbCustomer[]>(
       `SELECT * FROM "customer" 
        WHERE "email" ILIKE $1 OR "firstName" ILIKE $1 OR "lastName" ILIKE $1 OR "phone" ILIKE $1
        ORDER BY "lastName", "firstName" LIMIT $2`,
@@ -121,7 +121,7 @@ export class CustomerRepo {
     values.push(new Date());
     values.push(customerId);
 
-    const result = await queryOne<Customer>(
+    const result = await queryOne<DbCustomer>(
       `UPDATE "customer" SET ${setClauses.join(', ')} WHERE "customerId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -132,7 +132,7 @@ export class CustomerRepo {
 
   async updateCustomerLoginTimestamp(customerId: string): Promise<Customer> {
     const now = new Date();
-    const result = await queryOne<Customer>(
+    const result = await queryOne<DbCustomer>(
       'UPDATE "customer" SET "lastLoginAt" = $1, "updatedAt" = $1 WHERE "customerId" = $2 RETURNING *',
       [now, customerId],
     );
@@ -215,7 +215,7 @@ export class CustomerRepo {
 
   // Customer Address methods
   async findCustomerAddresses(customerId: string): Promise<CustomerAddress[]> {
-    const addresses = await query<CustomerAddress[]>(
+    const addresses = await query<DbCustomerAddress[]>(
       'SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC',
       [customerId],
     );
@@ -223,11 +223,11 @@ export class CustomerRepo {
   }
 
   async findCustomerAddressById(addressId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
+    return await queryOne<DbCustomerAddress>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
   }
 
   async findDefaultCustomerAddress(customerId: string, addressType: CustomerAddress['addressType']): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
+    return await queryOne<DbCustomerAddress>(
       'SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "addressType" = $2 AND "isDefault" = true LIMIT 1',
       [customerId, addressType],
     );
@@ -243,7 +243,7 @@ export class CustomerRepo {
       );
     }
 
-    const result = await queryOne<CustomerAddress>(
+    const result = await queryOne<DbCustomerAddress>(
       `INSERT INTO "customerAddress" 
       ("customerId", "addressLine1", "addressLine2", "city", "state", "postalCode", "country", "addressType", "isDefault", "phone", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
@@ -296,7 +296,7 @@ export class CustomerRepo {
     values.push(new Date());
     values.push(addressId);
 
-    const result = await queryOne<CustomerAddress>(
+    const result = await queryOne<DbCustomerAddress>(
       `UPDATE "customerAddress" SET ${setClauses.join(', ')} WHERE "customerAddressId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -315,23 +315,23 @@ export class CustomerRepo {
 
   // Customer Group methods
   async findAllCustomerGroups(): Promise<CustomerGroup[]> {
-    const groups = await query<CustomerGroup[]>('SELECT * FROM "customerGroup" ORDER BY "name" ASC');
+    const groups = await query<DbCustomerGroup[]>('SELECT * FROM "customerGroup" ORDER BY "name" ASC');
     return groups || [];
   }
 
   async findCustomerGroupById(groupId: string): Promise<CustomerGroup | null> {
-    return await queryOne<CustomerGroup>('SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1', [groupId]);
+    return await queryOne<DbCustomerGroup>('SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1', [groupId]);
   }
 
   async findActiveCustomerGroups(): Promise<CustomerGroup[]> {
-    const groups = await query<CustomerGroup[]>('SELECT * FROM "customerGroup" WHERE "isActive" = true ORDER BY "name" ASC');
+    const groups = await query<DbCustomerGroup[]>('SELECT * FROM "customerGroup" WHERE "isActive" = true ORDER BY "name" ASC');
     return groups || [];
   }
 
   async createCustomerGroup(group: Omit<CustomerGroup, 'customerGroupId' | 'createdAt' | 'updatedAt'>): Promise<CustomerGroup> {
     const now = new Date();
     const code = group.name.toLowerCase().replace(/\s+/g, '-');
-    const result = await queryOne<CustomerGroup>(
+    const result = await queryOne<DbCustomerGroup>(
       `INSERT INTO "customerGroup" ("name", "description", "discountPercent", "isActive", "code", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [group.name, group.description, group.discountPercent, group.isActive, code, now, now],
@@ -362,7 +362,7 @@ export class CustomerRepo {
     values.push(new Date());
     values.push(groupId);
 
-    const result = await queryOne<CustomerGroup>(
+    const result = await queryOne<DbCustomerGroup>(
       `UPDATE "customerGroup" SET ${setClauses.join(', ')} WHERE "customerGroupId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -381,14 +381,14 @@ export class CustomerRepo {
 
   // Customer Group Membership methods
   async findCustomerGroupMemberships(customerId: string): Promise<CustomerGroupMembership[]> {
-    const memberships = await query<CustomerGroupMembership[]>('SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1', [
+    const memberships = await query<DbCustomerGroupMembership[]>('SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1', [
       customerId,
     ]);
     return memberships || [];
   }
 
   async findCustomersInGroup(groupId: string): Promise<Customer[]> {
-    const customers = await query<Customer[]>(
+    const customers = await query<DbCustomer[]>(
       `SELECT c.* FROM "customer" c
        JOIN "customerGroupMembership" m ON c."customerId" = m."customerId"
        WHERE m."customerGroupId" = $1
@@ -399,13 +399,13 @@ export class CustomerRepo {
   }
 
   async addCustomerToGroup(customerId: string, groupId: string): Promise<CustomerGroupMembership> {
-    const existing = await queryOne<CustomerGroupMembership>(
+    const existing = await queryOne<DbCustomerGroupMembership>(
       'SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2',
       [customerId, groupId],
     );
     if (existing) return existing;
 
-    const result = await queryOne<CustomerGroupMembership>(
+    const result = await queryOne<DbCustomerGroupMembership>(
       `INSERT INTO "customerGroupMembership" ("customerId", "customerGroupId", "createdAt") VALUES ($1, $2, $3) RETURNING *`,
       [customerId, groupId, new Date()],
     );
@@ -423,7 +423,7 @@ export class CustomerRepo {
 
   // Customer Wishlist methods
   async findCustomerWishlists(customerId: string): Promise<CustomerWishlist[]> {
-    const wishlists = await query<CustomerWishlist[]>(
+    const wishlists = await query<DbCustomerWishlist[]>(
       'SELECT * FROM "customerWishlist" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
       [customerId],
     );
@@ -431,14 +431,14 @@ export class CustomerRepo {
   }
 
   async findCustomerWishlistById(wishlistId: string): Promise<CustomerWishlist | null> {
-    return await queryOne<CustomerWishlist>('SELECT * FROM "customerWishlist" WHERE "customerWishlistId" = $1', [wishlistId]);
+    return await queryOne<DbCustomerWishlist>('SELECT * FROM "customerWishlist" WHERE "customerWishlistId" = $1', [wishlistId]);
   }
 
   async createCustomerWishlist(
     wishlist: Omit<CustomerWishlist, 'customerWishlistId' | 'createdAt' | 'updatedAt'>,
   ): Promise<CustomerWishlist> {
     const now = new Date();
-    const result = await queryOne<CustomerWishlist>(
+    const result = await queryOne<DbCustomerWishlist>(
       `INSERT INTO "customerWishlist" ("customerId", "wishlistName", "isPublic", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [wishlist.customerId, wishlist.wishlistName, wishlist.isPublic, now, now],
     );
@@ -468,7 +468,7 @@ export class CustomerRepo {
     values.push(new Date());
     values.push(wishlistId);
 
-    const result = await queryOne<CustomerWishlist>(
+    const result = await queryOne<DbCustomerWishlist>(
       `UPDATE "customerWishlist" SET ${setClauses.join(', ')} WHERE "customerWishlistId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -487,7 +487,7 @@ export class CustomerRepo {
 
   // Customer Wishlist Item methods
   async findWishlistItems(wishlistId: string): Promise<CustomerWishlistItem[]> {
-    const items = await query<CustomerWishlistItem[]>(
+    const items = await query<DbCustomerWishlistItem[]>(
       'SELECT * FROM "customerWishlistItem" WHERE "customerWishlistId" = $1 ORDER BY "createdAt" DESC',
       [wishlistId],
     );
@@ -495,18 +495,18 @@ export class CustomerRepo {
   }
 
   async findWishlistItemById(itemId: string): Promise<CustomerWishlistItem | null> {
-    return await queryOne<CustomerWishlistItem>('SELECT * FROM "customerWishlistItem" WHERE "customerWishlistItemId" = $1', [itemId]);
+    return await queryOne<DbCustomerWishlistItem>('SELECT * FROM "customerWishlistItem" WHERE "customerWishlistItemId" = $1', [itemId]);
   }
 
   async addItemToWishlist(item: Omit<CustomerWishlistItem, 'customerWishlistItemId'>): Promise<CustomerWishlistItem> {
-    const existing = await queryOne<CustomerWishlistItem>(
+    const existing = await queryOne<DbCustomerWishlistItem>(
       'SELECT * FROM "customerWishlistItem" WHERE "customerWishlistId" = $1 AND "productId" = $2 AND "productVariantId" IS NOT DISTINCT FROM $3',
       [item.customerWishlistId, item.productId, item.productVariantId],
     );
 
     if (existing) {
       if (item.note !== existing.note) {
-        const updated = await queryOne<CustomerWishlistItem>(
+        const updated = await queryOne<DbCustomerWishlistItem>(
           'UPDATE "customerWishlistItem" SET "note" = $1, "updatedAt" = $2 WHERE "customerWishlistItemId" = $3 RETURNING *',
           [item.note, new Date(), existing.customerWishlistItemId],
         );
@@ -515,7 +515,7 @@ export class CustomerRepo {
       return existing;
     }
 
-    const result = await queryOne<CustomerWishlistItem>(
+    const result = await queryOne<DbCustomerWishlistItem>(
       `INSERT INTO "customerWishlistItem" ("customerWishlistId", "productId", "productVariantId", "note", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [item.customerWishlistId, item.productId, item.productVariantId, item.note, new Date(), new Date()],
     );
@@ -532,7 +532,7 @@ export class CustomerRepo {
   }
 
   async updateWishlistItemNote(itemId: string, note: string): Promise<CustomerWishlistItem> {
-    const result = await queryOne<CustomerWishlistItem>(
+    const result = await queryOne<DbCustomerWishlistItem>(
       'UPDATE "customerWishlistItem" SET "note" = $1 WHERE "customerWishlistItemId" = $2 RETURNING *',
       [note, itemId],
     );

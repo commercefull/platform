@@ -5,11 +5,7 @@
  * Controllers import from this file — never from infrastructure/.
  */
 
-import {
-  getCustomerCohorts,
-  getSalesSummary,
-  getTopProducts,
-} from '../infrastructure/repositories/analyticsRepo';
+import { getCustomerCohorts, getSalesSummary, getTopProducts } from '../infrastructure/repositories/analyticsRepo';
 import {
   findCustomerPurchaseHistory,
   findRecentCustomerId,

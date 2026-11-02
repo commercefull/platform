@@ -6,6 +6,7 @@ import type {
   ProductRelationshipProps as ProductRelationshipProps,
 } from '../../domain/entities/ProductRelationship';
 import type { ProductRelationshipRepository } from '../../domain/repositories/ProductRelationshipRepository';
+import type { ProductRelated as DbProductRelated } from '../../../../libs/db/types';
 
 // Backward-compatible aliases — the canonical types live in
 // domain/entities/ProductRelationship.ts
@@ -19,7 +20,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
    * Find relationship by ID
    */
   async findById(productRelatedId: string): Promise<ProductRelationship | null> {
-    return await queryOne<ProductRelationship>(`SELECT * FROM "productRelated" WHERE "productRelatedId" = $1`, [productRelatedId]);
+    return await queryOne<DbProductRelated>(`SELECT * FROM "productRelated" WHERE "productRelatedId" = $1`, [productRelatedId]);
   }
 
   /**
@@ -36,7 +37,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
 
     sql += ` ORDER BY "position" ASC, "createdAt" ASC`;
 
-    const results = await query<ProductRelationship[]>(sql, params);
+    const results = await query<DbProductRelated[]>(sql, params);
     return results || [];
   }
 
@@ -61,7 +62,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
 
     sql += ` ORDER BY "position" ASC, "createdAt" ASC`;
 
-    const results = await query<ProductRelationship[]>(sql, params);
+    const results = await query<DbProductRelated[]>(sql, params);
     return results || [];
   }
 
@@ -69,7 +70,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
    * Find automated relationships
    */
   async findAutomatedByProductId(productId: string): Promise<ProductRelationship[]> {
-    const results = await query<ProductRelationship[]>(
+    const results = await query<DbProductRelated[]>(
       `SELECT * FROM "productRelated" 
        WHERE "productId" = $1 AND "isAutomated" = true 
        ORDER BY "position" ASC`,
@@ -82,7 +83,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
    * Find manual relationships
    */
   async findManualByProductId(productId: string): Promise<ProductRelationship[]> {
-    const results = await query<ProductRelationship[]>(
+    const results = await query<DbProductRelated[]>(
       `SELECT * FROM "productRelated" 
        WHERE "productId" = $1 AND "isAutomated" = false 
        ORDER BY "position" ASC`,
@@ -121,7 +122,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
       throw new ProductValidationError(`Relationship already exists between products for type '${params.type}'`);
     }
 
-    const result = await queryOne<ProductRelationship>(
+    const result = await queryOne<DbProductRelated>(
       `INSERT INTO "productRelated" (
         "productId", "relatedProductId", "type", "position", "isAutomated",
         "createdAt", "updatedAt"
@@ -178,7 +179,7 @@ class ProductRelationshipRepo implements ProductRelationshipRepository {
     values.push(unixTimestamp());
     values.push(productRelatedId);
 
-    const result = await queryOne<ProductRelationship>(
+    const result = await queryOne<DbProductRelated>(
       `UPDATE "productRelated" 
        SET ${updateFields.join(', ')}
        WHERE "productRelatedId" = $${paramIndex}

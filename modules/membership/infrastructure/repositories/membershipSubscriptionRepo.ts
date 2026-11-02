@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
-import { MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
+import type { MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
 import { FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 
 // Re-export DB type
@@ -40,18 +40,18 @@ class MembershipSubscriptionRepo {
   }
 
   async findById(id: string): Promise<MembershipSubscription | null> {
-    return await queryOne<MembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "membershipSubscriptionId" = $1`, [id]);
+    return await queryOne<DbMembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "membershipSubscriptionId" = $1`, [id]);
   }
 
   async findByMembershipNumber(membershipNumber: string): Promise<MembershipSubscription | null> {
-    return await queryOne<MembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "membershipNumber" = $1`, [
+    return await queryOne<DbMembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "membershipNumber" = $1`, [
       membershipNumber,
     ]);
   }
 
   async findByCustomerId(customerId: string): Promise<MembershipSubscription[]> {
     return (
-      (await query<MembershipSubscription[]>(`SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 ORDER BY "createdAt" DESC`, [
+      (await query<DbMembershipSubscription[]>(`SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 ORDER BY "createdAt" DESC`, [
         customerId,
       ])) || []
     );
@@ -59,7 +59,7 @@ class MembershipSubscriptionRepo {
 
   async findActiveByCustomerId(customerId: string): Promise<MembershipSubscription[]> {
     return (
-      (await query<MembershipSubscription[]>(
+      (await query<DbMembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active' ORDER BY "createdAt" DESC`,
         [customerId],
       )) || []
@@ -68,7 +68,7 @@ class MembershipSubscriptionRepo {
 
   async findByPlanId(planId: string, limit = 50, offset = 0): Promise<MembershipSubscription[]> {
     return (
-      (await query<MembershipSubscription[]>(
+      (await query<DbMembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "membershipPlanId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
         [planId, limit, offset],
       )) || []
@@ -77,7 +77,7 @@ class MembershipSubscriptionRepo {
 
   async findByStatus(status: SubscriptionStatus, limit = 100): Promise<MembershipSubscription[]> {
     return (
-      (await query<MembershipSubscription[]>(
+      (await query<DbMembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
         [status, limit],
       )) || []
@@ -88,7 +88,7 @@ class MembershipSubscriptionRepo {
     const now = unixTimestamp();
     const futureDate = now + days * 24 * 60 * 60;
     return (
-      (await query<MembershipSubscription[]>(
+      (await query<DbMembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "status" = 'active' AND "endDate" IS NOT NULL AND "endDate" BETWEEN $1 AND $2`,
         [now, futureDate.toString()],
       )) || []
@@ -99,7 +99,7 @@ class MembershipSubscriptionRepo {
     const now = unixTimestamp();
     const futureDate = now + days * 24 * 60 * 60;
     return (
-      (await query<MembershipSubscription[]>(
+      (await query<DbMembershipSubscription[]>(
         `SELECT * FROM "membershipSubscription" WHERE "status" = 'trial' AND "trialEndDate" BETWEEN $1 AND $2`,
         [now, futureDate.toString()],
       )) || []
@@ -110,7 +110,7 @@ class MembershipSubscriptionRepo {
     const now = unixTimestamp();
     const membershipNumber = await this.generateMembershipNumber();
 
-    const result = await queryOne<MembershipSubscription>(
+    const result = await queryOne<DbMembershipSubscription>(
       `INSERT INTO "membershipSubscription" (
         "customerId", "membershipPlanId", "status", "membershipNumber", "startDate", "endDate",
         "trialEndDate", "nextBillingDate", "lastBillingDate", "isAutoRenew", "priceOverrideCents",
@@ -158,7 +158,7 @@ class MembershipSubscriptionRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<MembershipSubscription>(
+    return await queryOne<DbMembershipSubscription>(
       `UPDATE "membershipSubscription" SET ${updateFields.join(', ')} WHERE "membershipSubscriptionId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -188,7 +188,7 @@ class MembershipSubscriptionRepo {
 
   async changePlan(id: string, newPlanId: string, notes?: string): Promise<MembershipSubscription | null> {
     const now = unixTimestamp();
-    const result = await queryOne<MembershipSubscription>(
+    const result = await queryOne<DbMembershipSubscription>(
       `UPDATE "membershipSubscription" SET 
         "membershipPlanId" = $1, "notes" = $2, "updatedAt" = $3 
        WHERE "membershipSubscriptionId" = $4 RETURNING *`,
@@ -224,7 +224,7 @@ class MembershipSubscriptionRepo {
       params,
     );
 
-    const rows = await query<MembershipSubscription[]>(
+    const rows = await query<DbMembershipSubscription[]>(
       `SELECT * FROM "membershipSubscription" WHERE ${whereClause} ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
       [...params, limit, offset],
     );

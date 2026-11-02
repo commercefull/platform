@@ -129,7 +129,6 @@ export function createPaymentMethodConfig(overrides: Partial<PaymentMethodConfig
   };
 }
 
-
 export function createPaymentBalance(overrides: Partial<PaymentBalance> = {}): PaymentBalance {
   return {
     paymentBalanceId: 'bal-1',

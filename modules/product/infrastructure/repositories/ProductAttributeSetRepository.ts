@@ -50,12 +50,12 @@ export class ProductAttributeSetRepository {
 
   async findById(id: string): Promise<ProductAttributeSet | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "productAttributeSetId" = $1`;
-    return await queryOne<ProductAttributeSet>(sql, [id]);
+    return await queryOne<DbProductAttributeSet>(sql, [id]);
   }
 
   async findByCode(code: string): Promise<ProductAttributeSet | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "code" = $1`;
-    return await queryOne<ProductAttributeSet>(sql, [code]);
+    return await queryOne<DbProductAttributeSet>(sql, [code]);
   }
 
   async findByProductType(productTypeId: string): Promise<ProductAttributeSet[]> {
@@ -64,17 +64,17 @@ export class ProductAttributeSetRepository {
       WHERE "productTypeId" = $1 AND "isActive" = true
       ORDER BY "name" ASC
     `;
-    return (await query<ProductAttributeSet[]>(sql, [productTypeId])) || [];
+    return (await query<DbProductAttributeSet[]>(sql, [productTypeId])) || [];
   }
 
   async findAll(): Promise<ProductAttributeSet[]> {
     const sql = `SELECT * FROM "${this.tableName}" ORDER BY "name" ASC`;
-    return (await query<ProductAttributeSet[]>(sql)) || [];
+    return (await query<DbProductAttributeSet[]>(sql)) || [];
   }
 
   async findActive(): Promise<ProductAttributeSet[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "isActive" = true ORDER BY "name" ASC`;
-    return (await query<ProductAttributeSet[]>(sql)) || [];
+    return (await query<DbProductAttributeSet[]>(sql)) || [];
   }
 
   /**
@@ -139,7 +139,7 @@ export class ProductAttributeSetRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttributeSet>(sql, [
+    const result = await queryOne<DbProductAttributeSet>(sql, [
       input.name,
       input.code,
       input.description || null,
@@ -189,7 +189,7 @@ export class ProductAttributeSetRepository {
       RETURNING *
     `;
 
-    return await queryOne<ProductAttributeSet>(sql, values);
+    return await queryOne<DbProductAttributeSet>(sql, values);
   }
 
   async delete(id: string): Promise<boolean> {

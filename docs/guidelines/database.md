@@ -141,7 +141,15 @@ const products = await query<DbProduct[]>(
 const product = await queryOne<DbProduct>(`SELECT * FROM "product" WHERE "productId" = $1 AND "deletedAt" IS NULL`, [productId]);
 ```
 
-`query<T>`/`queryOne<T>` do **not** transform rows — `T` must describe what `pg` actually returns. Use the generated types from `libs/db/types` (aliased `X as DbX`), then map to the domain contract before returning from a repository. Runtime facts to keep in mind when mapping:
+`query<T>`/`queryOne<T>` do **not** transform rows — `T` must describe what `pg` actually returns. Use the generated types from `libs/db/types` (aliased `X as DbX`), then map to the domain contract before returning from a repository.
+
+Typing rules — enforced by `yarn lint:sql` (`scripts/check-sql-schema.ts`):
+
+- **`SELECT *` and `RETURNING *` must be typed `Db{Table}`** — never domain types or hand-rolled interfaces. Map the row to the domain contract before returning.
+- **Projection queries** (explicit column lists, joins, `AS` aliases) use a `*Row` type, `Pick<DbX, 'a' | 'b'>`, or an inline `{ ... }` shape that names exactly the selected columns — including renamed/aliased columns.
+- **Never type a query with a domain entity** (`query<Product>`, `query<Order>`) — domain types are what the repository returns after mapping, not what `pg` returns.
+
+Runtime facts to keep in mind when mapping:
 
 - `timestamp`/`timestamptz` columns arrive as `Date` objects (only `bigint` is custom-parsed to `number` in `libs/db/pool.ts`).
 - Nullable columns arrive as `T | null`; domain optional fields use `undefined` — convert with `?? undefined`.

@@ -2,9 +2,10 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table, Locale } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { LocaleCodeAlreadyExistsError, FailedToCreateLocaleError } from '../../domain/errors/LocalizationErrors';
+import type { Locale as DbLocale } from '../../../../libs/db/types';
 
 // Use Locale type directly from libs/db/types.ts
-export type { };
+export type {};
 
 // Type alias for text direction (used in other parts of the codebase)
 type TextDirection = 'ltr' | 'rtl';
@@ -18,21 +19,21 @@ class LocaleRepo {
    * Find locale by ID
    */
   async findById(localeId: string): Promise<Locale | null> {
-    return await queryOne<Locale>(`SELECT * FROM "${Table.Locale}" WHERE "localeId" = $1`, [localeId]);
+    return await queryOne<DbLocale>(`SELECT * FROM "${Table.Locale}" WHERE "localeId" = $1`, [localeId]);
   }
 
   /**
    * Find locale by code
    */
   async findByCode(code: string): Promise<Locale | null> {
-    return await queryOne<Locale>(`SELECT * FROM "${Table.Locale}" WHERE "code" = $1`, [code]);
+    return await queryOne<DbLocale>(`SELECT * FROM "${Table.Locale}" WHERE "code" = $1`, [code]);
   }
 
   /**
    * Find default locale
    */
   async findDefault(): Promise<Locale | null> {
-    return await queryOne<Locale>(`SELECT * FROM "${Table.Locale}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+    return await queryOne<DbLocale>(`SELECT * FROM "${Table.Locale}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
   }
 
   /**
@@ -47,7 +48,7 @@ class LocaleRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Locale[]>(sql);
+    const results = await query<DbLocale[]>(sql);
     return results || [];
   }
 
@@ -64,7 +65,7 @@ class LocaleRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Locale[]>(sql, params);
+    const results = await query<DbLocale[]>(sql, params);
     return results || [];
   }
 
@@ -81,7 +82,7 @@ class LocaleRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Locale[]>(sql, params);
+    const results = await query<DbLocale[]>(sql, params);
     return results || [];
   }
 
@@ -98,7 +99,7 @@ class LocaleRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Locale[]>(sql, params);
+    const results = await query<DbLocale[]>(sql, params);
     return results || [];
   }
 
@@ -115,7 +116,7 @@ class LocaleRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Locale[]>(sql, params);
+    const results = await query<DbLocale[]>(sql, params);
     return results || [];
   }
 
@@ -132,7 +133,7 @@ class LocaleRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Locale[]>(sql, params);
+    const results = await query<DbLocale[]>(sql, params);
     return results || [];
   }
 
@@ -153,7 +154,7 @@ class LocaleRepo {
       await this.unsetAllDefaults();
     }
 
-    const result = await queryOne<Locale>(
+    const result = await queryOne<DbLocale>(
       `INSERT INTO "${Table.Locale}" (
         "code", "name", "language", "countryCode", "isActive", "isDefault",
         "textDirection", "dateFormat", "timeFormat", "timeZone", "defaultCurrencyId",
@@ -219,7 +220,7 @@ class LocaleRepo {
     values.push(unixTimestamp());
     values.push(localeId);
 
-    const result = await queryOne<Locale>(
+    const result = await queryOne<DbLocale>(
       `UPDATE "${Table.Locale}" 
        SET ${updateFields.join(', ')}
        WHERE "localeId" = $${paramIndex}

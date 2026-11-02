@@ -2,34 +2,31 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
-import { CustomerCurrencyPreference as DbCustomerCurrencyPreference } from '../../../../libs/db/types';
+import type { CustomerCurrencyPreference as DbCustomerCurrencyPreference } from '../../../../libs/db/types';
 import { CustomerValidationError, FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
 type CustomerCurrencyPreference = DbCustomerCurrencyPreference;
 
 // Derived types for create/update operations
-type CustomerCurrencyPreferenceCreateParams = Omit<
-  CustomerCurrencyPreference,
-  'customerCurrencyPreferenceId' | 'createdAt' | 'updatedAt'
->;
+type CustomerCurrencyPreferenceCreateParams = Omit<CustomerCurrencyPreference, 'customerCurrencyPreferenceId' | 'createdAt' | 'updatedAt'>;
 type CustomerCurrencyPreferenceUpdateParams = Partial<Pick<CustomerCurrencyPreference, 'currencyId' | 'automaticDetection'>>;
 
 class CustomerCurrencyPreferenceRepo {
   async findById(id: string): Promise<CustomerCurrencyPreference | null> {
-    return await queryOne<CustomerCurrencyPreference>(
+    return await queryOne<DbCustomerCurrencyPreference>(
       `SELECT * FROM "customerCurrencyPreference" WHERE "customerCurrencyPreferenceId" = $1`,
       [id],
     );
   }
 
   async findByCustomerId(customerId: string): Promise<CustomerCurrencyPreference | null> {
-    return await queryOne<CustomerCurrencyPreference>(`SELECT * FROM "customerCurrencyPreference" WHERE "customerId" = $1`, [customerId]);
+    return await queryOne<DbCustomerCurrencyPreference>(`SELECT * FROM "customerCurrencyPreference" WHERE "customerId" = $1`, [customerId]);
   }
 
   async findByCurrencyId(currencyId: string, limit = 100): Promise<CustomerCurrencyPreference[]> {
     return (
-      (await query<CustomerCurrencyPreference[]>(`SELECT * FROM "customerCurrencyPreference" WHERE "currencyId" = $1 LIMIT $2`, [
+      (await query<DbCustomerCurrencyPreference[]>(`SELECT * FROM "customerCurrencyPreference" WHERE "currencyId" = $1 LIMIT $2`, [
         currencyId,
         limit,
       ])) || []
@@ -38,7 +35,7 @@ class CustomerCurrencyPreferenceRepo {
 
   async findWithAutoDetection(): Promise<CustomerCurrencyPreference[]> {
     return (
-      (await query<CustomerCurrencyPreference[]>(`SELECT * FROM "customerCurrencyPreference" WHERE "automaticDetection" = true`)) || []
+      (await query<DbCustomerCurrencyPreference[]>(`SELECT * FROM "customerCurrencyPreference" WHERE "automaticDetection" = true`)) || []
     );
   }
 
@@ -51,7 +48,7 @@ class CustomerCurrencyPreferenceRepo {
       throw new CustomerValidationError('Currency preference already exists for this customer');
     }
 
-    const result = await queryOne<CustomerCurrencyPreference>(
+    const result = await queryOne<DbCustomerCurrencyPreference>(
       `INSERT INTO "customerCurrencyPreference" (
         "customerId", "currencyId", "automaticDetection", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -94,7 +91,7 @@ class CustomerCurrencyPreferenceRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<CustomerCurrencyPreference>(
+    return await queryOne<DbCustomerCurrencyPreference>(
       `UPDATE "customerCurrencyPreference" SET ${updateFields.join(', ')} WHERE "customerCurrencyPreferenceId" = $${paramIndex} RETURNING *`,
       values,
     );

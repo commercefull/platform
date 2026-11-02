@@ -207,11 +207,7 @@ async function findLevelContext(inventoryLevelId: string): Promise<Record<string
   );
 }
 
-async function findTransactionsByLevelId(
-  inventoryLevelId: string,
-  limit: number,
-  offset: number,
-): Promise<Record<string, string>[]> {
+async function findTransactionsByLevelId(inventoryLevelId: string, limit: number, offset: number): Promise<Record<string, string>[]> {
   const level = await findLevelContext(inventoryLevelId);
   if (!level) return [];
 

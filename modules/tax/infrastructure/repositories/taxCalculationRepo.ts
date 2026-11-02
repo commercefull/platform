@@ -18,24 +18,24 @@ type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId
 
 class TaxCalculationRepo {
   async findById(id: string): Promise<TaxCalculation | null> {
-    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "taxCalculationId" = $1`, [id]);
+    return await queryOne<DbTaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "taxCalculationId" = $1`, [id]);
   }
 
   async findByOrder(orderId: string): Promise<TaxCalculation | null> {
-    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [
+    return await queryOne<DbTaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [
       orderId,
     ]);
   }
 
   async findByBasket(basketId: string): Promise<TaxCalculation | null> {
-    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "basketId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [
+    return await queryOne<DbTaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "basketId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [
       basketId,
     ]);
   }
 
   async findBySource(sourceType: TaxCalculationSourceType, sourceId: string): Promise<TaxCalculation[]> {
     return (
-      (await query<TaxCalculation[]>(
+      (await query<DbTaxCalculation[]>(
         `SELECT * FROM "taxCalculation" WHERE "sourceType" = $1 AND "sourceId" = $2 ORDER BY "createdAt" DESC`,
         [sourceType, sourceId],
       )) || []
@@ -51,12 +51,12 @@ class TaxCalculationRepo {
     }
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1}`;
     params.push(limit);
-    return (await query<TaxCalculation[]>(sql, params)) || [];
+    return (await query<DbTaxCalculation[]>(sql, params)) || [];
   }
 
   async create(params: TaxCalculationCreateParams): Promise<TaxCalculation> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxCalculation>(
+    const result = await queryOne<DbTaxCalculation>(
       `INSERT INTO "taxCalculation" (
         "organizationId", "orderId", "invoiceId", "basketId", "customerId", "calculationMethod",
         "status", "sourceType", "sourceId", "taxAddress", "taxableAmountCents", "taxExemptAmountCents",
@@ -112,7 +112,7 @@ class TaxCalculationRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxCalculation>(
+    return await queryOne<DbTaxCalculation>(
       `UPDATE "taxCalculation" SET ${updateFields.join(', ')} WHERE "taxCalculationId" = $${paramIndex} RETURNING *`,
       values,
     );

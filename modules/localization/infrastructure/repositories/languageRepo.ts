@@ -10,12 +10,12 @@ import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 type LanguageRecord = DbLanguage;
 
 export async function listLanguages(): Promise<LanguageRecord[]> {
-  const rows = await query<LanguageRecord[]>(`SELECT * FROM "language" ORDER BY "name"`);
+  const rows = await query<DbLanguage[]>(`SELECT * FROM "language" ORDER BY "name"`);
   return rows || [];
 }
 
 export async function findLanguageById(languageId: string): Promise<LanguageRecord | null> {
-  return queryOne<LanguageRecord>(`SELECT * FROM "language" WHERE "languageId" = $1`, [languageId]);
+  return queryOne<DbLanguage>(`SELECT * FROM "language" WHERE "languageId" = $1`, [languageId]);
 }
 
 export async function createLanguage(params: {
@@ -75,4 +75,3 @@ export async function updateLanguage(
 export async function deleteLanguage(languageId: string): Promise<void> {
   await query(`DELETE FROM "language" WHERE "languageId" = $1`, [languageId]);
 }
-

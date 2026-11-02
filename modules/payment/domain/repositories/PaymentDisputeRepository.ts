@@ -13,6 +13,3 @@ export interface PaymentDispute {
   createdAt: Date;
   updatedAt: Date;
 }
-
-
-

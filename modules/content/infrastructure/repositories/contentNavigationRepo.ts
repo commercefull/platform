@@ -7,6 +7,7 @@ import { queryOne, query } from '../../../../libs/db';
 import { ContentNavigation, ContentNavigationItem } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { SlugAlreadyExistsError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
+import type { ContentNavigation as DbContentNavigation, ContentNavigationItem as DbContentNavigationItem } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -24,15 +25,15 @@ export type ContentNavigationItemUpdateParams = Partial<Omit<ContentNavigationIt
 export class ContentNavigationRepo {
   // Navigation methods
   async findNavigationById(id: string): Promise<ContentNavigation | null> {
-    return queryOne<ContentNavigation>('SELECT * FROM "contentNavigation" WHERE "contentNavigationId" = $1', [id]);
+    return queryOne<DbContentNavigation>('SELECT * FROM "contentNavigation" WHERE "contentNavigationId" = $1', [id]);
   }
 
   async findNavigationBySlug(slug: string): Promise<ContentNavigation | null> {
-    return queryOne<ContentNavigation>('SELECT * FROM "contentNavigation" WHERE "slug" = $1', [slug]);
+    return queryOne<DbContentNavigation>('SELECT * FROM "contentNavigation" WHERE "slug" = $1', [slug]);
   }
 
   async findNavigationByLocation(location: string): Promise<ContentNavigation | null> {
-    return queryOne<ContentNavigation>('SELECT * FROM "contentNavigation" WHERE "location" = $1 AND "isActive" = true', [location]);
+    return queryOne<DbContentNavigation>('SELECT * FROM "contentNavigation" WHERE "location" = $1 AND "isActive" = true', [location]);
   }
 
   async findAllNavigations(isActive?: boolean): Promise<ContentNavigation[]> {
@@ -46,7 +47,7 @@ export class ContentNavigationRepo {
 
     sql += ' ORDER BY "name" ASC';
 
-    const results = await query<ContentNavigation[]>(sql, params);
+    const results = await query<DbContentNavigation[]>(sql, params);
     return results || [];
   }
 
@@ -59,7 +60,7 @@ export class ContentNavigationRepo {
       throw new SlugAlreadyExistsError(params.slug);
     }
 
-    const result = await queryOne<ContentNavigation>(
+    const result = await queryOne<DbContentNavigation>(
       `INSERT INTO "contentNavigation" 
       ("name", "slug", "description", "location", "isActive", "createdAt", "updatedAt", "createdBy", "updatedBy") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
@@ -115,7 +116,7 @@ export class ContentNavigationRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<ContentNavigation>(
+    const result = await queryOne<DbContentNavigation>(
       `UPDATE "contentNavigation" SET ${updateFields.join(', ')} WHERE "contentNavigationId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -140,7 +141,7 @@ export class ContentNavigationRepo {
 
   // Navigation Item methods
   async findNavigationItemById(id: string): Promise<ContentNavigationItem | null> {
-    return queryOne<ContentNavigationItem>('SELECT * FROM "contentNavigationItem" WHERE "contentNavigationItemId" = $1', [id]);
+    return queryOne<DbContentNavigationItem>('SELECT * FROM "contentNavigationItem" WHERE "contentNavigationItemId" = $1', [id]);
   }
 
   async findNavigationItems(navigationId: string, parentId?: string): Promise<ContentNavigationItem[]> {
@@ -156,20 +157,20 @@ export class ContentNavigationRepo {
 
     sql += ' ORDER BY "sortOrder" ASC';
 
-    const results = await query<ContentNavigationItem[]>(sql, params);
+    const results = await query<DbContentNavigationItem[]>(sql, params);
     return results || [];
   }
 
   async findAllNavigationItems(navigationId: string): Promise<ContentNavigationItem[]> {
     const sql = 'SELECT * FROM "contentNavigationItem" WHERE "navigationId" = $1 ORDER BY "depth" ASC, "sortOrder" ASC';
-    const results = await query<ContentNavigationItem[]>(sql, [navigationId]);
+    const results = await query<DbContentNavigationItem[]>(sql, [navigationId]);
     return results || [];
   }
 
   async createNavigationItem(params: ContentNavigationItemCreateParams): Promise<ContentNavigationItem> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ContentNavigationItem>(
+    const result = await queryOne<DbContentNavigationItem>(
       `INSERT INTO "contentNavigationItem" 
       ("navigationId", "parentId", "title", "type", "url", "contentPageId", "targetId", 
        "targetSlug", "icon", "cssClasses", "openInNewTab", "isActive", "sortOrder", 
@@ -247,7 +248,7 @@ export class ContentNavigationRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<ContentNavigationItem>(
+    const result = await queryOne<DbContentNavigationItem>(
       `UPDATE "contentNavigationItem" SET ${updateFields.join(', ')} WHERE "contentNavigationItemId" = $${paramIndex} RETURNING *`,
       values,
     );

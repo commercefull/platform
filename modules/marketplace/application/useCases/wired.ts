@@ -15,4 +15,3 @@ export const manageCommissionRuleUseCase = new ManageCommissionRuleUseCase(commi
 export const managePayoutUseCase = new ManagePayoutUseCase(payoutRepo, vendorRepo);
 
 export const marketplaceController = new MarketplaceController(manageVendorUseCase, manageCommissionRuleUseCase, managePayoutUseCase);
-

@@ -18,7 +18,6 @@ export const loginTestUser = async (
   }
 };
 
-
 // Test data for order items (used in order creation)
 export const testOrderItemData = {
   productId: '00000000-0000-0000-0000-000000000001', // Existing product in seeded DB

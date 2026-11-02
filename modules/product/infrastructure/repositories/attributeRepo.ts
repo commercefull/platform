@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttribute } from '../../../../libs/db/types';
 import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductAttribute as DbProductAttribute } from '../../../../libs/db/types';
 
 // Use ProductAttribute type directly from libs/db/types.ts
 export type { ProductAttribute };
@@ -15,16 +16,16 @@ type AttributeUpdateProps = Partial<AttributeCreateProps>;
 
 export class AttributeRepo {
   async findOne(id: string): Promise<ProductAttribute | null> {
-    return queryOne<ProductAttribute>(`SELECT * FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`, [id]);
+    return queryOne<DbProductAttribute>(`SELECT * FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`, [id]);
   }
 
   async findAll(): Promise<ProductAttribute[]> {
-    return (await query<ProductAttribute[]>(`SELECT * FROM "${Table.ProductAttribute}" ORDER BY "name" ASC`)) || [];
+    return (await query<DbProductAttribute[]>(`SELECT * FROM "${Table.ProductAttribute}" ORDER BY "name" ASC`)) || [];
   }
 
   async findByGroup(groupId: string): Promise<ProductAttribute[]> {
     return (
-      (await query<ProductAttribute[]>(
+      (await query<DbProductAttribute[]>(
         `SELECT * FROM "${Table.ProductAttribute}" WHERE "groupId" = $1 ORDER BY "position" ASC, "name" ASC`,
         [groupId],
       )) || []
@@ -32,13 +33,13 @@ export class AttributeRepo {
   }
 
   async findByCode(code: string): Promise<ProductAttribute | null> {
-    return queryOne<ProductAttribute>(`SELECT * FROM "${Table.ProductAttribute}" WHERE "code" = $1`, [code]);
+    return queryOne<DbProductAttribute>(`SELECT * FROM "${Table.ProductAttribute}" WHERE "code" = $1`, [code]);
   }
 
   async create(attribute: AttributeCreateProps): Promise<ProductAttribute> {
     const now = new Date();
 
-    const row = await queryOne<ProductAttribute>(
+    const row = await queryOne<DbProductAttribute>(
       `INSERT INTO "${Table.ProductAttribute}" 
        ("name", "code", "description", "groupId", "type", "isRequired", "isFilterable", "isSearchable", "position", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
@@ -82,7 +83,7 @@ export class AttributeRepo {
 
     values.push(id);
 
-    const row = await queryOne<ProductAttribute>(
+    const row = await queryOne<DbProductAttribute>(
       `UPDATE "${Table.ProductAttribute}" 
        SET ${updates.join(', ')} 
        WHERE "productAttributeId" = $${paramIndex} 

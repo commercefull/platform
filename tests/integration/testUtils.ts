@@ -115,7 +115,6 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
   }
 };
 
-
 /**
  * Assert response status with detailed error logging for traceability.
  * Logs response status, body, and error details when the assertion fails.
@@ -133,5 +132,3 @@ export const expectStatus = (
   }
   expect(response.status).toBe(expected);
 };
-
-

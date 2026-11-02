@@ -251,4 +251,3 @@ export const loyaltyAnalytics = async (req: HttpRequest, res: HttpResponse): Pro
     stats,
   });
 };
-

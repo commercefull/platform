@@ -20,5 +20,3 @@ export interface OrderShippingRate {
 }
 
 export type OrderShippingRateCreateParams = Omit<OrderShippingRate, 'orderShippingRateId' | 'createdAt' | 'updatedAt'>;
-
-

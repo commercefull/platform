@@ -30,5 +30,3 @@ export function expectQueryBudget(res: AxiosResponse, budget: number, label: str
     );
   }
 }
-
-

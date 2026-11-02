@@ -3,6 +3,3 @@
  *
  * Domain interface for analytics data access.
  */
-
-
-

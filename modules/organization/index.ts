@@ -13,4 +13,3 @@ export { organizationBusinessRouter } from './interface/http/organizationBusines
 export { organizationTypeDefs } from './interface/graphql/typeDefs';
 export { organizationResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

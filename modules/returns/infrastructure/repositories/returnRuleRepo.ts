@@ -34,7 +34,7 @@ function mapToEntity(row: ReturnRuleRow): ReturnRule {
 }
 
 async function findActiveRules(): Promise<ReturnRule[]> {
-  const rows = await query<ReturnRuleRow[]>(`SELECT * FROM "returnRule" WHERE "isActive" = true ORDER BY "priority" DESC`);
+  const rows = await query<DbReturnRule[]>(`SELECT * FROM "returnRule" WHERE "isActive" = true ORDER BY "priority" DESC`);
   return (rows || []).map(mapToEntity);
 }
 
@@ -70,14 +70,14 @@ async function findByProduct(productId: string, activeOnly = true): Promise<Retu
 }
 
 async function findById(returnRuleId: string): Promise<ReturnRule | null> {
-  const row = await queryOne<ReturnRuleRow>(`SELECT * FROM "returnRule" WHERE "returnRuleId" = $1`, [returnRuleId]);
+  const row = await queryOne<DbReturnRule>(`SELECT * FROM "returnRule" WHERE "returnRuleId" = $1`, [returnRuleId]);
   return row ? mapToEntity(row) : null;
 }
 
 type CreateReturnRuleInput = Omit<ReturnRuleProps, 'returnRuleId'>;
 
 async function create(input: CreateReturnRuleInput): Promise<ReturnRule> {
-  const row = await queryOne<ReturnRuleRow>(
+  const row = await queryOne<DbReturnRule>(
     `INSERT INTO "returnRule" (
       "name", "description", "scope", "categoryId", "productId",
       "returnWindowDays", "restockingFeePercent", "restockingFeeFlatCents", "returnShippingCostCents",

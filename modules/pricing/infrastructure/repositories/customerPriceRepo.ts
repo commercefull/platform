@@ -1,25 +1,96 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
-import { CustomerPrice, CustomerPriceList } from '../../domain/pricingRule';
+import { CustomerPrice, CustomerPriceList, PricingAdjustmentType, PricingRuleStatus } from '../../domain/pricingRule';
 import { FailedToCreatePricingError, PriceListNotFoundError, PriceNotFoundError } from '../../domain/errors/PricingErrors';
+import type {
+  CustomerPriceList as DbCustomerPriceList,
+  CustomerPrice as DbCustomerPrice,
+  PricingPriceList as DbPricingPriceList,
+} from '../../../../libs/db/types';
 
 /**
  * Customer Price Repository
  *
  * Uses camelCase for table and column names as per platform convention.
- * Tables: priceList, customerPriceList, customerPrice (from db/types.ts)
+ * CustomerPriceList is an aggregate: pricingPriceList row + customerPriceList link rows.
  */
+function rowToCustomerPrice(row: DbCustomerPrice): CustomerPrice {
+  return {
+    id: row.customerPriceId,
+    priceListId: row.priceListId,
+    productId: row.productId,
+    variantId: row.productVariantId ?? undefined,
+    adjustmentType: row.adjustmentType as PricingAdjustmentType,
+    adjustmentValue: Number(row.adjustmentValue),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function rowToPriceList(row: DbPricingPriceList, links: DbCustomerPriceList[]): CustomerPriceList {
+  const now = new Date();
+  const status = !row.isActive
+    ? PricingRuleStatus.INACTIVE
+    : row.startDate && row.startDate > now
+      ? PricingRuleStatus.SCHEDULED
+      : row.endDate && row.endDate < now
+        ? PricingRuleStatus.EXPIRED
+        : PricingRuleStatus.ACTIVE;
+  return {
+    id: row.priceListId,
+    priceListId: row.priceListId,
+    name: row.name,
+    description: row.description ?? undefined,
+    customerIds: links.map(l => l.customerId).filter((v): v is string => v !== null),
+    customerGroupIds: links.map(l => l.customerGroupId).filter((v): v is string => v !== null),
+    priority: row.priority ?? 0,
+    startDate: row.startDate ?? undefined,
+    endDate: row.endDate ?? undefined,
+    status,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    organizationId: row.organizationId ?? undefined,
+  };
+}
+
 class CustomerPriceRepo {
   private readonly priceListTable = Table.PricingPriceList;
   private readonly customerPriceListTable = Table.CustomerPriceList;
   private readonly customerPriceTable = Table.CustomerPrice;
 
+  private async findPriceListLinks(priceListIds: string[]): Promise<DbCustomerPriceList[]> {
+    if (priceListIds.length === 0) return [];
+    return (
+      (await query<DbCustomerPriceList[]>(`SELECT * FROM "${this.customerPriceListTable}" WHERE "priceListId" = ANY($1)`, [
+        priceListIds,
+      ])) || []
+    );
+  }
+
+  private async insertPriceListLinks(priceListId: string, customerIds?: string[], customerGroupIds?: string[]): Promise<void> {
+    const now = new Date();
+    for (const customerId of customerIds ?? []) {
+      await query(
+        `INSERT INTO "${this.customerPriceListTable}" ("priceListId", "customerId", "createdAt", "updatedAt") VALUES ($1, $2, $3, $3)`,
+        [priceListId, customerId, now],
+      );
+    }
+    for (const customerGroupId of customerGroupIds ?? []) {
+      await query(
+        `INSERT INTO "${this.customerPriceListTable}" ("priceListId", "customerGroupId", "createdAt", "updatedAt") VALUES ($1, $2, $3, $3)`,
+        [priceListId, customerGroupId, now],
+      );
+    }
+  }
+
   /**
    * Find a price list by ID
    */
   async findPriceListById(id: string): Promise<CustomerPriceList | null> {
-    const sql = `SELECT * FROM "${this.priceListTable}" WHERE "priceListId" = $1`;
-    return await queryOne<CustomerPriceList>(sql, [id]);
+    const row = await queryOne<DbPricingPriceList>(`SELECT * FROM "${this.priceListTable}" WHERE "priceListId" = $1`, [id]);
+    if (!row) return null;
+    const links = await this.findPriceListLinks([id]);
+    return rowToPriceList(row, links);
   }
 
   /**
@@ -28,28 +99,34 @@ class CustomerPriceRepo {
   async findPriceListsForCustomer(customerId: string, customerGroupIds?: string[]): Promise<CustomerPriceList[]> {
     const now = new Date();
 
-    let conditions = [`"isActive" = true`, `("startDate" IS NULL OR "startDate" <= $1)`, `("endDate" IS NULL OR "endDate" >= $1)`];
+    const conditions = [
+      `pl."isActive" = true`,
+      `(pl."startDate" IS NULL OR pl."startDate" <= $1)`,
+      `(pl."endDate" IS NULL OR pl."endDate" >= $1)`,
+    ];
+    const params: unknown[] = [now, customerId];
+    let linkCondition = `cpl."customerId" = $2`;
 
-    const params: unknown[] = [now];
-
-    // Customer ID condition
-    params.push(customerId);
-    conditions.push(`"customerIds" @> ARRAY[$${params.length}]::uuid[]`);
-
-    // Customer Group IDs condition (if provided)
     if (customerGroupIds && customerGroupIds.length > 0) {
-      const placeholders = customerGroupIds.map((_, i) => `$${params.length + i + 1}`).join(', ');
-      params.push(...customerGroupIds);
-      conditions.push(`"customerGroupIds" && ARRAY[${placeholders}]::uuid[]`);
+      params.push(customerGroupIds);
+      linkCondition += ` OR cpl."customerGroupId" = ANY($3)`;
     }
 
     const sql = `
-      SELECT * FROM "${this.customerPriceListTable}"
-      WHERE ${conditions.join(' AND ')}
-      ORDER BY "priority" DESC, "createdAt" ASC
+      SELECT DISTINCT pl.* FROM "${this.priceListTable}" pl
+      JOIN "${this.customerPriceListTable}" cpl ON cpl."priceListId" = pl."priceListId"
+      WHERE ${conditions.join(' AND ')} AND (${linkCondition})
+      ORDER BY pl."priority" DESC, pl."createdAt" ASC
     `;
 
-    return (await query<CustomerPriceList[]>(sql, params)) || [];
+    const rows = (await query<DbPricingPriceList[]>(sql, params)) || [];
+    const links = await this.findPriceListLinks(rows.map(r => r.priceListId));
+    return rows.map(row =>
+      rowToPriceList(
+        row,
+        links.filter(l => l.priceListId === row.priceListId),
+      ),
+    );
   }
 
   /**
@@ -60,20 +137,32 @@ class CustomerPriceRepo {
 
     const sql = `
       INSERT INTO "${this.priceListTable}" (
-        "name", "description", "priority", "isActive", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+        "name", "description", "priority", "isActive", "startDate", "endDate", "organizationId", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
 
-    const values = [priceList.name, priceList.description || null, priceList.priority || 0, true, now, now];
+    const values = [
+      priceList.name,
+      priceList.description || null,
+      priceList.priority || 0,
+      priceList.status ? priceList.status === PricingRuleStatus.ACTIVE : true,
+      priceList.startDate || null,
+      priceList.endDate || null,
+      priceList.organizationId || null,
+      now,
+      now,
+    ];
 
-    const result = await queryOne<CustomerPriceList>(sql, values);
+    const result = await queryOne<DbPricingPriceList>(sql, values);
 
     if (!result) {
       throw new FailedToCreatePricingError('Failed to create price list');
     }
 
-    return result;
+    await this.insertPriceListLinks(result.priceListId, priceList.customerIds, priceList.customerGroupIds);
+    const links = await this.findPriceListLinks([result.priceListId]);
+    return rowToPriceList(result, links);
   }
 
   /**
@@ -89,9 +178,23 @@ class CustomerPriceRepo {
     const values: unknown[] = [id, now];
     let paramIndex = 3;
 
+    const columnMap: Record<string, string> = {
+      name: 'name',
+      description: 'description',
+      priority: 'priority',
+      startDate: 'startDate',
+      endDate: 'endDate',
+      organizationId: 'organizationId',
+    };
+    if (priceList.status !== undefined) {
+      setStatements.push(`"isActive" = $${paramIndex}`);
+      values.push(priceList.status === PricingRuleStatus.ACTIVE);
+      paramIndex++;
+    }
+
     for (const [key, value] of Object.entries(priceList)) {
-      if (value === undefined) continue;
-      setStatements.push(`"${key}" = $${paramIndex}`);
+      if (value === undefined || !(key in columnMap)) continue;
+      setStatements.push(`"${columnMap[key]}" = $${paramIndex}`);
       values.push(value);
       paramIndex++;
     }
@@ -103,23 +206,28 @@ class CustomerPriceRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<CustomerPriceList>(sql, values);
+    const result = await queryOne<DbPricingPriceList>(sql, values);
 
     if (!result) {
       throw new PriceListNotFoundError(id);
     }
 
-    return result;
+    if (priceList.customerIds !== undefined || priceList.customerGroupIds !== undefined) {
+      await query(`DELETE FROM "${this.customerPriceListTable}" WHERE "priceListId" = $1`, [id]);
+      await this.insertPriceListLinks(id, priceList.customerIds, priceList.customerGroupIds);
+    }
+
+    const links = await this.findPriceListLinks([id]);
+    return rowToPriceList(result, links);
   }
 
   /**
    * Delete a price list
    */
   async deletePriceList(id: string): Promise<boolean> {
-    // First, delete all associated customer prices
     await query(`DELETE FROM "${this.customerPriceTable}" WHERE "priceListId" = $1`, [id]);
+    await query(`DELETE FROM "${this.customerPriceListTable}" WHERE "priceListId" = $1`, [id]);
 
-    // Then delete the price list
     const sql = `DELETE FROM "${this.priceListTable}" WHERE "priceListId" = $1`;
     const result = await query(sql, [id]);
 
@@ -131,7 +239,8 @@ class CustomerPriceRepo {
    */
   async findPriceById(id: string): Promise<CustomerPrice | null> {
     const sql = `SELECT * FROM "${this.customerPriceTable}" WHERE "customerPriceId" = $1`;
-    return await queryOne<CustomerPrice>(sql, [id]);
+    const row = await queryOne<DbCustomerPrice>(sql, [id]);
+    return row ? rowToCustomerPrice(row) : null;
   }
 
   /**
@@ -139,7 +248,8 @@ class CustomerPriceRepo {
    */
   async findPricesByPriceListId(priceListId: string): Promise<CustomerPrice[]> {
     const sql = `SELECT * FROM "${this.customerPriceTable}" WHERE "priceListId" = $1`;
-    return (await query<CustomerPrice[]>(sql, [priceListId])) || [];
+    const rows = (await query<DbCustomerPrice[]>(sql, [priceListId])) || [];
+    return rows.map(rowToCustomerPrice);
   }
 
   /**
@@ -165,7 +275,8 @@ class CustomerPriceRepo {
       WHERE ${conditions.join(' AND ')}
     `;
 
-    return (await query<CustomerPrice[]>(sql, params)) || [];
+    const rows = (await query<DbCustomerPrice[]>(sql, params)) || [];
+    return rows.map(rowToCustomerPrice);
   }
 
   /**
@@ -187,13 +298,13 @@ class CustomerPriceRepo {
       customerPrice.adjustmentValue,
     ];
 
-    const result = await queryOne<CustomerPrice>(sql, values);
+    const result = await queryOne<DbCustomerPrice>(sql, values);
 
     if (!result) {
       throw new FailedToCreatePricingError('Failed to create customer price');
     }
 
-    return result;
+    return rowToCustomerPrice(result);
   }
 
   /**
@@ -206,9 +317,17 @@ class CustomerPriceRepo {
     const values: unknown[] = [id, now];
     let paramIndex = 3;
 
+    const columnMap: Record<string, string> = {
+      priceListId: 'priceListId',
+      productId: 'productId',
+      variantId: 'productVariantId',
+      productVariantId: 'productVariantId',
+      adjustmentType: 'adjustmentType',
+      adjustmentValue: 'adjustmentValue',
+    };
     for (const [key, value] of Object.entries(customerPrice)) {
-      if (value === undefined) continue;
-      setStatements.push(`"${key}" = $${paramIndex}`);
+      if (value === undefined || !(key in columnMap)) continue;
+      setStatements.push(`"${columnMap[key]}" = $${paramIndex}`);
       values.push(value);
       paramIndex++;
     }
@@ -220,13 +339,13 @@ class CustomerPriceRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<CustomerPrice>(sql, values);
+    const result = await queryOne<DbCustomerPrice>(sql, values);
 
     if (!result) {
       throw new PriceNotFoundError(id);
     }
 
-    return result;
+    return rowToCustomerPrice(result);
   }
 
   /**

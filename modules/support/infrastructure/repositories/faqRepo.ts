@@ -444,4 +444,3 @@ export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean
     );
   }
 }
-

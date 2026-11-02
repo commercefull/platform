@@ -1,11 +1,7 @@
 import { StoreStoreFulfillmentAdapter } from './StoreStoreFulfillmentAdapter';
 import { Store } from '../../../store/domain/entities/Store';
 import type StoreRepoType from '../../../store/infrastructure/repositories/StoreRepo';
-import type {
-  getLocations,
-  getLocation,
-  findNearestLocations,
-} from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type { getLocations, getLocation, findNearestLocations } from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 type CreateStoreProps = Parameters<typeof Store.create>[0];
 type LocalDelivery = NonNullable<NonNullable<CreateStoreProps['settings']>['localDelivery']>;

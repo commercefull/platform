@@ -12,24 +12,27 @@ export type RuleAdjustmentUpdateParams = Partial<Omit<RuleAdjustment, 'ruleAdjus
 
 export class RuleAdjustmentRepo {
   async findById(id: string): Promise<RuleAdjustment | null> {
-    return await queryOne<RuleAdjustment>(`SELECT * FROM "pricingRuleAdjustment" WHERE "ruleAdjustmentId" = $1`, [id]);
+    return await queryOne<DbPricingRuleAdjustment>(`SELECT * FROM "pricingRuleAdjustment" WHERE "ruleAdjustmentId" = $1`, [id]);
   }
 
   async findByPricingRule(pricingRuleId: string): Promise<RuleAdjustment[]> {
     return (
-      (await query<RuleAdjustment[]>(`SELECT * FROM "pricingRuleAdjustment" WHERE "pricingRuleId" = $1 ORDER BY "createdAt" ASC`, [
+      (await query<DbPricingRuleAdjustment[]>(`SELECT * FROM "pricingRuleAdjustment" WHERE "pricingRuleId" = $1 ORDER BY "createdAt" ASC`, [
         pricingRuleId,
       ])) || []
     );
   }
 
   async findByType(type: RuleAdjustmentType): Promise<RuleAdjustment[]> {
-    return (await query<RuleAdjustment[]>(`SELECT * FROM "pricingRuleAdjustment" WHERE "type" = $1 ORDER BY "value" DESC`, [type])) || [];
+    return (
+      (await query<DbPricingRuleAdjustment[]>(`SELECT * FROM "pricingRuleAdjustment" WHERE "type" = $1 ORDER BY "value" DESC`, [type])) ||
+      []
+    );
   }
 
   async create(params: RuleAdjustmentCreateParams): Promise<RuleAdjustment> {
     const now = unixTimestamp();
-    const result = await queryOne<RuleAdjustment>(
+    const result = await queryOne<DbPricingRuleAdjustment>(
       `INSERT INTO "pricingRuleAdjustment" ("pricingRuleId", "type", "value", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.pricingRuleId, params.type, params.value, now, now],
@@ -55,7 +58,7 @@ export class RuleAdjustmentRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<RuleAdjustment>(
+    return await queryOne<DbPricingRuleAdjustment>(
       `UPDATE "pricingRuleAdjustment" SET ${updateFields.join(', ')} WHERE "ruleAdjustmentId" = $${paramIndex} RETURNING *`,
       values,
     );

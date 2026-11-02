@@ -14,4 +14,3 @@ export { checkoutCustomerRouter } from './interface/routers/checkoutRouter';
 export { checkoutTypeDefs } from './interface/graphql/typeDefs';
 export { checkoutResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

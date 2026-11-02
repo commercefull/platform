@@ -5,13 +5,7 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import {
-  cancelOrder,
-  createOrder,
-  getMyOrders,
-  getOrder,
-  getOrderByNumber,
-} from '../controllers/OrderCustomerController';
+import { cancelOrder, createOrder, getMyOrders, getOrder, getOrderByNumber } from '../controllers/OrderCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
 const router = createHttpRouter();

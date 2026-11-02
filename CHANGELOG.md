@@ -2,18 +2,16 @@
 
 ## [1.7.1](https://github.com/commercefull/platform/compare/v1.7.0...v1.7.1) (2026-11-02)
 
-
 ### Bug Fixes
 
-* **deps:** patch dependabot security vulnerabilities ([52ace8e](https://github.com/commercefull/platform/commit/52ace8ecac38118c4953f95012f26233225500de))
+- **deps:** patch dependabot security vulnerabilities ([52ace8e](https://github.com/commercefull/platform/commit/52ace8ecac38118c4953f95012f26233225500de))
 
 ## [1.7.0](https://github.com/commercefull/platform/compare/v1.6.0...v1.7.0) (2026-11-01)
 
-
 ### Features
 
-* add country-neutral global commerce platform with market-driven expansion ([a26b759](https://github.com/commercefull/platform/commit/a26b759ea1a93194c4d8dcd6cfc1943fb03d980f))
-* add country-neutral global commerce platform with market-driven… ([fffa18f](https://github.com/commercefull/platform/commit/fffa18fd1ea33e15395c60019fc62a1502d8e0eb))
+- add country-neutral global commerce platform with market-driven expansion ([a26b759](https://github.com/commercefull/platform/commit/a26b759ea1a93194c4d8dcd6cfc1943fb03d980f))
+- add country-neutral global commerce platform with market-driven… ([fffa18f](https://github.com/commercefull/platform/commit/fffa18fd1ea33e15395c60019fc62a1502d8e0eb))
 
 ## [1.6.0](https://github.com/commercefull/platform/compare/v1.5.0...v1.6.0) (2026-10-05)
 

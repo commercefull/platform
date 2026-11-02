@@ -14,4 +14,3 @@ export { analyticsBusinessRouter } from './interface/routers/analyticsBusinessRo
 export { analyticsTypeDefs } from './interface/graphql/typeDefs';
 export { analyticsResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

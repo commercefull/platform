@@ -6,12 +6,10 @@
 
 import type { LocaleRecord as Locale, Country, Currency, Language } from '../entities/LocalizationModel';
 
-
 export type LocaleCreateParams = Omit<Locale, 'localeId' | 'createdAt' | 'updatedAt'>;
 export type LocaleUpdateParams = Partial<Omit<Locale, 'localeId' | 'code' | 'createdAt' | 'updatedAt'>>;
 export type CountryCreateParams = Omit<Country, 'countryId' | 'createdAt' | 'updatedAt'>;
 export type CountryUpdateParams = Partial<Omit<Country, 'countryId' | 'code' | 'createdAt' | 'updatedAt'>>;
-
 
 export interface LanguageRepositoryPort {
   listLanguages(): Promise<Language[]>;

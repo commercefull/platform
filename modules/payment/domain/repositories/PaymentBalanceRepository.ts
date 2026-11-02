@@ -6,6 +6,3 @@ export interface PaymentBalance {
   createdAt: Date;
   updatedAt: Date;
 }
-
-
-

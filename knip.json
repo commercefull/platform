@@ -1,9 +1,6 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "exclude": [
-    "nsExports",
-    "nsTypes"
-  ],
+  "exclude": ["nsExports", "nsTypes"],
   "entry": [
     "boot/**/*.ts",
     "modules/*/interface/routers/**/*.ts",
@@ -12,35 +9,12 @@
     "modules/*/infrastructure/repositories/*Repository.ts",
     "web/**/*.ts"
   ],
-  "project": [
-    "modules/**/*.ts",
-    "libs/**/*.ts",
-    "boot/**/*.ts",
-    "web/**/*.ts",
-    "tests/**/*.ts"
-  ],
-  "ignore": [
-    "typedoc.json"
-  ],
-  "ignoreDependencies": [
-    "ejs",
-    "@types/ejs",
-    "@types/nodemailer",
-    "@typescript/native"
-  ],
-  "ignoreBinaries": [
-    "pm2",
-    "audit",
-    "k6"
-  ],
+  "project": ["modules/**/*.ts", "libs/**/*.ts", "boot/**/*.ts", "web/**/*.ts", "tests/**/*.ts"],
+  "ignore": ["typedoc.json"],
+  "ignoreDependencies": ["ejs", "@types/ejs", "@types/nodemailer", "@typescript/native"],
+  "ignoreBinaries": ["pm2", "audit", "k6"],
   "ignoreIssues": {
-    "libs/db/types.ts": [
-      "exports",
-      "types",
-      "enumMembers"
-    ],
-    "infra/aws/**": [
-      "unlisted"
-    ]
+    "libs/db/types.ts": ["exports", "types", "enumMembers"],
+    "infra/aws/**": ["unlisted"]
   }
 }

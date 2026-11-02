@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingMethod } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
+import type { ShippingMethod as DbShippingMethod } from '../../../../libs/db/types';
 
 export { ShippingMethod };
 
@@ -15,18 +16,18 @@ export type UpdateShippingMethodInput = Partial<Omit<ShippingMethod, 'shippingMe
 const TABLE = Table.ShippingMethod;
 
 async function findById(id: string): Promise<ShippingMethod | null> {
-  return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "shippingMethodId" = $1`, [id]);
+  return queryOne<DbShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "shippingMethodId" = $1`, [id]);
 }
 
 async function findByCode(code: string): Promise<ShippingMethod | null> {
-  return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
+  return queryOne<DbShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 async function findByCarrier(carrierId: string, activeOnly = false): Promise<ShippingMethod[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`;
   if (activeOnly) sql += ` AND "isActive" = true`;
   sql += ` ORDER BY "priority" ASC`;
-  return (await query<ShippingMethod[]>(sql, [carrierId])) || [];
+  return (await query<DbShippingMethod[]>(sql, [carrierId])) || [];
 }
 
 async function findAll(activeOnly = false, displayOnFrontend = false): Promise<ShippingMethod[]> {
@@ -34,11 +35,11 @@ async function findAll(activeOnly = false, displayOnFrontend = false): Promise<S
   if (activeOnly) sql += ` AND "isActive" = true`;
   if (displayOnFrontend) sql += ` AND "displayOnFrontend" = true`;
   sql += ` ORDER BY "priority" ASC, "name" ASC`;
-  return (await query<ShippingMethod[]>(sql)) || [];
+  return (await query<DbShippingMethod[]>(sql)) || [];
 }
 
 async function findDefault(): Promise<ShippingMethod | null> {
-  return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+  return queryOne<DbShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
 async function create(input: CreateShippingMethodInput): Promise<ShippingMethod> {
@@ -46,7 +47,7 @@ async function create(input: CreateShippingMethodInput): Promise<ShippingMethod>
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
   }
 
-  const result = await queryOne<ShippingMethod>(
+  const result = await queryOne<DbShippingMethod>(
     `INSERT INTO "${TABLE}" (
       "shippingCarrierId", "name", "code", "description", "isActive", "isDefault", "serviceCode",
       "domesticInternational", "estimatedDeliveryDays", "handlingDays", "priority",
@@ -106,7 +107,7 @@ async function update(id: string, input: UpdateShippingMethodInput): Promise<Shi
   updateFields.push(`"updatedAt" = NOW()`);
   values.push(id);
 
-  return queryOne<ShippingMethod>(
+  return queryOne<DbShippingMethod>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingMethodId" = $${paramIndex} RETURNING *`,
     values,
   );

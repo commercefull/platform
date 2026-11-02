@@ -18,7 +18,6 @@ export type ProductRelationType = 'related' | 'accessory' | 'bundle' | 'cross_se
 
 export const PRODUCT_RELATION_TYPES: ProductRelationType[] = ['related', 'accessory', 'bundle', 'cross_sell', 'up_sell', 'grouped'];
 
-
 export interface ProductRelationshipProps {
   productRelatedId: string;
   productId: string;
@@ -31,5 +30,3 @@ export interface ProductRelationshipProps {
 }
 
 export type ProductRelationshipCreateProps = Omit<ProductRelationshipProps, 'productRelatedId' | 'createdAt' | 'updatedAt'>;
-
-

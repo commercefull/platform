@@ -10,5 +10,3 @@ export interface PaymentWebhook {
 }
 
 export type PaymentWebhookCreateParams = Omit<PaymentWebhook, 'paymentWebhookId' | 'createdAt' | 'updatedAt'>;
-
-

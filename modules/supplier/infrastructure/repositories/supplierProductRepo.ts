@@ -14,14 +14,14 @@ export type SupplierProductUpdateParams = Partial<
 
 class SupplierProductRepo {
   async findById(id: string): Promise<SupplierProduct | null> {
-    return await queryOne<SupplierProduct>(`SELECT * FROM "supplierProduct" WHERE "supplierProductId" = $1`, [id]);
+    return await queryOne<DbSupplierProduct>(`SELECT * FROM "supplierProduct" WHERE "supplierProductId" = $1`, [id]);
   }
 
   async findBySupplierId(supplierId: string, activeOnly = false): Promise<SupplierProduct[]> {
     let sql = `SELECT * FROM "supplierProduct" WHERE "supplierId" = $1`;
     if (activeOnly) sql += ` AND "status" = 'active'`;
     sql += ` ORDER BY "isPreferred" DESC, "unitCostCents" ASC`;
-    return (await query<SupplierProduct[]>(sql, [supplierId])) || [];
+    return (await query<DbSupplierProduct[]>(sql, [supplierId])) || [];
   }
 
   async findByProduct(productId: string, productVariantId?: string): Promise<SupplierProduct[]> {
@@ -34,15 +34,15 @@ class SupplierProductRepo {
     }
 
     sql += ` ORDER BY "isPreferred" DESC, "unitCostCents" ASC`;
-    return (await query<SupplierProduct[]>(sql, params)) || [];
+    return (await query<DbSupplierProduct[]>(sql, params)) || [];
   }
 
   async findBySku(sku: string): Promise<SupplierProduct[]> {
-    return (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "sku" = $1 ORDER BY "unitCostCents" ASC`, [sku])) || [];
+    return (await query<DbSupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "sku" = $1 ORDER BY "unitCostCents" ASC`, [sku])) || [];
   }
 
   async findBySupplierSku(supplierSku: string): Promise<SupplierProduct[]> {
-    return (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "supplierSku" = $1`, [supplierSku])) || [];
+    return (await query<DbSupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "supplierSku" = $1`, [supplierSku])) || [];
   }
 
   async findPreferred(productId: string, productVariantId?: string): Promise<SupplierProduct | null> {
@@ -55,12 +55,12 @@ class SupplierProductRepo {
     }
 
     sql += ` LIMIT 1`;
-    return await queryOne<SupplierProduct>(sql, params);
+    return await queryOne<DbSupplierProduct>(sql, params);
   }
 
   async findByStatus(status: SupplierProductStatus, limit = 100): Promise<SupplierProduct[]> {
     return (
-      (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "status" = $1 ORDER BY "supplierId" LIMIT $2`, [
+      (await query<DbSupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "status" = $1 ORDER BY "supplierId" LIMIT $2`, [
         status,
         limit,
       ])) || []
@@ -70,7 +70,7 @@ class SupplierProductRepo {
   async create(params: SupplierProductCreateParams): Promise<SupplierProduct> {
     const now = unixTimestamp();
 
-    const result = await queryOne<SupplierProduct>(
+    const result = await queryOne<DbSupplierProduct>(
       `INSERT INTO "supplierProduct" (
         "supplierId", "productId", "productVariantId", "sku", "supplierSku", "supplierProductName",
         "status", "isPreferred", "unitCostCents", "currencyCode", "minimumOrderQuantity", "leadTime",
@@ -121,7 +121,7 @@ class SupplierProductRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<SupplierProduct>(
+    return await queryOne<DbSupplierProduct>(
       `UPDATE "supplierProduct" SET ${updateFields.join(', ')} WHERE "supplierProductId" = $${paramIndex} RETURNING *`,
       values,
     );

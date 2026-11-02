@@ -17,7 +17,6 @@ type ConditionOperator =
   | 'isNull'
   | 'regex';
 
-
 export interface TriggerConfig {
   eventName?: string;
   cronExpression?: string;
@@ -55,7 +54,6 @@ export interface RuleAction {
 }
 
 export type ActionExecutionMode = 'sequential' | 'parallel';
-
 
 export interface AutomationRuleProps {
   automationRuleId: string;

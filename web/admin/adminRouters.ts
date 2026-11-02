@@ -715,10 +715,7 @@ router.post('/catalog/collections/:collectionId', asyncHandler(updateCollection)
 router.put('/catalog/collections/:collectionId', asyncHandler(updateCollection));
 router.delete('/catalog/collections/:collectionId', asyncHandler(deleteCollection));
 router.post('/catalog/collections/:collectionId/publications', asyncHandler(upsertCollectionPublication));
-router.post(
-  '/catalog/collections/:collectionId/publications/:publicationId/remove',
-  asyncHandler(deleteCollectionPublication),
-);
+router.post('/catalog/collections/:collectionId/publications/:publicationId/remove', asyncHandler(deleteCollectionPublication));
 router.get('/stores/:storeId/assortment', asyncHandler(viewStoreAssortment));
 router.post('/stores/:storeId/assortment/mode', asyncHandler(setStoreAssortmentMode));
 router.post('/stores/:storeId/assortment/entries', asyncHandler(addStoreAssortmentEntry));

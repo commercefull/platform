@@ -164,4 +164,3 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
   await manageCouponsUseCase.delete(req.params.couponId);
   jsonResponse(res, 200, { success: true, message: 'Coupon deleted' });
 };
-

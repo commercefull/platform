@@ -1,6 +1,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttributeOption } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductAttributeOption as DbProductAttributeOption } from '../../../../libs/db/types';
 
 // Use ProductAttributeOption type directly from libs/db/types.ts
 export type { ProductAttributeOption };
@@ -10,11 +11,13 @@ type UpdateProps = Partial<CreateProps>;
 
 export class AttributeOptionRepo {
   async findOne(id: string): Promise<ProductAttributeOption | null> {
-    return queryOne<ProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`, [id]);
+    return queryOne<DbProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`, [
+      id,
+    ]);
   }
 
   async findByValue(attributeId: string, value: string): Promise<ProductAttributeOption | null> {
-    return queryOne<ProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 AND "value" = $2`, [
+    return queryOne<DbProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 AND "value" = $2`, [
       attributeId,
       value,
     ]);
@@ -22,7 +25,7 @@ export class AttributeOptionRepo {
 
   async findByAttribute(attributeId: string): Promise<ProductAttributeOption[]> {
     return (
-      (await query<ProductAttributeOption[]>(
+      (await query<DbProductAttributeOption[]>(
         `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 ORDER BY "position" ASC`,
         [attributeId],
       )) || []
@@ -31,7 +34,7 @@ export class AttributeOptionRepo {
 
   async create(props: CreateProps): Promise<ProductAttributeOption> {
     const now = new Date();
-    const row = await queryOne<ProductAttributeOption>(
+    const row = await queryOne<DbProductAttributeOption>(
       `INSERT INTO "${Table.ProductAttributeOption}" 
        ("attributeId", "value", "label", "position", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6) 
@@ -57,7 +60,7 @@ export class AttributeOptionRepo {
     const values = options.flatMap(opt => [opt.attributeId, opt.value, opt.label, opt.position, now, now]);
 
     return (
-      (await query<ProductAttributeOption[]>(
+      (await query<DbProductAttributeOption[]>(
         `INSERT INTO "${Table.ProductAttributeOption}" 
        ("attributeId", "value", "label", "position", "createdAt", "updatedAt") 
        VALUES ${valueGroups.join(', ')} 
@@ -81,7 +84,7 @@ export class AttributeOptionRepo {
     }
 
     values.push(id);
-    return queryOne<ProductAttributeOption>(
+    return queryOne<DbProductAttributeOption>(
       `UPDATE "${Table.ProductAttributeOption}" 
        SET ${updates.join(', ')} 
        WHERE "productAttributeOptionId" = $${paramIndex} 
@@ -91,7 +94,7 @@ export class AttributeOptionRepo {
   }
 
   async delete(id: string): Promise<ProductAttributeOption | null> {
-    return queryOne<ProductAttributeOption>(
+    return queryOne<DbProductAttributeOption>(
       `DELETE FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1 RETURNING *`,
       [id],
     );

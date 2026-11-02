@@ -2,9 +2,10 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table, Country } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { CountryCodeAlreadyExistsError, FailedToCreateCountryError } from '../../domain/errors/LocalizationErrors';
+import type { Country as DbCountry } from '../../../../libs/db/types';
 
 // Use Country type directly from libs/db/types.ts
-export type { };
+export type {};
 
 // Derived types for create/update operations
 export type CountryCreateParams = Omit<Country, 'countryId' | 'createdAt' | 'updatedAt'>;
@@ -15,28 +16,28 @@ class CountryRepo {
    * Find country by ID
    */
   async findById(countryId: string): Promise<Country | null> {
-    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "countryId" = $1`, [countryId]);
+    return await queryOne<DbCountry>(`SELECT * FROM "${Table.Country}" WHERE "countryId" = $1`, [countryId]);
   }
 
   /**
    * Find country by code (ISO 2-letter)
    */
   async findByCode(code: string): Promise<Country | null> {
-    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "code" = $1`, [code.toUpperCase()]);
+    return await queryOne<DbCountry>(`SELECT * FROM "${Table.Country}" WHERE "code" = $1`, [code.toUpperCase()]);
   }
 
   /**
    * Find country by alpha3 code (ISO 3-letter)
    */
   async findByAlpha3Code(alpha3Code: string): Promise<Country | null> {
-    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "alpha3Code" = $1`, [alpha3Code.toUpperCase()]);
+    return await queryOne<DbCountry>(`SELECT * FROM "${Table.Country}" WHERE "alpha3Code" = $1`, [alpha3Code.toUpperCase()]);
   }
 
   /**
    * Find country by numeric code
    */
   async findByNumericCode(numericCode: number): Promise<Country | null> {
-    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "numericCode" = $1`, [numericCode]);
+    return await queryOne<DbCountry>(`SELECT * FROM "${Table.Country}" WHERE "numericCode" = $1`, [numericCode]);
   }
 
   /**
@@ -51,7 +52,7 @@ class CountryRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Country[]>(sql);
+    const results = await query<DbCountry[]>(sql);
     return results || [];
   }
 
@@ -68,7 +69,7 @@ class CountryRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Country[]>(sql, params);
+    const results = await query<DbCountry[]>(sql, params);
     return results || [];
   }
 
@@ -85,7 +86,7 @@ class CountryRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Country[]>(sql, params);
+    const results = await query<DbCountry[]>(sql, params);
     return results || [];
   }
 
@@ -102,7 +103,7 @@ class CountryRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Country[]>(sql, params);
+    const results = await query<DbCountry[]>(sql, params);
     return results || [];
   }
 
@@ -118,7 +119,7 @@ class CountryRepo {
       throw new CountryCodeAlreadyExistsError(params.code);
     }
 
-    const result = await queryOne<Country>(
+    const result = await queryOne<DbCountry>(
       `INSERT INTO "${Table.Country}" (
         "code", "name", "numericCode", "alpha3Code", "defaultCurrencyId",
         "isActive", "flagIcon", "region",
@@ -174,7 +175,7 @@ class CountryRepo {
     values.push(unixTimestamp());
     values.push(countryId);
 
-    const result = await queryOne<Country>(
+    const result = await queryOne<DbCountry>(
       `UPDATE "${Table.Country}" 
        SET ${updateFields.join(', ')}
        WHERE "countryId" = $${paramIndex}

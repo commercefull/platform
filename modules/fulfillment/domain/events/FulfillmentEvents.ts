@@ -16,8 +16,6 @@ export interface FulfillmentCreatedEvent {
   sourceId: string;
 }
 
-
-
 export interface FulfillmentShippedEvent {
   fulfillmentId: string;
   orderId: string;
@@ -32,17 +30,14 @@ export interface FulfillmentDeliveredEvent {
   deliveredAt: Date;
 }
 
-
 // Event emitters
 export function emitFulfillmentCreated(payload: FulfillmentCreatedEvent): void {
   eventBus.emit('fulfillment.created', payload);
 }
 
-
 export function emitFulfillmentPickingStarted(payload: { fulfillmentId: string; orderId: string }): void {
   eventBus.emit('fulfillment.picking_started', payload);
 }
-
 
 export function emitFulfillmentShipped(payload: FulfillmentShippedEvent): void {
   eventBus.emit('fulfillment.shipped', payload);
@@ -51,6 +46,3 @@ export function emitFulfillmentShipped(payload: FulfillmentShippedEvent): void {
 export function emitFulfillmentDelivered(payload: FulfillmentDeliveredEvent): void {
   eventBus.emit('fulfillment.delivered', payload);
 }
-
-
-

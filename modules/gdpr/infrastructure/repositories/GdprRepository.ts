@@ -9,6 +9,7 @@ import { GdprDataRequestRepository, GdprCookieConsentRepository, GdprRequestFilt
 import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../../domain/entities/GdprDataRequest';
 import { GdprCookieConsent } from '../../domain/entities/GdprCookieConsent';
+import type { GdprDataRequest as DbGdprDataRequest } from '../../../../libs/db/types';
 
 // Table names
 const GDPR_COOKIE_CONSENT_TABLE = 'gdprCookieConsent';
@@ -19,12 +20,12 @@ const GDPR_COOKIE_CONSENT_TABLE = 'gdprCookieConsent';
 
 export class GdprDataRequestRepo implements GdprDataRequestRepository {
   async findById(gdprDataRequestId: string): Promise<GdprDataRequest | null> {
-    const row = await queryOne<GdprDataRequestDb>('SELECT * FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1', [gdprDataRequestId]);
+    const row = await queryOne<DbGdprDataRequest>('SELECT * FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1', [gdprDataRequestId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByCustomerId(customerId: string): Promise<GdprDataRequest[]> {
-    const rows = await query<GdprDataRequestDb[]>('SELECT * FROM "gdprDataRequest" WHERE "customerId" = $1 ORDER BY "createdAt" DESC', [
+    const rows = await query<DbGdprDataRequest[]>('SELECT * FROM "gdprDataRequest" WHERE "customerId" = $1 ORDER BY "createdAt" DESC', [
       customerId,
     ]);
     return (rows || []).map(row => this.mapToEntity(row));
@@ -72,7 +73,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "gdprDataRequest" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
-    const rows = await query<GdprDataRequestDb[]>(
+    const rows = await query<DbGdprDataRequest[]>(
       `SELECT * FROM "gdprDataRequest" ${whereClause} 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
@@ -166,7 +167,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
   }
 
   async findOverdueRequests(): Promise<GdprDataRequest[]> {
-    const rows = await query<GdprDataRequestDb[]>(
+    const rows = await query<DbGdprDataRequest[]>(
       `SELECT * FROM "gdprDataRequest" 
        WHERE ("deadlineAt" < NOW() OR ("extendedDeadlineAt" IS NOT NULL AND "extendedDeadlineAt" < NOW()))
        AND "status" IN ('pending', 'processing')

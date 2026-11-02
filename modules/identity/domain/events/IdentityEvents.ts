@@ -8,7 +8,6 @@
 // Event Types
 // ============================================================================
 
-
 // ============================================================================
 // Event Payloads
 // ============================================================================
@@ -21,18 +20,12 @@ export interface CustomerLoginEvent {
   timestamp: Date;
 }
 
-
-
-
-
 export interface TokenRefreshedEvent {
   userId: string;
   userType: 'customer' | 'organization';
   ipAddress?: string;
   timestamp: Date;
 }
-
-
 
 export interface OrganizationLoginEvent {
   organizationId: string;
@@ -43,7 +36,6 @@ export interface OrganizationLoginEvent {
   timestamp: Date;
 }
 
-
 export interface OrganizationRegisteredEvent {
   organizationId: string;
   email: string;
@@ -52,14 +44,6 @@ export interface OrganizationRegisteredEvent {
   timestamp: Date;
 }
 
-
-
-
-
-
 // ============================================================================
 // Event Union Type
 // ============================================================================
-
-
-

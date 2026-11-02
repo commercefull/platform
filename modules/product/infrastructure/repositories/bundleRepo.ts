@@ -355,4 +355,3 @@ export async function calculateBundlePrice(
     savingsPercent: savingsCents > 0 ? (savingsCents / originalTotalCents) * 100 : 0,
   };
 }
-

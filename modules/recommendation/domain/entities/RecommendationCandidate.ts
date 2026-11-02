@@ -8,7 +8,6 @@
 
 export type CandidateSource = 'rule' | 'fbt' | 'similar' | 'coView';
 
-
 /** Relation types a candidate can serve — mirrors product's ProductRelationType minus grouped/bundle. */
 export type RecommendationRelationType = 'related' | 'accessory' | 'cross_sell' | 'up_sell';
 
@@ -44,5 +43,3 @@ export interface RecommendationCandidateProps {
 }
 
 export type RecommendationCandidateInsert = Omit<RecommendationCandidateProps, 'recommendationCandidateId' | 'createdAt'>;
-
-

@@ -39,8 +39,6 @@ export const CUSTOMER_CREDENTIALS = {
   password: 'password123',
 };
 
-
-
 // Test Address Data
 export const TEST_SHIPPING_ADDRESS = {
   firstName: 'Jane',
@@ -64,7 +62,6 @@ export const TEST_BILLING_ADDRESS = {
   phone: '555-123-4567',
 };
 
-
 // Test Content Page Data
 export const TEST_CONTENT_PAGE = {
   id: TEST_CONTENT_PAGE_ID,
@@ -79,7 +76,3 @@ export const TEST_CONTENT_PAGE = {
   metaDescription: 'This is a test page for integration testing',
   isHomePage: false,
 };
-
-
-
-

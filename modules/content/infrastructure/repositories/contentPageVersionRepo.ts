@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentPageVersion } from '../../../../libs/db/types';
 import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
+import type { ContentPageVersion as DbContentPageVersion } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -28,11 +29,11 @@ export type PageVersionCreateParams = {
 
 export class ContentPageVersionRepo {
   async findVersionById(id: string): Promise<ContentPageVersion | null> {
-    return queryOne<ContentPageVersion>('SELECT * FROM "contentPageVersion" WHERE "contentPageVersionId" = $1', [id]);
+    return queryOne<DbContentPageVersion>('SELECT * FROM "contentPageVersion" WHERE "contentPageVersionId" = $1', [id]);
   }
 
   async findVersionsByPageId(pageId: string, limit: number = 50, offset: number = 0): Promise<ContentPageVersion[]> {
-    const results = await query<ContentPageVersion[]>(
+    const results = await query<DbContentPageVersion[]>(
       'SELECT * FROM "contentPageVersion" WHERE "contentPageId" = $1 ORDER BY "version" DESC LIMIT $2 OFFSET $3',
       [pageId, limit, offset],
     );
@@ -40,7 +41,7 @@ export class ContentPageVersionRepo {
   }
 
   async findLatestVersion(pageId: string): Promise<ContentPageVersion | null> {
-    return queryOne<ContentPageVersion>('SELECT * FROM "contentPageVersion" WHERE "contentPageId" = $1 ORDER BY "version" DESC LIMIT 1', [
+    return queryOne<DbContentPageVersion>('SELECT * FROM "contentPageVersion" WHERE "contentPageId" = $1 ORDER BY "version" DESC LIMIT 1', [
       pageId,
     ]);
   }
@@ -50,7 +51,7 @@ export class ContentPageVersionRepo {
     const latest = await this.findLatestVersion(params.contentPageId);
     const nextVersion = latest ? latest.version + 1 : 1;
 
-    const result = await queryOne<ContentPageVersion>(
+    const result = await queryOne<DbContentPageVersion>(
       `INSERT INTO "contentPageVersion"
       ("contentPageId", "version", "title", "status", "summary", "content", "customFields", "comment", "createdBy")
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)

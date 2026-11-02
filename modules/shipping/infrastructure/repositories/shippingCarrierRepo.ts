@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingCarrier } from '../../../../libs/db/types';
 import { ShippingCarrierAlreadyExistsError, FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
+import type { ShippingCarrier as DbShippingCarrier } from '../../../../libs/db/types';
 
 // Re-export the type for convenience
 export { ShippingCarrier };
@@ -19,14 +20,14 @@ const TABLE = Table.ShippingCarrier;
  * Find a shipping carrier by ID
  */
 async function findById(id: string): Promise<ShippingCarrier | null> {
-  return queryOne<ShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`, [id]);
+  return queryOne<DbShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`, [id]);
 }
 
 /**
  * Find a shipping carrier by code
  */
 async function findByCode(code: string): Promise<ShippingCarrier | null> {
-  return queryOne<ShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
+  return queryOne<DbShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 /**
@@ -36,7 +37,7 @@ async function findAll(activeOnly = false): Promise<ShippingCarrier[]> {
   let sql = `SELECT * FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   sql += ` ORDER BY "name" ASC`;
-  return (await query<ShippingCarrier[]>(sql)) || [];
+  return (await query<DbShippingCarrier[]>(sql)) || [];
 }
 
 /**
@@ -44,7 +45,7 @@ async function findAll(activeOnly = false): Promise<ShippingCarrier[]> {
  */
 async function findWithApiIntegration(): Promise<ShippingCarrier[]> {
   return (
-    (await query<ShippingCarrier[]>(
+    (await query<DbShippingCarrier[]>(
       `SELECT * FROM "${TABLE}" WHERE "hasApiIntegration" = true AND "isActive" = true ORDER BY "name" ASC`,
     )) || []
   );
@@ -55,7 +56,7 @@ async function findWithApiIntegration(): Promise<ShippingCarrier[]> {
  */
 async function findByRegion(region: string): Promise<ShippingCarrier[]> {
   return (
-    (await query<ShippingCarrier[]>(
+    (await query<DbShippingCarrier[]>(
       `SELECT * FROM "${TABLE}" WHERE "supportedRegions" @> $1::jsonb AND "isActive" = true ORDER BY "name" ASC`,
       [JSON.stringify([region])],
     )) || []
@@ -67,7 +68,7 @@ async function findByRegion(region: string): Promise<ShippingCarrier[]> {
  */
 async function search(searchTerm: string): Promise<ShippingCarrier[]> {
   return (
-    (await query<ShippingCarrier[]>(
+    (await query<DbShippingCarrier[]>(
       `SELECT * FROM "${TABLE}" WHERE ("name" ILIKE $1 OR "code" ILIKE $1) AND "isActive" = true ORDER BY "name" ASC`,
       [`%${searchTerm}%`],
     )) || []
@@ -83,7 +84,7 @@ async function create(input: CreateShippingCarrierInput): Promise<ShippingCarrie
     throw new ShippingCarrierAlreadyExistsError(input.code);
   }
 
-  const result = await queryOne<ShippingCarrier>(
+  const result = await queryOne<DbShippingCarrier>(
     `INSERT INTO "${TABLE}" (
       "name", "code", "description", "websiteUrl", "trackingUrl", "isActive", "accountNumber",
       "apiCredentials", "supportedRegions", "supportedServices", "requiresContract", "hasApiIntegration",
@@ -133,7 +134,7 @@ async function update(id: string, input: UpdateShippingCarrierInput): Promise<Sh
   updateFields.push(`"updatedAt" = NOW()`);
   values.push(id);
 
-  return queryOne<ShippingCarrier>(
+  return queryOne<DbShippingCarrier>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingCarrierId" = $${paramIndex} RETURNING *`,
     values,
   );

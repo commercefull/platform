@@ -50,7 +50,7 @@ export interface PricingRule {
   pricingRuleId?: string; // Alias for id
   name: string;
   description?: string;
-  type: PricingRuleType;
+  type?: PricingRuleType;
   ruleType?: 'percentage' | 'fixed'; // Alias for type
   scope: PricingRuleScope;
   status: PricingRuleStatus;
@@ -156,6 +156,7 @@ export interface TierPrice {
 
 export interface CustomerPriceList {
   id: string;
+  priceListId?: string; // Alias for id
   name: string;
   description?: string;
   customerIds: string[];

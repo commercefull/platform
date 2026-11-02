@@ -357,4 +357,3 @@ export async function updatePriceAlertCurrentPrice(productId: string, newPriceCe
     [newPriceCents, new Date().toISOString(), productId],
   );
 }
-

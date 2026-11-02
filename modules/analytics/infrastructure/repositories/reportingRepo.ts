@@ -15,6 +15,11 @@ import {
   AnalyticsReportDashboard as AnalyticsReportDashboardRow,
 } from '../../../../libs/db/types';
 import type { AnalyticsReportEvent, AnalyticsReportSnapshot, AnalyticsReportDashboard } from '../../domain/types';
+import type {
+  AnalyticsReportDashboard as DbAnalyticsReportDashboard,
+  AnalyticsReportEvent as DbAnalyticsReportEvent,
+  AnalyticsReportSnapshot as DbAnalyticsReportSnapshot,
+} from '../../../../libs/db/types';
 export type { AnalyticsReportEvent, AnalyticsReportSnapshot, AnalyticsReportDashboard };
 
 // ============================================================================
@@ -62,7 +67,7 @@ export async function trackEvent(event: {
   country?: string;
   region?: string;
 }): Promise<AnalyticsReportEvent> {
-  const result = await queryOne<AnalyticsReportEventRow>(
+  const result = await queryOne<DbAnalyticsReportEvent>(
     `INSERT INTO "analyticsReportEvent" (
       "eventType", "eventCategory", "eventAction",
       "organizationId", "customerId", "orderId", "productId", "basketId",
@@ -169,7 +174,7 @@ export async function getEvents(
   const limit = pagination?.limit || 100;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<AnalyticsReportEventRow[]>(
+  const rows = await query<DbAnalyticsReportEvent[]>(
     `SELECT * FROM "analyticsReportEvent" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -182,7 +187,7 @@ export async function getEvents(
 }
 
 export async function getUnprocessedEvents(limit: number = 1000): Promise<AnalyticsReportEvent[]> {
-  const rows = await query<AnalyticsReportEventRow[]>(
+  const rows = await query<DbAnalyticsReportEvent[]>(
     `SELECT * FROM "analyticsReportEvent" WHERE "isProcessed" = false 
      ORDER BY "createdAt" ASC LIMIT $1`,
     [limit],
@@ -237,7 +242,7 @@ export async function createSnapshot(
     snapshotDate: Date;
   },
 ): Promise<AnalyticsReportSnapshot> {
-  const result = await queryOne<AnalyticsReportSnapshotRow>(
+  const result = await queryOne<DbAnalyticsReportSnapshot>(
     `INSERT INTO "analyticsReportSnapshot" (
       "organizationId", "snapshotType", "snapshotTime", "snapshotDate", "snapshotHour",
       "totalOrders", "pendingOrders", "processingOrders", "shippedOrders",
@@ -324,7 +329,7 @@ export async function getSnapshots(
     params.push(organizationId);
   }
 
-  const rows = await query<AnalyticsReportSnapshotRow[]>(
+  const rows = await query<DbAnalyticsReportSnapshot[]>(
     `SELECT * FROM "analyticsReportSnapshot" WHERE ${whereClause} ORDER BY "snapshotTime" DESC`,
     params,
   );
@@ -344,7 +349,7 @@ export async function getLatestSnapshot(
     params.push(organizationId);
   }
 
-  const row = await queryOne<AnalyticsReportSnapshotRow>(
+  const row = await queryOne<DbAnalyticsReportSnapshot>(
     `SELECT * FROM "analyticsReportSnapshot" WHERE ${whereClause} ORDER BY "snapshotTime" DESC LIMIT 1`,
     params,
   );
@@ -365,7 +370,7 @@ export async function getDashboards(organizationId?: string): Promise<AnalyticsR
     params.push(organizationId);
   }
 
-  const rows = await query<AnalyticsReportDashboardRow[]>(
+  const rows = await query<DbAnalyticsReportDashboard[]>(
     `SELECT * FROM "analyticsReportDashboard" WHERE ${whereClause} ORDER BY "isDefault" DESC, "name" ASC`,
     params,
   );
@@ -374,7 +379,7 @@ export async function getDashboards(organizationId?: string): Promise<AnalyticsR
 }
 
 export async function getDashboard(dashboardId: string): Promise<AnalyticsReportDashboard | null> {
-  const row = await queryOne<AnalyticsReportDashboardRow>(
+  const row = await queryOne<DbAnalyticsReportDashboard>(
     'SELECT * FROM "analyticsReportDashboard" WHERE "analyticsReportDashboardId" = $1',
     [dashboardId],
   );
@@ -412,7 +417,7 @@ export async function saveDashboard(
     );
     return (await getDashboard(dashboard.analyticsReportDashboardId))!;
   } else {
-    const result = await queryOne<AnalyticsReportDashboardRow>(
+    const result = await queryOne<DbAnalyticsReportDashboard>(
       `INSERT INTO "analyticsReportDashboard" (
         "organizationId", "createdBy", "name", "slug", "description",
         "isDefault", "isShared", "layout", "widgets", "filters", "dateRange",

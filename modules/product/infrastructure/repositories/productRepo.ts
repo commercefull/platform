@@ -1,6 +1,55 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { ProductNotFoundError, FailedToCreateProductError, ProductValidationError } from '../../domain/errors/ProductErrors';
+import type { Product as DbProduct } from '../../../../libs/db/types';
+
+function rowToProduct(row: DbProduct): Product {
+  return {
+    productId: row.productId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    sku: row.sku,
+    name: row.name,
+    slug: row.slug,
+    description: row.description ?? undefined,
+    shortDescription: row.shortDescription ?? undefined,
+    type: row.type as ProductType,
+    status: row.status as ProductStatus,
+    visibility: row.visibility as ProductVisibility,
+    taxClass: row.taxClass ?? undefined,
+    isTaxable: row.isTaxable,
+    isInventoryManaged: row.isInventoryManaged,
+    minOrderQuantity: row.minOrderQuantity ?? undefined,
+    maxOrderQuantity: row.maxOrderQuantity ?? undefined,
+    orderIncrementQuantity: row.orderIncrementQuantity ?? undefined,
+    weight: row.weight != null ? Number(row.weight) : undefined,
+    weightUnit: row.weightUnit ?? undefined,
+    length: row.length != null ? Number(row.length) : undefined,
+    width: row.width != null ? Number(row.width) : undefined,
+    height: row.height != null ? Number(row.height) : undefined,
+    dimensionUnit: row.dimensionUnit ?? undefined,
+    metaTitle: row.metaTitle ?? undefined,
+    metaDescription: row.metaDescription ?? undefined,
+    metaKeywords: row.metaKeywords ?? undefined,
+    hsCode: row.hsCode ?? undefined,
+    countryOfOrigin: row.countryOfOrigin ?? undefined,
+    isFeatured: row.isFeatured,
+    isNew: row.isNew,
+    isBestseller: row.isBestseller,
+    warningThreshold: row.warningThreshold ?? undefined,
+    preorderEnabled: row.preorderEnabled,
+    preorderReleaseDate: row.preorderReleaseDate ?? undefined,
+    preorderAllowance: row.preorderAllowance ?? undefined,
+    averageRating: row.averageRating != null ? Number(row.averageRating) : undefined,
+    reviewCount: row.reviewCount ?? 0,
+    customFields: (row.customFields ?? undefined) as Record<string, unknown> | undefined,
+    seoData: (row.seoData ?? undefined) as Record<string, unknown> | undefined,
+    isVirtual: row.isVirtual,
+    isDownloadable: row.isDownloadable,
+    isSubscription: row.isSubscription,
+    hasVariants: row.hasVariants,
+  };
+}
 
 // Product status and visibility enums to match database schema
 export enum ProductStatus {
@@ -90,7 +139,7 @@ export interface Product {
   updatedBy?: string;
 }
 
- // Include id alias for compatibility
+// Include id alias for compatibility
 
 type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
 
@@ -125,7 +174,8 @@ class ProductRepo {
       SELECT * FROM "${this.tableName}" 
       WHERE "productId" = $1 AND "deletedAt" IS NULL
     `;
-    return await queryOne<Product>(sql, [id]);
+    const row = await queryOne<DbProduct>(sql, [id]);
+    return row ? rowToProduct(row) : null;
   }
 
   /**
@@ -136,7 +186,8 @@ class ProductRepo {
       SELECT * FROM "${this.tableName}" 
       WHERE "slug" = $1 AND "deletedAt" IS NULL
     `;
-    return await queryOne<Product>(sql, [slug]);
+    const row = await queryOne<DbProduct>(sql, [slug]);
+    return row ? rowToProduct(row) : null;
   }
 
   /**
@@ -147,7 +198,8 @@ class ProductRepo {
       SELECT * FROM "${this.tableName}" 
       WHERE "sku" = $1 AND "deletedAt" IS NULL
     `;
-    return await queryOne<Product>(sql, [sku]);
+    const row = await queryOne<DbProduct>(sql, [sku]);
+    return row ? rowToProduct(row) : null;
   }
 
   /**
@@ -439,13 +491,13 @@ class ProductRepo {
       data.updatedBy || null,
     ];
 
-    const result = await queryOne<Product>(sql, values);
+    const result = await queryOne<DbProduct>(sql, values);
 
     if (!result) {
       throw new FailedToCreateProductError();
     }
 
-    return result;
+    return rowToProduct(result);
   }
 
   /**
@@ -538,13 +590,13 @@ class ProductRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<Product>(sql, values);
+    const result = await queryOne<DbProduct>(sql, values);
 
     if (!result) {
       throw new ProductValidationError('Product not found or update failed');
     }
 
-    return result;
+    return rowToProduct(result);
   }
 
   /**
@@ -609,7 +661,7 @@ class ProductRepo {
       ORDER BY "createdAt" DESC
       LIMIT $3
     `;
-    return (await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
+    return ((await query<DbProduct[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []).map(rowToProduct);
   }
 
   /**
@@ -625,7 +677,7 @@ class ProductRepo {
       ORDER BY "reviewCount" DESC, "averageRating" DESC
       LIMIT $3
     `;
-    return (await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
+    return ((await query<DbProduct[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []).map(rowToProduct);
   }
 
   /**
@@ -648,7 +700,9 @@ class ProductRepo {
           AND "deletedAt" IS NULL
         LIMIT $${product.relatedProducts.length + 3}
       `;
-      return (await query<Product[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
+      return (
+        (await query<DbProduct[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []
+      ).map(rowToProduct);
     }
 
     // Otherwise, find products in the same category
@@ -663,7 +717,9 @@ class ProductRepo {
         ORDER BY "isFeatured" DESC, RANDOM()
         LIMIT $5
       `;
-      return (await query<Product[]>(sql, [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
+      return (
+        (await query<DbProduct[]>(sql, [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []
+      ).map(rowToProduct);
     }
 
     return [];
@@ -694,13 +750,13 @@ class ProductRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<Product>(sql, [productId, averageRating, reviewCount]);
+    const result = await queryOne<DbProduct>(sql, [productId, averageRating, reviewCount]);
 
     if (!result) {
       throw new ProductNotFoundError(productId);
     }
 
-    return result;
+    return rowToProduct(result);
   }
 
   /**
@@ -714,13 +770,13 @@ class ProductRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<Product>(sql, [id, ProductStatus.ACTIVE]);
+    const result = await queryOne<DbProduct>(sql, [id, ProductStatus.ACTIVE]);
 
     if (!result) {
       throw new ProductNotFoundError(id);
     }
 
-    return result;
+    return rowToProduct(result);
   }
 
   /**
@@ -730,6 +786,5 @@ class ProductRepo {
     return this.update(id, { status: ProductStatus.DRAFT });
   }
 }
-
 
 export default new ProductRepo();

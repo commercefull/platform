@@ -167,10 +167,12 @@ export function createProductQaAnswer(overrides: Partial<ProductQaAnswer> = {}):
     productQaAnswerId: 'a1',
     createdAt: ISO,
     updatedAt: ISO,
-    productQaId: 'q1',
+    questionId: 'q1',
     answer: 'Yes',
-    status: 'approved',
-    isOfficial: true,
+    status: 'answered',
+    isVerified: true,
+    helpfulCount: 0,
+    unhelpfulCount: 0,
     ...overrides,
   };
 }
@@ -186,12 +188,11 @@ export function createProductTypeRow(overrides: Partial<ProductTypeRow> = {}): P
   };
 }
 
-
 import type { ProductReview, ProductReviewMedia, ProductReviewVote, ProductLookupPort } from '../domain/repositories/ProductCatalogPorts';
 
 export function createProductReview(overrides: Partial<ProductReview> = {}): ProductReview {
   return {
-    productReviewId: 'r1',
+    reviewId: 'r1',
     createdAt: new Date(ISO),
     updatedAt: new Date(ISO),
     productId: 'p1',
@@ -211,10 +212,10 @@ export function createReviewMedia(overrides: Partial<ProductReviewMedia> = {}): 
     productReviewMediaId: 'm1',
     createdAt: ISO,
     updatedAt: ISO,
-    productReviewId: 'r1',
+    reviewId: 'r1',
     url: 'https://example.com/img.jpg',
     type: 'image',
-    position: 0,
+    status: 'approved',
     ...overrides,
   };
 }

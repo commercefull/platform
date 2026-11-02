@@ -7,5 +7,17 @@ export * from './application/useCases';
 export * from './infrastructure';
 
 export { marketplaceBusinessRouter } from './interface/routers/marketplaceRouter';
-export { listVendors, viewVendor, createVendorForm, createVendor, editVendorForm, updateVendor, approveVendor, suspendVendor, listCommissionRules, viewCommissionRule, listPayouts, viewPayout } from './interface/controllers/adminMarketplaceController';
-
+export {
+  listVendors,
+  viewVendor,
+  createVendorForm,
+  createVendor,
+  editVendorForm,
+  updateVendor,
+  approveVendor,
+  suspendVendor,
+  listCommissionRules,
+  viewCommissionRule,
+  listPayouts,
+  viewPayout,
+} from './interface/controllers/adminMarketplaceController';

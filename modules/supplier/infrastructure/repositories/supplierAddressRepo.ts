@@ -12,18 +12,18 @@ export type SupplierAddressUpdateParams = Partial<Omit<SupplierAddress, 'supplie
 
 class SupplierAddressRepo {
   async findById(id: string): Promise<SupplierAddress | null> {
-    return await queryOne<SupplierAddress>(`SELECT * FROM "supplierAddress" WHERE "supplierAddressId" = $1`, [id]);
+    return await queryOne<DbSupplierAddress>(`SELECT * FROM "supplierAddress" WHERE "supplierAddressId" = $1`, [id]);
   }
 
   async findBySupplierId(supplierId: string, activeOnly = false): Promise<SupplierAddress[]> {
     let sql = `SELECT * FROM "supplierAddress" WHERE "supplierId" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "isDefault" DESC, "addressType" ASC`;
-    return (await query<SupplierAddress[]>(sql, [supplierId])) || [];
+    return (await query<DbSupplierAddress[]>(sql, [supplierId])) || [];
   }
 
   async findDefaultBySupplierId(supplierId: string): Promise<SupplierAddress | null> {
-    return await queryOne<SupplierAddress>(
+    return await queryOne<DbSupplierAddress>(
       `SELECT * FROM "supplierAddress" WHERE "supplierId" = $1 AND "isDefault" = true AND "isActive" = true LIMIT 1`,
       [supplierId],
     );
@@ -31,7 +31,7 @@ class SupplierAddressRepo {
 
   async findByType(supplierId: string, addressType: SupplierAddressType): Promise<SupplierAddress[]> {
     return (
-      (await query<SupplierAddress[]>(
+      (await query<DbSupplierAddress[]>(
         `SELECT * FROM "supplierAddress" WHERE "supplierId" = $1 AND "addressType" = $2 AND "isActive" = true ORDER BY "isDefault" DESC`,
         [supplierId, addressType],
       )) || []
@@ -45,7 +45,7 @@ class SupplierAddressRepo {
       await this.unsetDefaults(params.supplierId);
     }
 
-    const result = await queryOne<SupplierAddress>(
+    const result = await queryOne<DbSupplierAddress>(
       `INSERT INTO "supplierAddress" (
         "supplierId", "name", "addressLine1", "addressLine2", "city", "state", "postalCode",
         "country", "addressType", "isDefault", "contactName", "contactEmail", "contactPhone",
@@ -100,7 +100,7 @@ class SupplierAddressRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<SupplierAddress>(
+    return await queryOne<DbSupplierAddress>(
       `UPDATE "supplierAddress" SET ${updateFields.join(', ')} WHERE "supplierAddressId" = $${paramIndex} RETURNING *`,
       values,
     );

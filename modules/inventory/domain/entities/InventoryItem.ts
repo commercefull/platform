@@ -2,7 +2,6 @@
  * Inventory Item Aggregate Root
  */
 
-
 import { InventoryValidationError, InvalidStockQuantityError, InsufficientStockError } from '../errors/InventoryErrors';
 
 export interface InventoryItemProps {

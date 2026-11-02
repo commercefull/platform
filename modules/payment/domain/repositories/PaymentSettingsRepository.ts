@@ -21,5 +21,3 @@ export interface PaymentSettings {
 export type PaymentSettingsUpsertParams = { organizationId: string } & Partial<
   Omit<PaymentSettings, 'paymentSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>
 >;
-
-

@@ -1,17 +1,32 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
+import type { PricingPriceList as DbPricingPriceList } from '../../../../libs/db/types';
 
 export interface PriceList {
   priceListId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   name: string;
   description?: string;
   priority?: number;
   isActive: boolean;
-  startDate?: string;
-  endDate?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+function rowToPriceList(row: DbPricingPriceList): PriceList {
+  return {
+    priceListId: row.priceListId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    name: row.name,
+    description: row.description ?? undefined,
+    priority: row.priority ?? undefined,
+    isActive: row.isActive,
+    startDate: row.startDate ?? undefined,
+    endDate: row.endDate ?? undefined,
+  };
 }
 
 export type PriceListCreateParams = Omit<PriceList, 'priceListId' | 'createdAt' | 'updatedAt'>;
@@ -19,21 +34,25 @@ export type PriceListUpdateParams = Partial<Omit<PriceList, 'priceListId' | 'cre
 
 class PriceListRepo {
   async findById(id: string): Promise<PriceList | null> {
-    return await queryOne<PriceList>(`SELECT * FROM "pricingPriceList" WHERE "priceListId" = $1`, [id]);
+    const row = await queryOne<DbPricingPriceList>(`SELECT * FROM "pricingPriceList" WHERE "priceListId" = $1`, [id]);
+    return row ? rowToPriceList(row) : null;
   }
 
   async findByName(name: string): Promise<PriceList | null> {
-    return await queryOne<PriceList>(`SELECT * FROM "pricingPriceList" WHERE "name" = $1`, [name]);
+    const row = await queryOne<DbPricingPriceList>(`SELECT * FROM "pricingPriceList" WHERE "name" = $1`, [name]);
+    return row ? rowToPriceList(row) : null;
   }
 
   async findAll(activeOnly = false): Promise<PriceList[]> {
     let sql = `SELECT * FROM "pricingPriceList"`;
     if (activeOnly) {
       sql += ` WHERE "isActive" = true AND ("startDate" IS NULL OR "startDate" <= $1) AND ("endDate" IS NULL OR "endDate" >= $1)`;
-      return (await query<PriceList[]>(sql, [unixTimestamp()])) || [];
+      const rows = await query<DbPricingPriceList[]>(sql, [unixTimestamp()]);
+      return (rows || []).map(rowToPriceList);
     }
     sql += ` ORDER BY "priority" DESC, "name" ASC`;
-    return (await query<PriceList[]>(sql)) || [];
+    const rows = await query<DbPricingPriceList[]>(sql);
+    return (rows || []).map(rowToPriceList);
   }
 
   async findActive(): Promise<PriceList[]> {
@@ -42,7 +61,7 @@ class PriceListRepo {
 
   async create(params: PriceListCreateParams): Promise<PriceList> {
     const now = unixTimestamp();
-    const result = await queryOne<PriceList>(
+    const result = await queryOne<DbPricingPriceList>(
       `INSERT INTO "pricingPriceList" (
         "name", "description", "priority", "isActive", "startDate", "endDate", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -58,7 +77,7 @@ class PriceListRepo {
       ],
     );
     if (!result) throw new FailedToCreatePricingError('Failed to create price list');
-    return result;
+    return rowToPriceList(result);
   }
 
   async update(id: string, params: PriceListUpdateParams): Promise<PriceList | null> {
@@ -78,10 +97,11 @@ class PriceListRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<PriceList>(
+    const row = await queryOne<DbPricingPriceList>(
       `UPDATE "pricingPriceList" SET ${updateFields.join(', ')} WHERE "priceListId" = $${paramIndex} RETURNING *`,
       values,
     );
+    return row ? rowToPriceList(row) : null;
   }
 
   async activate(id: string): Promise<PriceList | null> {

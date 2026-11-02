@@ -30,15 +30,15 @@ function rowToEntity(row: ProfileDbRow): CustomerProfile {
 
 export class CustomerProfileRepositoryImpl implements CustomerProfileRepository {
   async findByCustomerId(customerId: string): Promise<CustomerProfile | null> {
-    const row = await queryOne<ProfileDbRow>(`SELECT * FROM "segmentCustomerProfile" WHERE "customerId" = $1`, [customerId]);
+    const row = await queryOne<DbSegmentCustomerProfile>(`SELECT * FROM "segmentCustomerProfile" WHERE "customerId" = $1`, [customerId]);
     return row ? rowToEntity(row) : null;
   }
 
   async findAll(limit = 50, offset = 0): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "segmentCustomerProfile" ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`, [
-      limit,
-      offset,
-    ]);
+    const rows = await query<DbSegmentCustomerProfile[]>(
+      `SELECT * FROM "segmentCustomerProfile" ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset],
+    );
     return (rows || []).map(rowToEntity);
   }
 
@@ -54,7 +54,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async findByTier(tier: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(
+    const rows = await query<DbSegmentCustomerProfile[]>(
       `SELECT * FROM "segmentCustomerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValueCents" DESC`,
       [tier],
     );
@@ -62,7 +62,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async findByRFM(rfmSegment: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(
+    const rows = await query<DbSegmentCustomerProfile[]>(
       `SELECT * FROM "segmentCustomerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValueCents" DESC`,
       [rfmSegment],
     );
@@ -71,7 +71,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
 
   async upsert(profile: CustomerProfile): Promise<CustomerProfile> {
     const p = profile.toJSON();
-    const row = await queryOne<ProfileDbRow>(
+    const row = await queryOne<DbSegmentCustomerProfile>(
       `INSERT INTO "segmentCustomerProfile" (
         "customerId", "email", "firstName", "lastName", "status", "tier",
         "lifetimeValueCents", "totalSpentCents", "averageOrderValueCents", "totalOrders",
@@ -206,7 +206,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
 
     setClauses.push(`"lastComputedAt" = NOW()`, `"updatedAt" = NOW()`);
 
-    const row = await queryOne<ProfileDbRow>(
+    const row = await queryOne<DbSegmentCustomerProfile>(
       `UPDATE "segmentCustomerProfile" SET ${setClauses.join(', ')} WHERE "customerId" = $1 RETURNING *`,
       params,
     );

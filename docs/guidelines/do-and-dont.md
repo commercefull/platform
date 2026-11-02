@@ -23,6 +23,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Emit domain events (`eventBus.emit`, `writeToOutbox`) from use cases, not controllers.
 - Create domain entities with `create()` and `reconstitute()` factory methods.
 - Import types from `domain/entities/` for all signatures and returns — domain entities are the single source of truth. Generated `libs/db/types` types may be used inside `infrastructure/` for `query<DbX>` row typing only.
+- Type `SELECT *`/`RETURNING *` queries with `Db{Table}` from `libs/db/types` — never domain types; projections use `*Row` types matching the selected columns (enforced by `yarn lint:sql`).
 - Declare domain timestamp fields as `Date` — `pg` returns `Date` objects; serialize to ISO via `.toISOString()` at the use-case DTO boundary.
 - Export domain entities from the module's `index.ts` so they are reachable from the entry point.
 - Check for existing data before inserting in seed files.

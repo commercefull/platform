@@ -27,8 +27,6 @@ export class TrackingConfigAlreadyExistsError extends TrackingError {
   }
 }
 
-
-
 export class TrackingEventNotMappedError extends TrackingError {
   constructor(sourceEvent: string) {
     super(`No tracking mapping found for event: ${sourceEvent}`, 400, 'tracking.event_not_mapped');

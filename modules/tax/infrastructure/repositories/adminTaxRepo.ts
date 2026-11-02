@@ -7,6 +7,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import type { TaxZone as DbTaxZone } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -146,7 +147,16 @@ export async function softDeleteTaxRate(taxRateId: string): Promise<void> {
 // ============================================================================
 
 export async function findAllTaxZones(): Promise<AdminTaxZone[]> {
-  return (await query<AdminTaxZone[]>(`SELECT * FROM "taxZone" ORDER BY "name"`)) || [];
+  const rows = await query<DbTaxZone[]>(`SELECT * FROM "taxZone" ORDER BY "name"`);
+  return (rows || []).map(row => ({
+    taxZoneId: row.taxZoneId,
+    name: row.name,
+    description: row.description ?? undefined,
+    countries: Array.isArray(row.countries) ? (row.countries as string[]) : undefined,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }));
 }
 
 export async function createTaxZone(params: { name: string; description?: string; countries: string[]; isActive: boolean }): Promise<void> {
@@ -213,4 +223,3 @@ export async function updateTaxClass(taxClassId: string, params: { name: string;
 export async function softDeleteTaxClass(taxClassId: string): Promise<void> {
   await query(`UPDATE "taxCategory" SET "isActive" = false, "updatedAt" = NOW() WHERE "taxCategoryId" = $1`, [taxClassId]);
 }
-

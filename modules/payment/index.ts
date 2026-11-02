@@ -23,4 +23,3 @@ export { handleGatewayWebhook } from './interface/controllers/webhookController'
 export { paymentTypeDefs } from './interface/graphql/typeDefs';
 export { paymentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

@@ -16,5 +16,3 @@ export interface FraudScreeningRepositoryPort {
   incrementRuleTrigger(fraudRuleId: string): Promise<void>;
   isBlacklisted(type: BlacklistType, value: string): Promise<boolean>;
 }
-
-

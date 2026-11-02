@@ -7,6 +7,7 @@ import { queryOne, query } from '../../../../libs/db';
 import { ContentRedirect } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { ContentValidationError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
+import type { ContentRedirect as DbContentRedirect } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -23,11 +24,11 @@ export type ContentRedirectUpdateParams = Partial<
 
 export class ContentRedirectRepo {
   async findRedirectById(id: string): Promise<ContentRedirect | null> {
-    return queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "contentRedirectId" = $1', [id]);
+    return queryOne<DbContentRedirect>('SELECT * FROM "contentRedirect" WHERE "contentRedirectId" = $1', [id]);
   }
 
   async findRedirectBySourceUrl(sourceUrl: string): Promise<ContentRedirect | null> {
-    return queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1 AND "isActive" = true', [sourceUrl]);
+    return queryOne<DbContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1 AND "isActive" = true', [sourceUrl]);
   }
 
   async findMatchingRedirect(url: string): Promise<ContentRedirect | null> {
@@ -38,7 +39,7 @@ export class ContentRedirectRepo {
     }
 
     // Then try regex matches
-    const regexRedirects = await query<ContentRedirect[]>('SELECT * FROM "contentRedirect" WHERE "isRegex" = true AND "isActive" = true');
+    const regexRedirects = await query<DbContentRedirect[]>('SELECT * FROM "contentRedirect" WHERE "isRegex" = true AND "isActive" = true');
 
     if (regexRedirects) {
       for (const redirect of regexRedirects) {
@@ -69,7 +70,7 @@ export class ContentRedirectRepo {
     sql += ` ORDER BY "hits" DESC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(limit, offset);
 
-    const results = await query<ContentRedirect[]>(sql, params);
+    const results = await query<DbContentRedirect[]>(sql, params);
     return results || [];
   }
 
@@ -77,7 +78,7 @@ export class ContentRedirectRepo {
     const now = unixTimestamp();
 
     // Check for duplicate source URL
-    const existing = await queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1', [params.sourceUrl]);
+    const existing = await queryOne<DbContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1', [params.sourceUrl]);
     if (existing) {
       throw new ContentValidationError(`Redirect for source URL "${params.sourceUrl}" already exists`);
     }
@@ -91,7 +92,7 @@ export class ContentRedirectRepo {
       }
     }
 
-    const result = await queryOne<ContentRedirect>(
+    const result = await queryOne<DbContentRedirect>(
       `INSERT INTO "contentRedirect" 
       ("sourceUrl", "targetUrl", "statusCode", "isRegex", "isActive", "hits", "notes", 
        "createdAt", "updatedAt", "createdBy", "updatedBy") 
@@ -154,7 +155,7 @@ export class ContentRedirectRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<ContentRedirect>(
+    const result = await queryOne<DbContentRedirect>(
       `UPDATE "contentRedirect" SET ${updateFields.join(', ')} WHERE "contentRedirectId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -180,7 +181,7 @@ export class ContentRedirectRepo {
   }
 
   async getTopRedirects(limit: number = 10): Promise<ContentRedirect[]> {
-    const results = await query<ContentRedirect[]>(
+    const results = await query<DbContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "isActive" = true ORDER BY "hits" DESC LIMIT $1',
       [limit],
     );
@@ -188,7 +189,7 @@ export class ContentRedirectRepo {
   }
 
   async getRecentRedirects(limit: number = 10): Promise<ContentRedirect[]> {
-    const results = await query<ContentRedirect[]>(
+    const results = await query<DbContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "lastUsed" IS NOT NULL ORDER BY "lastUsed" DESC LIMIT $1',
       [limit],
     );

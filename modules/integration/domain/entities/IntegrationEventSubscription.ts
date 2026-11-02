@@ -6,7 +6,6 @@
  * to the integration's endpoint.
  */
 
-
 export interface IntegrationEventSubscriptionProps {
   subscriptionId: string;
   integrationId: string;

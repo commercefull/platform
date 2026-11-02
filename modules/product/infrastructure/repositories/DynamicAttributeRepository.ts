@@ -16,6 +16,8 @@ import type {
   ProductAttributeValue,
   ProductAttributeData,
 } from '../../domain/repositories/ProductCatalogPorts';
+import type { ProductAttributeValueMap as DbProductAttributeValueMap } from '../../../../libs/db/types';
+
 export type {
   AttributeType,
   ProductAttribute,
@@ -390,7 +392,7 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttributeValueMap>(sql, [
+    const result = await queryOne<DbProductAttributeValueMap>(sql, [
       input.productId,
       input.attributeId,
       input.value,

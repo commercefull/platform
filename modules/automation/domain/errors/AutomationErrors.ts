@@ -6,13 +6,11 @@ export class AutomationRuleNotFoundError extends AppError {
   }
 }
 
-
 export class InvalidAutomationRuleError extends AppError {
   constructor(reason: string) {
     super(`Invalid automation rule: ${reason}`, 400, { code: 'automation.invalid_rule', details: { reason } });
   }
 }
-
 
 export class AutomationValidationError extends AppError {
   constructor(message: string) {

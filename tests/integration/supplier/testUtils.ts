@@ -1,4 +1,3 @@
-
 // Seeded test data IDs from seeds/20240805001800_seedSupplierTestData.js
 export const SEEDED_SUPPLIER_IDS = {
   ACME_CORP: '01938000-0000-7000-8000-000000000001',
@@ -12,7 +11,6 @@ export const SEEDED_SUPPLIER_ADDRESS_IDS = {
   GLOBAL_HQ: '01938001-0000-7000-8000-000000000003',
 };
 
-
 export const SEEDED_PURCHASE_ORDER_IDS = {
   PO_001: '01938003-0000-7000-8000-000000000001',
   PO_002: '01938003-0000-7000-8000-000000000002',
@@ -20,7 +18,6 @@ export const SEEDED_PURCHASE_ORDER_IDS = {
 
 // Warehouse ID from seeds/20240805002100_seedWarehouseTestData.js
 export const SEEDED_WAREHOUSE_ID = '0193b000-0000-7000-8000-000000000001';
-
 
 export function createTestSupplier(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();

@@ -23,12 +23,7 @@ import {
   submitProductQa,
   voteOnReview,
 } from '../controllers/ProductCustomerController';
-import {
-  calculateBundlePrice,
-  getActiveBundles,
-  getBundleByProduct,
-  getBundleDetails,
-} from '../controllers/BundleController';
+import { calculateBundlePrice, getActiveBundles, getBundleByProduct, getBundleDetails } from '../controllers/BundleController';
 import productSearchController from '../controllers/ProductSearchController';
 import { isCustomerLoggedIn, optionalCustomerAuth } from '../../../../libs/auth';
 

@@ -11,6 +11,3 @@ export interface PaymentReport {
   createdAt: Date;
   updatedAt: Date;
 }
-
-
-

@@ -5,12 +5,7 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
-import {
-  checkGiftCardBalance,
-  getMyGiftCards,
-  redeemGiftCard,
-  reloadGiftCard,
-} from '../controllers/giftCardCustomerController';
+import { checkGiftCardBalance, getMyGiftCards, redeemGiftCard, reloadGiftCard } from '../controllers/giftCardCustomerController';
 const router = createHttpRouter();
 
 // Gift Card routes

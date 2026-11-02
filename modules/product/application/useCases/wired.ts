@@ -18,7 +18,6 @@ import productAttributeRepository from '../../infrastructure/repositories/Produc
 import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductPricingAdapter } from '../../infrastructure/acl/ProductPricingAdapter';
 
-
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
 import { GetProductUseCase } from './GetProduct';
@@ -136,7 +135,6 @@ export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmen
 );
 export const getProductAttributesUseCase = new GetProductAttributesUseCase(dynamicAttributeRepo);
 export const searchProductsUseCase = new SearchProductsUseCase(productRepo, productPricingPort);
-
 
 export const createCatalogVariantUseCase = new CreateCatalogVariantUseCase(catalogVariantRepo, productPricingPort);
 export const updateCatalogVariantUseCase = new UpdateCatalogVariantUseCase(catalogVariantRepo, productPricingPort);

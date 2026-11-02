@@ -3,7 +3,6 @@
  * Shared test data and IDs for content integration tests
  */
 
-
 export const TEST_DATA = {
   contentType: {
     name: 'Test Blog Post',

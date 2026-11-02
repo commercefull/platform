@@ -9,6 +9,7 @@ import { InventoryReservation } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
 import crypto from 'crypto';
 import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
+import type { InventoryReservation as DbInventoryReservation } from '../../../../libs/db/types';
 
 interface CreateReservationParams {
   orderId: string;
@@ -33,7 +34,7 @@ async function create(params: CreateReservationParams): Promise<InventoryReserva
     RETURNING *
   `;
 
-  const result = await queryOne<InventoryReservation>(sql, [
+  const result = await queryOne<DbInventoryReservation>(sql, [
     reservationId,
     params.inventoryItemId,
     params.productId,
@@ -85,7 +86,7 @@ async function createAtomic(params: CreateReservationParams): Promise<InventoryR
         [params.locationId, params.quantity, now],
       );
 
-      return tx.queryOne<InventoryReservation>(
+      return tx.queryOne<DbInventoryReservation>(
         `INSERT INTO "inventoryReservation" (
           "inventoryReservationId", "inventoryItemId", "productId", "variantId", "sku",
           "orderId", "locationId", "quantity", "status", "expiresAt", "createdAt", "updatedAt"
@@ -114,13 +115,14 @@ async function createAtomic(params: CreateReservationParams): Promise<InventoryR
 }
 
 async function findById(reservationId: string): Promise<InventoryReservation | null> {
-  return queryOne<InventoryReservation>('SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1', [reservationId]);
+  return queryOne<DbInventoryReservation>('SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1', [reservationId]);
 }
 
 async function findByOrder(orderId: string): Promise<InventoryReservation[]> {
-  const result = await query<InventoryReservation[]>('SELECT * FROM "inventoryReservation" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [
-    orderId,
-  ]);
+  const result = await query<DbInventoryReservation[]>(
+    'SELECT * FROM "inventoryReservation" WHERE "orderId" = $1 ORDER BY "createdAt" ASC',
+    [orderId],
+  );
   return result ?? [];
 }
 
@@ -137,7 +139,7 @@ async function findByLocation(locationId: string, productId?: string, variantId?
     params.push(variantId);
   }
 
-  const result = await query<InventoryReservation[]>(sql, params);
+  const result = await query<DbInventoryReservation[]>(sql, params);
   return result ?? [];
 }
 
@@ -185,7 +187,7 @@ async function release(inventoryReservationId: string): Promise<boolean> {
 }
 
 async function consume(reservationId: string): Promise<boolean> {
-  const result = await queryOne<InventoryReservation>(
+  const result = await queryOne<DbInventoryReservation>(
     'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2 AND "status" = \'reserved\' RETURNING *',
     [new Date(), reservationId],
   );
@@ -228,7 +230,7 @@ async function releaseByOrder(orderId: string): Promise<number> {
 async function consumeByOrder(orderId: string): Promise<number> {
   // Finalize all live holds: 'reserved' (event-path), 'active' (checkout
   // orchestration), and 'confirmed' (post-payment allocations).
-  const result = await query<InventoryReservation[]>(
+  const result = await query<DbInventoryReservation[]>(
     'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "orderId" = $2 AND "status" IN (\'reserved\', \'active\', \'confirmed\') RETURNING *',
     [new Date(), orderId],
   );
@@ -237,7 +239,7 @@ async function consumeByOrder(orderId: string): Promise<number> {
 
 export async function releaseExpired(): Promise<number> {
   const now = new Date();
-  const expired = await query<InventoryReservation[]>(
+  const expired = await query<DbInventoryReservation[]>(
     'SELECT * FROM "inventoryReservation" WHERE "status" IN (\'reserved\', \'active\') AND "expiresAt" IS NOT NULL AND "expiresAt" < $1',
     [now],
   );

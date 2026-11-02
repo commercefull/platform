@@ -13,7 +13,6 @@ import type {
   SenderType,
 } from '../entities/SupportTicket';
 
-
 export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType };
 type SupportTicket = SupportTicketProps;
 export type AgentRole = 'agent' | 'supervisor' | 'admin';
@@ -51,5 +50,3 @@ export interface SupportTicketWithCustomer extends SupportTicket {
   customerEmail?: string;
   customerName?: string;
 }
-
-

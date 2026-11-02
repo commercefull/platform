@@ -2,6 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table, StoreCurrencySettings } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
+import type { StoreCurrencySettings as DbStoreCurrencySettings } from '../../../../libs/db/types';
 
 export type RoundingMethod = 'up' | 'down' | 'ceiling' | 'floor' | 'half_up' | 'half_down' | 'half_even';
 export type PriceDisplayFormat = 'symbol' | 'code' | 'symbol_code' | 'name';
@@ -14,7 +15,7 @@ class StoreCurrencySettingsRepo {
    * Find settings by ID
    */
   async findById(storeCurrencySettingsId: string): Promise<StoreCurrencySettings | null> {
-    return await queryOne<StoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeCurrencySettingsId" = $1`, [
+    return await queryOne<DbStoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeCurrencySettingsId" = $1`, [
       storeCurrencySettingsId,
     ]);
   }
@@ -23,14 +24,14 @@ class StoreCurrencySettingsRepo {
    * Find settings for a store (one settings row per store)
    */
   async findByStore(storeId: string): Promise<StoreCurrencySettings | null> {
-    return await queryOne<StoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeId" = $1`, [storeId]);
+    return await queryOne<DbStoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeId" = $1`, [storeId]);
   }
 
   /**
    * Find all settings
    */
   async findAll(): Promise<StoreCurrencySettings[]> {
-    const results = await query<StoreCurrencySettings[]>(`SELECT * FROM "${Table.StoreCurrencySettings}" ORDER BY "createdAt" ASC`);
+    const results = await query<DbStoreCurrencySettings[]>(`SELECT * FROM "${Table.StoreCurrencySettings}" ORDER BY "createdAt" ASC`);
     return results || [];
   }
 
@@ -38,7 +39,7 @@ class StoreCurrencySettingsRepo {
    * Find settings by base currency
    */
   async findByBaseCurrency(baseCurrencyId: string): Promise<StoreCurrencySettings[]> {
-    const results = await query<StoreCurrencySettings[]>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "baseCurrencyId" = $1`, [
+    const results = await query<DbStoreCurrencySettings[]>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "baseCurrencyId" = $1`, [
       baseCurrencyId,
     ]);
     return results || [];
@@ -48,7 +49,7 @@ class StoreCurrencySettingsRepo {
    * Find settings with auto-update enabled
    */
   async findWithAutoUpdate(): Promise<StoreCurrencySettings[]> {
-    const results = await query<StoreCurrencySettings[]>(
+    const results = await query<DbStoreCurrencySettings[]>(
       `SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "autoUpdateRates" = true`,
       [],
     );
@@ -66,7 +67,7 @@ class StoreCurrencySettingsRepo {
       throw new PricingValidationError(`Settings already exist for store ID '${params.storeId}'`);
     }
 
-    const result = await queryOne<StoreCurrencySettings>(
+    const result = await queryOne<DbStoreCurrencySettings>(
       `INSERT INTO "${Table.StoreCurrencySettings}" (
         "storeId", "baseCurrencyId", "displayCurrencyId",
         "allowCustomerCurrencySelection", "showCurrencySelector", "autoUpdateRates",
@@ -124,7 +125,7 @@ class StoreCurrencySettingsRepo {
     values.push(unixTimestamp());
     values.push(storeCurrencySettingsId);
 
-    const result = await queryOne<StoreCurrencySettings>(
+    const result = await queryOne<DbStoreCurrencySettings>(
       `UPDATE "${Table.StoreCurrencySettings}" 
        SET ${updateFields.join(', ')}
        WHERE "storeCurrencySettingsId" = $${paramIndex}

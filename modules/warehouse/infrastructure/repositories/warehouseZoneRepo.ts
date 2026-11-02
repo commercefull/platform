@@ -9,7 +9,6 @@ import { FailedToCreateWarehouseEntityError } from '../../domain/errors/Warehous
 import type { DistributionWarehouseZone as DbDistributionWarehouseZone } from '../../../../libs/db/types';
 import type { WarehouseZone, CreateZoneInput, UpdateZoneInput } from '../../domain/repositories/WarehouseRepository';
 
-
 const rec = (v: unknown): Record<string, unknown> | undefined => (v as Record<string, unknown> | null) ?? undefined;
 
 function mapToZone(row: DbDistributionWarehouseZone): WarehouseZone {

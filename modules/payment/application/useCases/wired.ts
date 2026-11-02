@@ -140,4 +140,3 @@ const failoverRoutingEngine = new FailoverRoutingEngine({
 const pspRoutingRepo = new PSPRoutingRepositoryImpl(gatewayRepo);
 const routePaymentUseCase = new RoutePaymentUseCase(pspRoutingRepo, failoverRoutingEngine);
 export const chargeDelegatedPaymentUseCase = new ChargeDelegatedPaymentUseCase(paymentRepo, routePaymentUseCase, orderStatusSyncAdapter);
-

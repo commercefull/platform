@@ -10,16 +10,16 @@ export type ProductSeoUpdateParams = Partial<Omit<ProductSeo, 'productSeoId' | '
 
 class ProductSeoRepo {
   async findById(id: string): Promise<ProductSeo | null> {
-    return await queryOne<ProductSeo>(`SELECT * FROM "productSeo" WHERE "productSeoId" = $1 AND "deletedAt" IS NULL`, [id]);
+    return await queryOne<DbProductSeo>(`SELECT * FROM "productSeo" WHERE "productSeoId" = $1 AND "deletedAt" IS NULL`, [id]);
   }
 
   async findByProductId(productId: string): Promise<ProductSeo | null> {
-    return await queryOne<ProductSeo>(`SELECT * FROM "productSeo" WHERE "productId" = $1 AND "deletedAt" IS NULL`, [productId]);
+    return await queryOne<DbProductSeo>(`SELECT * FROM "productSeo" WHERE "productId" = $1 AND "deletedAt" IS NULL`, [productId]);
   }
 
   async findAll(limit = 100, offset = 0): Promise<ProductSeo[]> {
     return (
-      (await query<ProductSeo[]>(`SELECT * FROM "productSeo" WHERE "deletedAt" IS NULL ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`, [
+      (await query<DbProductSeo[]>(`SELECT * FROM "productSeo" WHERE "deletedAt" IS NULL ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`, [
         limit,
         offset,
       ])) || []
@@ -33,7 +33,7 @@ class ProductSeoRepo {
     const existing = await this.findByProductId(params.productId);
     if (existing) throw new ProductValidationError('SEO already exists for this product');
 
-    const result = await queryOne<ProductSeo>(
+    const result = await queryOne<DbProductSeo>(
       `INSERT INTO "productSeo" (
         "productId", "metaTitle", "metaDescription", "metaKeywords", "ogTitle", "ogDescription",
         "ogImage", "twitterCard", "twitterTitle", "twitterDescription", "twitterImage",
@@ -91,7 +91,7 @@ class ProductSeoRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<ProductSeo>(
+    return await queryOne<DbProductSeo>(
       `UPDATE "productSeo" SET ${updateFields.join(', ')} WHERE "productSeoId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
       values,
     );

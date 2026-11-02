@@ -7,7 +7,6 @@ import {
   ContentBlockType,
   ContentTemplate,
   ContentPagePublication,
-  ContentPageTranslation,
 } from '../../../../libs/db/types';
 import type { ContentPublicationContext } from '../../domain/repositories/ContentRepository';
 import { unixTimestamp } from '../../../../libs/date';
@@ -20,6 +19,13 @@ import {
   FailedToCreateContentError,
   SlugAlreadyExistsError,
 } from '../../domain/errors/ContentErrors';
+import type { ContentBlockType as DbContentBlockType } from '../../../../libs/db/types';
+import type { ContentType as DbContentType } from '../../../../libs/db/types';
+import type { ContentPage as DbContentPage } from '../../../../libs/db/types';
+import type { ContentPagePublication as DbContentPagePublication } from '../../../../libs/db/types';
+import type { ContentPageTranslation as DbContentPageTranslation } from '../../../../libs/db/types';
+import type { ContentBlock as DbContentBlock } from '../../../../libs/db/types';
+import type { ContentTemplate as DbContentTemplate } from '../../../../libs/db/types';
 
 // Table constants
 const TABLES = {
@@ -65,7 +71,7 @@ type ContentTemplateUpdateParams = Partial<
 class ContentRepo {
   // Content Block Type methods
   async findBlockTypeById(id: string): Promise<ContentBlockType | null> {
-    return queryOne<ContentBlockType>(`SELECT * FROM "${TABLES.CONTENT_BLOCK_TYPE}" WHERE "contentBlockTypeId" = $1`, [id]);
+    return queryOne<DbContentBlockType>(`SELECT * FROM "${TABLES.CONTENT_BLOCK_TYPE}" WHERE "contentBlockTypeId" = $1`, [id]);
   }
 
   async findAllBlockTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentBlockType[]> {
@@ -80,17 +86,17 @@ class ContentRepo {
     sql += ` ORDER BY "sortOrder" ASC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
-    const results = await query<ContentBlockType[]>(sql, params);
+    const results = await query<DbContentBlockType[]>(sql, params);
     return results || [];
   }
 
   // Content Type methods
   async findContentTypeById(id: string): Promise<ContentType | null> {
-    return queryOne<ContentType>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1`, [id]);
+    return queryOne<DbContentType>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1`, [id]);
   }
 
   async findContentTypeBySlug(slug: string): Promise<ContentType | null> {
-    return queryOne<ContentType>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "slug" = $1`, [slug]);
+    return queryOne<DbContentType>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "slug" = $1`, [slug]);
   }
 
   async findAllContentTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentType[]> {
@@ -105,7 +111,7 @@ class ContentRepo {
     sql += ' ORDER BY "name" ASC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
     params.push(limit, offset);
 
-    const results = await query<ContentType[]>(sql, params);
+    const results = await query<DbContentType[]>(sql, params);
     return results || [];
   }
 
@@ -118,7 +124,7 @@ class ContentRepo {
       throw new SlugAlreadyExistsError(params.slug);
     }
 
-    const result = await queryOne<ContentType>(
+    const result = await queryOne<DbContentType>(
       `INSERT INTO "${TABLES.CONTENT_TYPE}" 
       ("name", "slug", "description", "icon", "allowedBlocks", "defaultTemplate", 
        "requiredFields", "metaFields", "isSystem", "isActive", "createdAt", "updatedAt") 
@@ -211,7 +217,7 @@ class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<ContentType>(query, values);
+    const result = await queryOne<DbContentType>(query, values);
 
     if (!result) {
       throw new FailedToCreateContentError(`Failed to update content type with ID ${id}`);
@@ -241,15 +247,15 @@ class ContentRepo {
 
   // Content Page methods
   async findPageById(id: string): Promise<ContentPage | null> {
-    return queryOne<ContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1`, [id]);
+    return queryOne<DbContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1`, [id]);
   }
 
   async findPageBySlug(slug: string): Promise<ContentPage | null> {
-    return queryOne<ContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "slug" = $1`, [slug]);
+    return queryOne<DbContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "slug" = $1`, [slug]);
   }
 
   async findHomePage(): Promise<ContentPage | null> {
-    return queryOne<ContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "isHomePage" = true LIMIT 1`);
+    return queryOne<DbContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "isHomePage" = true LIMIT 1`);
   }
 
   async findAllPages(
@@ -286,7 +292,7 @@ class ContentRepo {
     sql += ' ORDER BY "title" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex;
     params.push(limit, offset);
 
-    const results = await query<ContentPage[]>(sql, params);
+    const results = await query<DbContentPage[]>(sql, params);
     return results || [];
   }
 
@@ -335,7 +341,7 @@ class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<ContentPage>(sqlQuery, fieldValues);
+    const result = await queryOne<DbContentPage>(sqlQuery, fieldValues);
 
     if (!result) {
       throw new FailedToCreateContentError('Failed to create content page');
@@ -397,7 +403,7 @@ class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<ContentPage>(sql, values);
+    const result = await queryOne<DbContentPage>(sql, values);
 
     if (!result) {
       throw new FailedToCreateContentError(`Failed to update page with ID ${id}`);
@@ -422,7 +428,7 @@ class ContentRepo {
   async publishPage(id: string): Promise<ContentPage> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ContentPage>(
+    const result = await queryOne<DbContentPage>(
       `UPDATE "${TABLES.CONTENT_PAGE}" 
        SET "status" = 'published', "publishedAt" = $1, "updatedAt" = $1 
        WHERE "contentPageId" = $2 
@@ -440,7 +446,7 @@ class ContentRepo {
   // Content Page Publication methods
 
   async findPagePublications(contentPageId: string): Promise<ContentPagePublication[]> {
-    const rows = await query<ContentPagePublication[]>(
+    const rows = await query<DbContentPagePublication[]>(
       `SELECT * FROM "${TABLES.CONTENT_PAGE_PUBLICATION}" WHERE "contentPageId" = $1 ORDER BY "createdAt" ASC`,
       [contentPageId],
     );
@@ -454,7 +460,7 @@ class ContentRepo {
     locale?: string | null;
   }): Promise<ContentPagePublication> {
     const now = unixTimestamp();
-    const result = await queryOne<ContentPagePublication>(
+    const result = await queryOne<DbContentPagePublication>(
       `INSERT INTO "${TABLES.CONTENT_PAGE_PUBLICATION}"
          ("contentPageId", "storeId", "channelId", "locale", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $5)
@@ -482,7 +488,7 @@ class ContentRepo {
     channelId?: string | null,
     locale?: string | null,
   ): Promise<ContentPagePublication | null> {
-    return queryOne<ContentPagePublication>(
+    return queryOne<DbContentPagePublication>(
       `SELECT * FROM "${TABLES.CONTENT_PAGE_PUBLICATION}"
        WHERE "contentPageId" = $1 AND "storeId" = $2
          AND "channelId" IS NOT DISTINCT FROM $3
@@ -521,7 +527,7 @@ class ContentRepo {
     if (context.locale) {
       const language = context.locale.split('-')[0];
       const clause = this.publicationVisibilityClause(context, 4);
-      const translated = await queryOne<ContentPage>(
+      const translated = await queryOne<DbContentPage>(
         `SELECT "${TABLES.CONTENT_PAGE}".* FROM "${TABLES.CONTENT_PAGE}"
          JOIN "${TABLES.CONTENT_PAGE_TRANSLATION}" t
            ON t."contentPageId" = "${TABLES.CONTENT_PAGE}"."contentPageId"
@@ -539,7 +545,7 @@ class ContentRepo {
     }
 
     const { sql, params } = this.publicationVisibilityClause(context, 2);
-    const page = await queryOne<ContentPage>(
+    const page = await queryOne<DbContentPage>(
       `SELECT * FROM "${TABLES.CONTENT_PAGE}"
        WHERE "slug" = $1 AND "status" = 'published' AND ${sql}
        ORDER BY "updatedAt" DESC
@@ -558,7 +564,7 @@ class ContentRepo {
    */
   private async overlayPageTranslation(page: ContentPage, locale: string): Promise<ContentPage> {
     const language = locale.split('-')[0];
-    const translation = await queryOne<ContentPageTranslation>(
+    const translation = await queryOne<DbContentPageTranslation>(
       `SELECT t.* FROM "${TABLES.CONTENT_PAGE_TRANSLATION}" t
        JOIN "locale" l ON l."localeId" = t."localeId"
        WHERE t."contentPageId" = $1 AND t."isPublished" = true
@@ -580,7 +586,7 @@ class ContentRepo {
 
   async findPublishedPagesForContext(context: ContentPublicationContext, limit: number = 50, offset: number = 0): Promise<ContentPage[]> {
     const { sql, params } = this.publicationVisibilityClause(context, 3);
-    const rows = await query<ContentPage[]>(
+    const rows = await query<DbContentPage[]>(
       `SELECT * FROM "${TABLES.CONTENT_PAGE}"
        WHERE "status" = 'published' AND ${sql}
        ORDER BY "sortOrder" ASC, "publishedAt" DESC
@@ -592,11 +598,11 @@ class ContentRepo {
 
   // Content Block methods
   async findBlockById(id: string): Promise<ContentBlock | null> {
-    return queryOne<ContentBlock>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1`, [id]);
+    return queryOne<DbContentBlock>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1`, [id]);
   }
 
   async findBlocksByPageId(pageId: string): Promise<ContentBlock[]> {
-    const results = await query<ContentBlock[]>(
+    const results = await query<DbContentBlock[]>(
       `SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentPageId" = $1 ORDER BY "sortOrder" ASC`,
       [pageId],
     );
@@ -618,7 +624,7 @@ class ContentRepo {
       throw new ContentTypeNotFoundError(params.blockTypeId);
     }
 
-    const result = await queryOne<ContentBlock>(
+    const result = await queryOne<DbContentBlock>(
       `INSERT INTO "${TABLES.CONTENT_BLOCK}" 
       ("contentPageId", "blockTypeId", "title", "area", "sortOrder", "content", "isVisible", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
@@ -686,7 +692,7 @@ class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<ContentBlock>(sql, values);
+    const result = await queryOne<DbContentBlock>(sql, values);
 
     if (!result) {
       throw new FailedToCreateContentError(`Failed to update content block with ID ${id}`);
@@ -706,7 +712,7 @@ class ContentRepo {
 
   // Content Template methods
   async findTemplateById(id: string): Promise<ContentTemplate | null> {
-    return queryOne<ContentTemplate>(`SELECT * FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1`, [id]);
+    return queryOne<DbContentTemplate>(`SELECT * FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1`, [id]);
   }
 
   async findAllTemplates(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentTemplate[]> {
@@ -727,14 +733,14 @@ class ContentRepo {
     sql += ' ORDER BY "name" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex;
     params.push(limit, offset);
 
-    const results = await query<ContentTemplate[]>(sql, params);
+    const results = await query<DbContentTemplate[]>(sql, params);
     return results || [];
   }
 
   async createTemplate(params: ContentTemplateCreateParams): Promise<ContentTemplate> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ContentTemplate>(
+    const result = await queryOne<DbContentTemplate>(
       `INSERT INTO "${TABLES.CONTENT_TEMPLATE}" 
       ("name", "slug", "description", "thumbnail", "htmlStructure", "cssStyles", "jsScripts", 
        "areas", "defaultBlocks", "compatibleContentTypes", "isSystem", "isActive", "createdAt", "updatedAt") 
@@ -808,7 +814,7 @@ class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<ContentTemplate>(sql, values);
+    const result = await queryOne<DbContentTemplate>(sql, values);
 
     if (!result) {
       throw new FailedToCreateContentError(`Failed to update content template with ID ${id}`);

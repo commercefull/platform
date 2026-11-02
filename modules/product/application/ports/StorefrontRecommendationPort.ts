@@ -37,4 +37,3 @@ export interface StorefrontRecommendationPort {
     limit?: number,
   ): Promise<StorefrontRecommendationItem[]>;
 }
-

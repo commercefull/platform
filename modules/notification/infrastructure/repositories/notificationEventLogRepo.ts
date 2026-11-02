@@ -3,10 +3,8 @@ import { query, queryOne } from '../../../../libs/db';
 
 type NotificationEventLog = DbNotificationEventLog;
 
-async function create(
-  params: Omit<NotificationEventLog, 'notificationEventLogId' | 'createdAt'>,
-): Promise<NotificationEventLog | null> {
-  return queryOne<NotificationEventLog>(
+async function create(params: Omit<NotificationEventLog, 'notificationEventLogId' | 'createdAt'>): Promise<NotificationEventLog | null> {
+  return queryOne<DbNotificationEventLog>(
     `INSERT INTO "notificationEventLog" ("notificationId", "deliveryLogId", "userId", "userType", "eventType", "eventData", "createdAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [
@@ -26,7 +24,7 @@ async function create(
 }
 
 async function findUnprocessed(limit = 100): Promise<NotificationEventLog[]> {
-  return (await query<NotificationEventLog[]>(`SELECT * FROM "notificationEventLog" ORDER BY "createdAt" ASC LIMIT $1`, [limit])) || [];
+  return (await query<DbNotificationEventLog[]>(`SELECT * FROM "notificationEventLog" ORDER BY "createdAt" ASC LIMIT $1`, [limit])) || [];
 }
 
 async function markProcessed(notificationEventLogId: string): Promise<void> {

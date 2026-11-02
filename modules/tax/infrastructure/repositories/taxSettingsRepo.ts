@@ -19,16 +19,16 @@ type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'orga
 
 class TaxSettingsRepo {
   async findById(id: string): Promise<TaxSettings | null> {
-    return await queryOne<TaxSettings>(`SELECT * FROM "taxSettings" WHERE "taxSettingsId" = $1`, [id]);
+    return await queryOne<DbTaxSettings>(`SELECT * FROM "taxSettings" WHERE "taxSettingsId" = $1`, [id]);
   }
 
   async findByMerchant(organizationId: string): Promise<TaxSettings | null> {
-    return await queryOne<TaxSettings>(`SELECT * FROM "taxSettings" WHERE "organizationId" = $1`, [organizationId]);
+    return await queryOne<DbTaxSettings>(`SELECT * FROM "taxSettings" WHERE "organizationId" = $1`, [organizationId]);
   }
 
   async create(params: TaxSettingsCreateParams): Promise<TaxSettings> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxSettings>(
+    const result = await queryOne<DbTaxSettings>(
       `INSERT INTO "taxSettings" (
         "organizationId", "calculationMethod", "pricesIncludeTax", "displayPricesWithTax", "taxBasedOn",
         "shippingTaxClass", "displayTaxTotals", "applyTaxToShipping", "applyDiscountBeforeTax",
@@ -76,7 +76,7 @@ class TaxSettingsRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxSettings>(
+    return await queryOne<DbTaxSettings>(
       `UPDATE "taxSettings" SET ${updateFields.join(', ')} WHERE "taxSettingsId" = $${paramIndex} RETURNING *`,
       values,
     );

@@ -6,6 +6,7 @@ import type {
   ProductCategoryCreateParams,
   ProductCategoryUpdateParams,
 } from '../../domain/repositories/ProductCatalogPorts';
+import type { ProductCategory as DbProductCategory } from '../../../../libs/db/types';
 export type { ProductCategoryCreateParams, ProductCategoryUpdateParams } from '../../domain/repositories/ProductCatalogPorts';
 export type ProductCategory = ProductCategoryRow;
 
@@ -14,20 +15,20 @@ class ProductCategoryRepo {
     const sql = includeDeleted
       ? `SELECT * FROM "productCategory" ORDER BY "position" ASC, "name" ASC`
       : `SELECT * FROM "productCategory" ORDER BY "position" ASC, "name" ASC`;
-    return (await query<ProductCategory[]>(sql)) || [];
+    return (await query<DbProductCategory[]>(sql)) || [];
   }
 
   async findById(productCategoryId: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1`, [productCategoryId]);
+    return queryOne<DbProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1`, [productCategoryId]);
   }
 
   async findBySlug(slug: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "slug" = $1`, [slug]);
+    return queryOne<DbProductCategory>(`SELECT * FROM "productCategory" WHERE "slug" = $1`, [slug]);
   }
 
   async create(params: ProductCategoryCreateParams): Promise<ProductCategory> {
     const now = new Date();
-    const result = await queryOne<ProductCategory>(
+    const result = await queryOne<DbProductCategory>(
       `INSERT INTO "productCategory" ("name", "slug", "description", "parentId", "position", "isActive", "imageUrl", "metaTitle", "metaDescription", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
@@ -65,7 +66,7 @@ class ProductCategoryRepo {
     fields.push(`"updatedAt" = $${i++}`);
     values.push(new Date(), productCategoryId);
 
-    return queryOne<ProductCategory>(
+    return queryOne<DbProductCategory>(
       `UPDATE "productCategory" SET ${fields.join(', ')} WHERE "productCategoryId" = $${i} RETURNING *`,
       values,
     );

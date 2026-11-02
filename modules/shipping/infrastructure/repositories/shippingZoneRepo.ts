@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingZone } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
+import type { ShippingZone as DbShippingZone } from '../../../../libs/db/types';
 
 export { ShippingZone };
 
@@ -15,25 +16,25 @@ export type UpdateShippingZoneInput = Partial<Omit<ShippingZone, 'shippingZoneId
 const TABLE = Table.ShippingZone;
 
 async function findById(id: string): Promise<ShippingZone | null> {
-  return queryOne<ShippingZone>(`SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1`, [id]);
+  return queryOne<DbShippingZone>(`SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1`, [id]);
 }
 
 async function findByName(name: string): Promise<ShippingZone | null> {
-  return queryOne<ShippingZone>(`SELECT * FROM "${TABLE}" WHERE "name" = $1`, [name]);
+  return queryOne<DbShippingZone>(`SELECT * FROM "${TABLE}" WHERE "name" = $1`, [name]);
 }
 
 async function findAll(activeOnly = false): Promise<ShippingZone[]> {
   let sql = `SELECT * FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   sql += ` ORDER BY "priority" ASC, "name" ASC`;
-  return (await query<ShippingZone[]>(sql)) || [];
+  return (await query<DbShippingZone[]>(sql)) || [];
 }
 
 async function findByLocationType(locationType: ShippingZone['locationType'], activeOnly = false): Promise<ShippingZone[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "locationType" = $1`;
   if (activeOnly) sql += ` AND "isActive" = true`;
   sql += ` ORDER BY "priority" ASC`;
-  return (await query<ShippingZone[]>(sql, [locationType])) || [];
+  return (await query<DbShippingZone[]>(sql, [locationType])) || [];
 }
 
 async function findByLocation(country: string, state?: string): Promise<ShippingZone[]> {
@@ -45,7 +46,7 @@ async function findByLocation(country: string, state?: string): Promise<Shipping
       AND NOT (COALESCE("excludedLocations", '[]'::jsonb) @> $1::jsonb OR COALESCE("excludedLocations", '[]'::jsonb) @> $2::jsonb)
       ORDER BY "priority" ASC
     `;
-    return (await query<ShippingZone[]>(sql, [JSON.stringify([country]), JSON.stringify([state])])) || [];
+    return (await query<DbShippingZone[]>(sql, [JSON.stringify([country]), JSON.stringify([state])])) || [];
   }
   const sql = `
     SELECT * FROM "${TABLE}" 
@@ -54,11 +55,11 @@ async function findByLocation(country: string, state?: string): Promise<Shipping
     AND NOT (COALESCE("excludedLocations", '[]'::jsonb) @> $1::jsonb)
     ORDER BY "priority" ASC
   `;
-  return (await query<ShippingZone[]>(sql, [JSON.stringify([country])])) || [];
+  return (await query<DbShippingZone[]>(sql, [JSON.stringify([country])])) || [];
 }
 
 async function create(input: CreateShippingZoneInput): Promise<ShippingZone> {
-  const result = await queryOne<ShippingZone>(
+  const result = await queryOne<DbShippingZone>(
     `INSERT INTO "${TABLE}" (
       "name", "description", "isActive", "priority", "locationType", "locations",
       "excludedLocations", "createdBy"
@@ -97,7 +98,7 @@ async function update(id: string, input: UpdateShippingZoneInput): Promise<Shipp
   updateFields.push(`"updatedAt" = NOW()`);
   values.push(id);
 
-  return queryOne<ShippingZone>(
+  return queryOne<DbShippingZone>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingZoneId" = $${paramIndex} RETURNING *`,
     values,
   );

@@ -2,6 +2,10 @@ import { query, queryOne } from '../../../../libs/db';
 import { withTransaction } from '../../../../libs/db';
 import { Table, Promotion, PromotionRule, PromotionAction } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
+import type { Promotion as DbPromotion } from '../../../../libs/db/types';
+import type { PromotionRule as DbPromotionRule } from '../../../../libs/db/types';
+import type { PromotionAction as DbPromotionAction } from '../../../../libs/db/types';
+import type { PromotionUsage as DbPromotionUsage } from '../../../../libs/db/types';
 
 // Table name constants
 const PROMOTION_TABLE = Table.Promotion;
@@ -24,7 +28,7 @@ export type PromotionUsage = {
   promotionId: string;
   orderId: string | null;
   customerId: string | null;
-  discountAmountCents: string;
+  discountAmountCents: number;
   currencyCode: string;
   usedAt: Date;
   createdAt: Date;
@@ -112,7 +116,7 @@ class PromotionRepo {
    * Find a promotion by ID
    */
   async findById(id: string): Promise<Promotion | null> {
-    return await queryOne<Promotion>(`SELECT * FROM "${PROMOTION_TABLE}" WHERE "promotionId" = $1`, [id]);
+    return await queryOne<DbPromotion>(`SELECT * FROM "${PROMOTION_TABLE}" WHERE "promotionId" = $1`, [id]);
   }
 
   /**
@@ -199,7 +203,7 @@ class PromotionRepo {
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    return (await query<Promotion[]>(sql, params)) || [];
+    return (await query<DbPromotion[]>(sql, params)) || [];
   }
 
   /**
@@ -231,7 +235,7 @@ class PromotionRepo {
     const now = new Date();
 
     return withTransaction(async tx => {
-      const promotion = await tx.queryOne<Promotion>(
+      const promotion = await tx.queryOne<DbPromotion>(
         `INSERT INTO "${PROMOTION_TABLE}" (
           "name", "description", "status", "scope", "priority",
           "startDate", "endDate", "isActive", "isExclusive", "stackability", "maxUsage",
@@ -273,7 +277,7 @@ class PromotionRepo {
       // Insert rules if provided
       if (input.rules && input.rules.length > 0) {
         for (const rule of input.rules) {
-          await tx.queryOne<PromotionRule>(
+          await tx.queryOne<DbPromotionRule>(
             `INSERT INTO "${PROMOTION_RULE_TABLE}" (
               "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -294,7 +298,7 @@ class PromotionRepo {
       // Insert actions if provided
       if (input.actions && input.actions.length > 0) {
         for (const action of input.actions) {
-          await tx.queryOne<PromotionAction>(
+          await tx.queryOne<DbPromotionAction>(
             `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
               "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
             ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -367,7 +371,7 @@ class PromotionRepo {
       return promotion;
     }
 
-    const promotion = await queryOne<Promotion>(
+    const promotion = await queryOne<DbPromotion>(
       `UPDATE "${PROMOTION_TABLE}" SET ${updateFields.join(', ')} 
        WHERE "promotionId" = $1 RETURNING *`,
       params,
@@ -406,7 +410,7 @@ class PromotionRepo {
   async createRule(promotionId: string, input: CreateRuleInput): Promise<PromotionRule> {
     const now = new Date();
 
-    const rule = await queryOne<PromotionRule>(
+    const rule = await queryOne<DbPromotionRule>(
       `INSERT INTO "${PROMOTION_RULE_TABLE}" (
         "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -424,7 +428,7 @@ class PromotionRepo {
    * Find rules by promotion ID
    */
   async findRulesByPromotionId(promotionId: string): Promise<PromotionRule[]> {
-    return (await query<PromotionRule[]>(`SELECT * FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
+    return (await query<DbPromotionRule[]>(`SELECT * FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
   }
 
   /**
@@ -446,7 +450,7 @@ class PromotionRepo {
   async createAction(promotionId: string, input: CreateActionInput): Promise<PromotionAction> {
     const now = new Date();
 
-    const action = await queryOne<PromotionAction>(
+    const action = await queryOne<DbPromotionAction>(
       `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
         "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -472,7 +476,7 @@ class PromotionRepo {
    * Find actions by promotion ID
    */
   async findActionsByPromotionId(promotionId: string): Promise<PromotionAction[]> {
-    return (await query<PromotionAction[]>(`SELECT * FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
+    return (await query<DbPromotionAction[]>(`SELECT * FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
   }
 
   /**
@@ -501,7 +505,7 @@ class PromotionRepo {
     const now = new Date();
 
     return withTransaction(async tx => {
-      const usage = await tx.queryOne<PromotionUsage>(
+      const usage = await tx.queryOne<DbPromotionUsage>(
         `INSERT INTO "${PROMOTION_USAGE_TABLE}" (
           "promotionId", "orderId", "customerId", "discountAmountCents", "currencyCode", "usedAt", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -526,7 +530,7 @@ class PromotionRepo {
    */
   async getUsage(promotionId: string): Promise<PromotionUsage[]> {
     return (
-      (await query<PromotionUsage[]>(`SELECT * FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1 ORDER BY "usedAt" DESC`, [
+      (await query<DbPromotionUsage[]>(`SELECT * FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1 ORDER BY "usedAt" DESC`, [
         promotionId,
       ])) || []
     );

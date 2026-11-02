@@ -24,4 +24,3 @@ export const b2bController = new B2BController(
   manageQuoteUseCase,
   manageApprovalWorkflowUseCase,
 );
-

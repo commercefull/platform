@@ -25,5 +25,3 @@ export interface OrderTax {
 }
 
 export type OrderTaxCreateParams = Omit<OrderTax, 'orderTaxId' | 'createdAt' | 'updatedAt'>;
-
-

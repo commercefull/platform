@@ -7,7 +7,7 @@
 
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
-import type { IdentityStoreUser as DbStoreUser } from '../../../../libs/db/types';
+import type { IdentityStoreUser as DbStoreUser, Role as DbRole } from '../../../../libs/db/types';
 import { UserStoreAssignment, StoreRole } from '../../domain/entities/UserStoreAssignment';
 import { StoreUserRepository as IStoreUserRepository } from '../../domain/repositories/StoreUserRepository';
 
@@ -314,7 +314,7 @@ export class IdentityRepository implements IStoreUserRepository {
   }
 
   async findRoleById(roleId: string): Promise<RoleRecord | null> {
-    return queryOne<RoleRecord>(`SELECT * FROM "role" WHERE "roleId" = $1`, [roleId]);
+    return queryOne<DbRole>(`SELECT * FROM "role" WHERE "roleId" = $1`, [roleId]);
   }
 
   async createRole(params: { name: string; description?: string; permissions: string[] }): Promise<string> {
