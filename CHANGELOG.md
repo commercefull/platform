@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/commercefull/platform/compare/v1.7.0...v1.7.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **deps:** patch dependabot security vulnerabilities ([52ace8e](https://github.com/commercefull/platform/commit/52ace8ecac38118c4953f95012f26233225500de))
+
 ## [1.7.0](https://github.com/commercefull/platform/compare/v1.6.0...v1.7.0) (2026-11-01)
 
 
