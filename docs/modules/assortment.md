@@ -188,39 +188,39 @@ This makes the feed story consistent: **the assortment decides what a channel se
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method                                                                            | Endpoint                                                            | Controller                                     | Description                                                         |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------- |
-| GET                                                                               | `/assortment/collections`                                           | `isOrganizationLoggedIn`                       | List collections                                                    |
+| Method                                                                            | Endpoint                                                            | Controller                          | Description                                                         |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------- |
+| GET                                                                               | `/assortment/collections`                                           | `isOrganizationLoggedIn`            | List collections                                                    |
 | GET /business/assortment/collections                                              |
-| POST                                                                              | `/assortment/collections`                                           | `isOrganizationLoggedIn`                       | Create collection                                                   |
+| POST                                                                              | `/assortment/collections`                                           | `isOrganizationLoggedIn`            | Create collection                                                   |
 | POST /business/assortment/collections                                             |
-| GET                                                                               | `/assortment/collections`                                           | `asyncHandler(controller.listCollections)`     | List published collections                                          |
+| GET                                                                               | `/assortment/collections`                                           | `asyncHandler(listCollections)`     | List published collections                                          |
 | GET /customer/assortment/collections                                              |
-| GET                                                                               | `/assortment/collections/:collectionId`                             | `isOrganizationLoggedIn`                       | Get collection (with members)                                       |
+| GET                                                                               | `/assortment/collections/:collectionId`                             | `isOrganizationLoggedIn`            | Get collection (with members)                                       |
 | GET /business/assortment/collections/:collectionId                                |
-| PUT                                                                               | `/assortment/collections/:collectionId`                             | `isOrganizationLoggedIn`                       | Update collection                                                   |
+| PUT                                                                               | `/assortment/collections/:collectionId`                             | `isOrganizationLoggedIn`            | Update collection                                                   |
 | PUT /business/assortment/collections/:collectionId                                |
-| DELETE                                                                            | `/assortment/collections/:collectionId`                             | `isOrganizationLoggedIn`                       | Delete collection (soft)                                            |
+| DELETE                                                                            | `/assortment/collections/:collectionId`                             | `isOrganizationLoggedIn`            | Delete collection (soft)                                            |
 | DELETE /business/assortment/collections/:collectionId                             |
-| GET                                                                               | `/assortment/collections/:collectionId/products`                    | `isOrganizationLoggedIn`                       | Resolve collection products (manual or smart)                       |
+| GET                                                                               | `/assortment/collections/:collectionId/products`                    | `isOrganizationLoggedIn`            | Resolve collection products (manual or smart)                       |
 | GET /business/assortment/collections/:collectionId/products                       |
-| GET                                                                               | `/assortment/collections/:collectionId/publications`                | `isOrganizationLoggedIn`                       | List collection visibility publications (store/channel scoping)     |
+| GET                                                                               | `/assortment/collections/:collectionId/publications`                | `isOrganizationLoggedIn`            | List collection visibility publications (store/channel scoping)     |
 | GET /business/assortment/collections/:collectionId/publications                   |
-| POST                                                                              | `/assortment/collections/:collectionId/publications`                | `isOrganizationLoggedIn`                       | Create or update a collection publication for a store/channel scope |
+| POST                                                                              | `/assortment/collections/:collectionId/publications`                | `isOrganizationLoggedIn`            | Create or update a collection publication for a store/channel scope |
 | POST /business/assortment/collections/:collectionId/publications                  |
-| DELETE                                                                            | `/assortment/collections/:collectionId/publications/:publicationId` | `isOrganizationLoggedIn`                       | Remove a collection publication                                     |
+| DELETE                                                                            | `/assortment/collections/:collectionId/publications/:publicationId` | `isOrganizationLoggedIn`            | Remove a collection publication                                     |
 | DELETE /business/assortment/collections/:collectionId/publications/:publicationId |
-| GET                                                                               | `/assortment/collections/:slug`                                     | `asyncHandler(controller.getCollectionBySlug)` | Get collection page by slug (metadata + resolved products)          |
+| GET                                                                               | `/assortment/collections/:slug`                                     | `asyncHandler(getCollectionBySlug)` | Get collection page by slug (metadata + resolved products)          |
 | GET /customer/assortment/collections/:slug                                        |
-| GET                                                                               | `/assortment/stores/:storeId`                                       | `isOrganizationLoggedIn`                       | Get store assortment config + entries                               |
+| GET                                                                               | `/assortment/stores/:storeId`                                       | `isOrganizationLoggedIn`            | Get store assortment config + entries                               |
 | GET /business/assortment/stores/:storeId                                          |
-| PUT                                                                               | `/assortment/stores/:storeId`                                       | `isOrganizationLoggedIn`                       | Set assortment mode (all                                            | include    | exclude)  |
+| PUT                                                                               | `/assortment/stores/:storeId`                                       | `isOrganizationLoggedIn`            | Set assortment mode (all                                            | include    | exclude)  |
 | PUT /business/assortment/stores/:storeId                                          |
-| GET                                                                               | `/assortment/stores/:storeId/catalog`                               | `isOrganizationLoggedIn`                       | Resolve effective store catalog                                     |
+| GET                                                                               | `/assortment/stores/:storeId/catalog`                               | `isOrganizationLoggedIn`            | Resolve effective store catalog                                     |
 | GET /business/assortment/stores/:storeId/catalog                                  |
-| POST                                                                              | `/assortment/stores/:storeId/entries`                               | `isOrganizationLoggedIn`                       | Add assortment entry (product                                       | collection | category) |
+| POST                                                                              | `/assortment/stores/:storeId/entries`                               | `isOrganizationLoggedIn`            | Add assortment entry (product                                       | collection | category) |
 | POST /business/assortment/stores/:storeId/entries                                 |
-| DELETE                                                                            | `/assortment/stores/:storeId/entries/:entryId`                      | `isOrganizationLoggedIn`                       | Remove assortment entry                                             |
+| DELETE                                                                            | `/assortment/stores/:storeId/entries/:entryId`                      | `isOrganizationLoggedIn`            | Remove assortment entry                                             |
 | DELETE /business/assortment/stores/:storeId/entries/:entryId                      |
 
 <!-- GENERATED:ENDPOINTS:END -->

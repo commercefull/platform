@@ -110,17 +110,17 @@ The Notification feature manages in-app notifications for merchants and administ
 | GET | `/notifications/count` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| GET | `/notifications/devices` | `asyncHandler(notificationCustomerController.listDevices)` | — |
-| POST | `/notifications/devices` | `asyncHandler(notificationCustomerController.registerDevice)` | — |
-| DELETE | `/notifications/devices/:deviceToken` | `asyncHandler(notificationCustomerController.deleteDevice)` | — |
-| GET | `/notifications/preferences` | `asyncHandler(notificationCustomerController.getPreferences)` | — |
-| POST | `/notifications/preferences` | `asyncHandler(notificationCustomerController.createPreference` | — |
-| GET | `/notifications/preferences/:id` | `asyncHandler(notificationCustomerController.getPreferenceByI` | — |
-| PUT | `/notifications/preferences/:id` | `asyncHandler(notificationCustomerController.updatePreference` | — |
-| DELETE | `/notifications/preferences/:id` | `asyncHandler(notificationCustomerController.deletePreference` | — |
-| PUT | `/notifications/preferences/:id/schedule` | `asyncHandler(notificationCustomerController.updateSchedule)` | — |
-| POST | `/notifications/preferences/bulk` | `asyncHandler(notificationCustomerController.bulkUpdatePrefer` | — |
-| GET | `/notifications/preferences/type/:type` | `asyncHandler(notificationCustomerController.getPreferenceByT` | — |
+| GET | `/notifications/devices` | `asyncHandler(listDevices)` | — |
+| POST | `/notifications/devices` | `asyncHandler(registerDevice)` | — |
+| DELETE | `/notifications/devices/:deviceToken` | `asyncHandler(deleteDevice)` | — |
+| GET | `/notifications/preferences` | `asyncHandler(getPreferences)` | — |
+| POST | `/notifications/preferences` | `asyncHandler(createPreference)` | — |
+| GET | `/notifications/preferences/:id` | `asyncHandler(getPreferenceById)` | — |
+| PUT | `/notifications/preferences/:id` | `asyncHandler(updatePreference)` | — |
+| DELETE | `/notifications/preferences/:id` | `asyncHandler(deletePreference)` | — |
+| PUT | `/notifications/preferences/:id/schedule` | `asyncHandler(updateSchedule)` | — |
+| POST | `/notifications/preferences/bulk` | `asyncHandler(bulkUpdatePreferences)` | — |
+| GET | `/notifications/preferences/type/:type` | `asyncHandler(getPreferenceByType)` | — |
 | PUT | `/notifications/read` | `async (req, res) => {
   try {
     const customerId = req.use` | — |

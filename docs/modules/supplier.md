@@ -73,50 +73,50 @@ The Supplier feature manages supplier/vendor relationships for inventory sourcin
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                         | Controller                                                     | Description                |
-| ------ | -------------------------------- | -------------------------------------------------------------- | -------------------------- |
-| PUT    | `/purchase-order-items/:id`      | `asyncHandler(purchaseOrderController.updatePurchaseOrderItem` | —                          |
-| DELETE | `/purchase-order-items/:id`      | `asyncHandler(purchaseOrderController.deletePurchaseOrderItem` | —                          |
-| GET    | `/purchase-orders`               | `asyncHandler(purchaseOrderController.getPurchaseOrders)`      | Purchase order CRUD        |
-| POST   | `/purchase-orders`               | `asyncHandler(purchaseOrderController.createPurchaseOrder)`    | —                          |
-| GET    | `/purchase-orders/:id`           | `asyncHandler(purchaseOrderController.getPurchaseOrderById)`   | —                          |
-| PUT    | `/purchase-orders/:id`           | `asyncHandler(purchaseOrderController.updatePurchaseOrder)`    | —                          |
-| DELETE | `/purchase-orders/:id`           | `asyncHandler(purchaseOrderController.deletePurchaseOrder)`    | —                          |
-| POST   | `/purchase-orders/:id/approve`   | `asyncHandler(purchaseOrderController.approvePurchaseOrder)`   | Purchase order workflow    |
-| POST   | `/purchase-orders/:id/cancel`    | `asyncHandler(purchaseOrderController.cancelPurchaseOrder)`    | —                          |
-| GET    | `/purchase-orders/:id/items`     | `asyncHandler(purchaseOrderController.getPurchaseOrderItems)`  | Purchase order items       |
-| POST   | `/purchase-orders/:id/items`     | `asyncHandler(purchaseOrderController.addPurchaseOrderItem)`   | —                          |
-| GET    | `/purchase-orders/:id/receiving` | `asyncHandler(receivingController.getReceivingByPurchaseOrder` | —                          |
-| POST   | `/purchase-orders/:id/send`      | `asyncHandler(purchaseOrderController.sendPurchaseOrder)`      | —                          |
-| GET    | `/receiving`                     | `asyncHandler(receivingController.getReceivingRecords)`        | Receiving record CRUD      |
-| POST   | `/receiving`                     | `asyncHandler(receivingController.createReceivingRecord)`      | —                          |
-| PUT    | `/receiving-items/:id`           | `asyncHandler(receivingController.updateReceivingItem)`        | —                          |
-| POST   | `/receiving-items/:id/accept`    | `asyncHandler(receivingController.acceptReceivingItem)`        | —                          |
-| POST   | `/receiving-items/:id/reject`    | `asyncHandler(receivingController.rejectReceivingItem)`        | —                          |
-| GET    | `/receiving/:id`                 | `asyncHandler(receivingController.getReceivingRecordById)`     | —                          |
-| PUT    | `/receiving/:id`                 | `asyncHandler(receivingController.updateReceivingRecord)`      | —                          |
-| POST   | `/receiving/:id/complete`        | `asyncHandler(receivingController.completeReceiving)`          | —                          |
-| GET    | `/receiving/:id/items`           | `asyncHandler(receivingController.getReceivingItems)`          | Receiving items            |
-| POST   | `/receiving/:id/items`           | `asyncHandler(receivingController.createReceivingItem)`        | —                          |
-| PUT    | `/supplier-addresses/:id`        | `asyncHandler(supplierController.updateSupplierAddress)`       | —                          |
-| DELETE | `/supplier-addresses/:id`        | `asyncHandler(supplierController.deleteSupplierAddress)`       | —                          |
-| PUT    | `/supplier-products/:id`         | `asyncHandler(supplierController.updateSupplierProduct)`       | —                          |
-| DELETE | `/supplier-products/:id`         | `asyncHandler(supplierController.removeProductFromSupplier)`   | —                          |
-| GET    | `/suppliers`                     | `asyncHandler(supplierController.getSuppliers)`                | Supplier CRUD              |
-| POST   | `/suppliers`                     | `asyncHandler(supplierController.createSupplier)`              | —                          |
-| GET    | `/suppliers/:id`                 | `asyncHandler(supplierController.getSupplierById)`             | —                          |
-| PUT    | `/suppliers/:id`                 | `asyncHandler(supplierController.updateSupplier)`              | —                          |
-| DELETE | `/suppliers/:id`                 | `asyncHandler(supplierController.deleteSupplier)`              | —                          |
-| GET    | `/suppliers/:id/addresses`       | `asyncHandler(supplierController.getSupplierAddresses)`        | Supplier addresses         |
-| POST   | `/suppliers/:id/addresses`       | `asyncHandler(supplierController.createSupplierAddress)`       | —                          |
-| POST   | `/suppliers/:id/approve`         | `asyncHandler(supplierController.approveSupplier)`             | —                          |
-| GET    | `/suppliers/:id/products`        | `asyncHandler(supplierController.getSupplierProducts)`         | Supplier products          |
-| POST   | `/suppliers/:id/products`        | `asyncHandler(supplierController.addProductToSupplier)`        | —                          |
-| GET    | `/suppliers/:id/purchase-orders` | `asyncHandler(purchaseOrderController.getPurchaseOrdersBySupp` | —                          |
-| PATCH  | `/suppliers/:id/status`          | `asyncHandler(supplierController.updateSupplierStatus)`        | Supplier status management |
-| POST   | `/suppliers/:id/suspend`         | `asyncHandler(supplierController.suspendSupplier)`             | —                          |
-| PATCH  | `/suppliers/:id/visibility`      | `asyncHandler(supplierController.updateSupplierVisibility)`    | —                          |
-| GET    | `/suppliers/code/:code`          | `asyncHandler(supplierController.getSupplierByCode)`           | —                          |
-| GET    | `/suppliers/statistics`          | `asyncHandler(supplierController.getSupplierStatistics)`       | —                          |
+| Method | Endpoint                         | Controller                                    | Description                |
+| ------ | -------------------------------- | --------------------------------------------- | -------------------------- |
+| PUT    | `/purchase-order-items/:id`      | `asyncHandler(updatePurchaseOrderItem)`       | —                          |
+| DELETE | `/purchase-order-items/:id`      | `asyncHandler(deletePurchaseOrderItem)`       | —                          |
+| GET    | `/purchase-orders`               | `asyncHandler(getPurchaseOrders)`             | Purchase order CRUD        |
+| POST   | `/purchase-orders`               | `asyncHandler(createPurchaseOrder)`           | —                          |
+| GET    | `/purchase-orders/:id`           | `asyncHandler(getPurchaseOrderById)`          | —                          |
+| PUT    | `/purchase-orders/:id`           | `asyncHandler(updatePurchaseOrder)`           | —                          |
+| DELETE | `/purchase-orders/:id`           | `asyncHandler(deletePurchaseOrder)`           | —                          |
+| POST   | `/purchase-orders/:id/approve`   | `asyncHandler(approvePurchaseOrder)`          | Purchase order workflow    |
+| POST   | `/purchase-orders/:id/cancel`    | `asyncHandler(cancelPurchaseOrder)`           | —                          |
+| GET    | `/purchase-orders/:id/items`     | `asyncHandler(getPurchaseOrderItems)`         | Purchase order items       |
+| POST   | `/purchase-orders/:id/items`     | `asyncHandler(addPurchaseOrderItem)`          | —                          |
+| GET    | `/purchase-orders/:id/receiving` | `asyncHandler(getReceivingByPurchaseOrder)`   | —                          |
+| POST   | `/purchase-orders/:id/send`      | `asyncHandler(sendPurchaseOrder)`             | —                          |
+| GET    | `/receiving`                     | `asyncHandler(getReceivingRecords)`           | Receiving record CRUD      |
+| POST   | `/receiving`                     | `asyncHandler(createReceivingRecord)`         | —                          |
+| PUT    | `/receiving-items/:id`           | `asyncHandler(updateReceivingItem)`           | —                          |
+| POST   | `/receiving-items/:id/accept`    | `asyncHandler(acceptReceivingItem)`           | —                          |
+| POST   | `/receiving-items/:id/reject`    | `asyncHandler(rejectReceivingItem)`           | —                          |
+| GET    | `/receiving/:id`                 | `asyncHandler(getReceivingRecordById)`        | —                          |
+| PUT    | `/receiving/:id`                 | `asyncHandler(updateReceivingRecord)`         | —                          |
+| POST   | `/receiving/:id/complete`        | `asyncHandler(completeReceiving)`             | —                          |
+| GET    | `/receiving/:id/items`           | `asyncHandler(getReceivingItems)`             | Receiving items            |
+| POST   | `/receiving/:id/items`           | `asyncHandler(createReceivingItem)`           | —                          |
+| PUT    | `/supplier-addresses/:id`        | `asyncHandler(updateSupplierAddress)`         | —                          |
+| DELETE | `/supplier-addresses/:id`        | `asyncHandler(deleteSupplierAddress)`         | —                          |
+| PUT    | `/supplier-products/:id`         | `asyncHandler(updateSupplierProduct)`         | —                          |
+| DELETE | `/supplier-products/:id`         | `asyncHandler(removeProductFromSupplier)`     | —                          |
+| GET    | `/suppliers`                     | `asyncHandler(getSuppliers)`                  | Supplier CRUD              |
+| POST   | `/suppliers`                     | `asyncHandler(createSupplier)`                | —                          |
+| GET    | `/suppliers/:id`                 | `asyncHandler(getSupplierById)`               | —                          |
+| PUT    | `/suppliers/:id`                 | `asyncHandler(updateSupplier)`                | —                          |
+| DELETE | `/suppliers/:id`                 | `asyncHandler(deleteSupplier)`                | —                          |
+| GET    | `/suppliers/:id/addresses`       | `asyncHandler(getSupplierAddresses)`          | Supplier addresses         |
+| POST   | `/suppliers/:id/addresses`       | `asyncHandler(createSupplierAddress)`         | —                          |
+| POST   | `/suppliers/:id/approve`         | `asyncHandler(approveSupplier)`               | —                          |
+| GET    | `/suppliers/:id/products`        | `asyncHandler(getSupplierProducts)`           | Supplier products          |
+| POST   | `/suppliers/:id/products`        | `asyncHandler(addProductToSupplier)`          | —                          |
+| GET    | `/suppliers/:id/purchase-orders` | `asyncHandler(getPurchaseOrdersBySupplierId)` | —                          |
+| PATCH  | `/suppliers/:id/status`          | `asyncHandler(updateSupplierStatus)`          | Supplier status management |
+| POST   | `/suppliers/:id/suspend`         | `asyncHandler(suspendSupplier)`               | —                          |
+| PATCH  | `/suppliers/:id/visibility`      | `asyncHandler(updateSupplierVisibility)`      | —                          |
+| GET    | `/suppliers/code/:code`          | `asyncHandler(getSupplierByCode)`             | —                          |
+| GET    | `/suppliers/statistics`          | `asyncHandler(getSupplierStatistics)`         | —                          |
 
 <!-- GENERATED:ENDPOINTS:END -->

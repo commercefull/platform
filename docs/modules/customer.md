@@ -64,43 +64,43 @@ Customer identity is decoupled from market: a customer record carries `preferred
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method                                          | Endpoint                                      | Controller                                              | Description            |
-| ----------------------------------------------- | --------------------------------------------- | ------------------------------------------------------- | ---------------------- |
-| GET                                             | `/customer-groups/:customerGroupId`           | `asyncHandler(customerController.getCustomerGroup)`     | —                      |
-| GET                                             | `/customer-groups/:customerGroupId/customers` | `asyncHandler(customerController.getCustomersInGroup)`  | —                      |
-| GET                                             | `/customers`                                  | `asyncHandler(customerController.listCustomers)`        | List all customers     |
+| Method                                          | Endpoint                                      | Controller                           | Description            |
+| ----------------------------------------------- | --------------------------------------------- | ------------------------------------ | ---------------------- |
+| GET                                             | `/customer-groups/:customerGroupId`           | `asyncHandler(getCustomerGroup)`     | —                      |
+| GET                                             | `/customer-groups/:customerGroupId/customers` | `asyncHandler(getCustomersInGroup)`  | —                      |
+| GET                                             | `/customers`                                  | `asyncHandler(listCustomers)`        | List all customers     |
 | GET /business/customers                         |
-| POST                                            | `/customers`                                  | `asyncHandler(customerController.createCustomer)`       | Create a new customer  |
+| POST                                            | `/customers`                                  | `asyncHandler(createCustomer)`       | Create a new customer  |
 | POST /business/customers                        |
-| GET                                             | `/customers/:customerId`                      | `asyncHandler(customerController.getCustomer)`          | Get customer by ID     |
+| GET                                             | `/customers/:customerId`                      | `asyncHandler(getCustomer)`          | Get customer by ID     |
 | GET /business/customers/:customerId             |
-| PUT                                             | `/customers/:customerId`                      | `asyncHandler(customerController.updateCustomer)`       | Update customer        |
+| PUT                                             | `/customers/:customerId`                      | `asyncHandler(updateCustomer)`       | Update customer        |
 | PUT /business/customers/:customerId             |
-| DELETE                                          | `/customers/:customerId`                      | `asyncHandler(customerController.deleteCustomer)`       | Delete customer        |
+| DELETE                                          | `/customers/:customerId`                      | `asyncHandler(deleteCustomer)`       | Delete customer        |
 | DELETE /business/customers/:customerId          |
-| GET                                             | `/customers/:customerId/addresses`            | `asyncHandler(customerController.getCustomerAddresses)` | Get customer addresses |
+| GET                                             | `/customers/:customerId/addresses`            | `asyncHandler(getCustomerAddresses)` | Get customer addresses |
 | GET /business/customers/:customerId/addresses   |
-| POST                                            | `/customers/:customerId/addresses`            | `asyncHandler(customerController.addCustomerAddress)`   | Add customer address   |
+| POST                                            | `/customers/:customerId/addresses`            | `asyncHandler(addCustomerAddress)`   | Add customer address   |
 | POST /business/customers/:customerId/addresses  |
-| POST                                            | `/customers/:customerId/deactivate`           | `asyncHandler(customerController.deactivateCustomer)`   | Deactivate customer    |
+| POST                                            | `/customers/:customerId/deactivate`           | `asyncHandler(deactivateCustomer)`   | Deactivate customer    |
 | POST /business/customers/:customerId/deactivate |
-| POST                                            | `/customers/:customerId/reactivate`           | `asyncHandler(customerController.reactivateCustomer)`   | Reactivate customer    |
+| POST                                            | `/customers/:customerId/reactivate`           | `asyncHandler(reactivateCustomer)`   | Reactivate customer    |
 | POST /business/customers/:customerId/reactivate |
-| POST                                            | `/customers/:customerId/verify`               | `asyncHandler(customerController.verifyCustomer)`       | Verify customer        |
+| POST                                            | `/customers/:customerId/verify`               | `asyncHandler(verifyCustomer)`       | Verify customer        |
 | POST /business/customers/:customerId/verify     |
-| GET                                             | `/me`                                         | `asyncHandler(customerController.getMyProfile)`         | Get my profile         |
+| GET                                             | `/me`                                         | `asyncHandler(getMyProfile)`         | Get my profile         |
 | GET /customers/me                               |
-| PUT                                             | `/me`                                         | `asyncHandler(customerController.updateMyProfile)`      | Update my profile      |
+| PUT                                             | `/me`                                         | `asyncHandler(updateMyProfile)`      | Update my profile      |
 | PUT /customers/me                               |
-| GET                                             | `/me/addresses`                               | `asyncHandler(customerController.getAddresses)`         | Get my addresses       |
+| GET                                             | `/me/addresses`                               | `asyncHandler(getAddresses)`         | Get my addresses       |
 | GET /customers/me/addresses                     |
-| POST                                            | `/me/addresses`                               | `asyncHandler(customerController.addAddress)`           | Add a new address      |
+| POST                                            | `/me/addresses`                               | `asyncHandler(addAddress)`           | Add a new address      |
 | POST /customers/me/addresses                    |
-| PUT                                             | `/me/addresses/:addressId`                    | `asyncHandler(customerController.updateAddress)`        | Update an address      |
+| PUT                                             | `/me/addresses/:addressId`                    | `asyncHandler(updateAddress)`        | Update an address      |
 | PUT /customers/me/addresses/:addressId          |
-| DELETE                                          | `/me/addresses/:addressId`                    | `asyncHandler(customerController.deleteAddress)`        | Delete an address      |
+| DELETE                                          | `/me/addresses/:addressId`                    | `asyncHandler(deleteAddress)`        | Delete an address      |
 | DELETE /customers/me/addresses/:addressId       |
-| POST                                            | `/me/addresses/:addressId/default`            | `asyncHandler(customerController.setDefaultAddress)`    | Set default address    |
+| POST                                            | `/me/addresses/:addressId/default`            | `asyncHandler(setDefaultAddress)`    | Set default address    |
 | POST /customers/me/addresses/:addressId/default |
 
 <!-- GENERATED:ENDPOINTS:END -->
