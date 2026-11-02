@@ -1,4 +1,7 @@
 /** @type {import('dependency-cruiser').IConfiguration} */
+// Note: `import * as` / `export * as` namespace facades on internal modules are
+// forbidden via `no-restricted-syntax` in eslint.config.mjs (dependency-cruiser
+// has no specifier-kind restriction — ESLint is the enforcement point).
 module.exports = {
   forbidden: [
     // ── DDD Layer Rules ──────────────────────────────────────────────

@@ -103,6 +103,19 @@ export default [
             "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
           message: 'Do not use expect([array]).toContain(x). Assert a single expected value with expect(x).toBe(y) instead.',
         },
+        // Namespace facades hide per-export usage from knip — use named imports
+        // and explicit object literals when a whole-module object must be passed.
+        {
+          selector:
+            "ImportDeclaration[source.value=/^(\\.|libs\\/|modules\\/|boot\\/|web\\/|features\\/|tests\\/)/] > ImportNamespaceSpecifier",
+          message:
+            'No `import * as` on internal modules — it hides per-export usage from knip. Use named imports; pass an explicit object literal if a namespace object is required.',
+        },
+        {
+          selector: 'ExportAllDeclaration[exported.name]',
+          message:
+            'No `export * as` — it hides per-export usage from knip. Re-export named members with `export *` or `export { ... }`.',
+        },
         {
           selector:
             "CallExpression[callee.type='MemberExpression'][callee.property.name='toBe'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='CallExpression'][callee.object.arguments.0.callee.type='MemberExpression'][callee.object.arguments.0.callee.property.name='includes'][callee.object.arguments.0.callee.object.type='ArrayExpression']",

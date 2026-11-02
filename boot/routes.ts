@@ -46,7 +46,7 @@ import {
   loyaltyMerchantRouter,
 } from '../modules/loyalty';
 import {
-  gatewayWebhookController,
+  handleGatewayWebhook,
   paymentBusinessRouter,
   paymentCustomerRouter,
 } from '../modules/payment';
@@ -189,7 +189,7 @@ export function configureRoutes(app: HttpApplication): void {
   initSearchAdapter();
 
   // Gateway webhook — unauthenticated, HMAC-verified, raw body required
-  app.post('/payment/webhook', express.raw({ type: 'application/json' }), gatewayWebhookController.handleGatewayWebhook);
+  app.post('/payment/webhook', express.raw({ type: 'application/json' }), handleGatewayWebhook);
 
   // Agentic Commerce Protocol — channel-authenticated (Bearer key + optional
   // Signature HMAC), raw body preserved inside the router for signature checks

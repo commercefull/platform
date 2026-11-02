@@ -19,7 +19,7 @@ export * from './domain/errors/PaymentErrors';
 // Interface exports (routers, GraphQL)
 export { paymentCustomerRouter } from './interface/routers/paymentCustomerRouter';
 export { paymentBusinessRouter } from './interface/routers/paymentBusinessRouter';
-export * as gatewayWebhookController from './interface/controllers/webhookController';
+export { handleGatewayWebhook } from './interface/controllers/webhookController';
 export { paymentTypeDefs } from './interface/graphql/typeDefs';
 export { paymentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';

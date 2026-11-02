@@ -117,8 +117,6 @@ export {
 
 export { PromotionGiftCard };
 
-export * as giftCardRepo from '../infrastructure/repositories/GiftCardRepository';
-
 // ============================================================================
 // Wired use-case instances (composition root)
 // ============================================================================
