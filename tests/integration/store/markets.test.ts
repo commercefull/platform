@@ -162,7 +162,7 @@ describe('Market Integration Tests', () => {
       }
       const response = await client.post(`/business/markets/${marketId}/launch`, {}, { headers: authHeaders() });
       expectStatus(response, 400);
-      expect(response.data.message).toContain('not ready for launch');
+      expect(response.data.error.message).toContain('not ready for launch');
       // Market must remain non-active
       const market = await client.get(`/business/markets/${marketId}`, { headers: authHeaders() });
       expect(market.data.data.status).not.toBe('active');

@@ -105,7 +105,7 @@ describe('Tax Rates API Integration Tests', () => {
         includeInPrice: false,
         isShippingTaxable: false,
         isActive: true,
-        startDate: Date.now() / 1000, // Convert to unix timestamp
+        startDate: new Date().toISOString(),
       };
 
       const response = await client.post('/business/tax/rates', newTaxRate, {
