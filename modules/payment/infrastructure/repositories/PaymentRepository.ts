@@ -315,42 +315,25 @@ export class PaymentRepo implements IPaymentRepository {
     provider: string;
     isTestMode: boolean;
   } | null> {
-    let row: Record<string, unknown> | null = null;
+    const orgGateway =
+      organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)
+        ? await queryOne<DbPaymentGateway>(
+            'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
+            [organizationId],
+          )
+        : null;
 
-    if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)) {
-      row = await queryOne<DbPaymentGateway>(
-        'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
-        [organizationId],
-      );
-    }
-
-    if (!row) {
-      const fallback = await queryOne<DbPaymentGateway>(
+    const row =
+      orgGateway ??
+      (await queryOne<DbPaymentGateway>(
         'SELECT * FROM "paymentGateway" WHERE "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
-      );
-      if (!fallback) {
-        const anyGateway = await queryOne<DbPaymentGateway>(
-          'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
-        );
-        if (!anyGateway) return null;
-        return {
-          gatewayId: anyGateway.paymentGatewayId as string,
-          provider: anyGateway.provider as string,
-          isTestMode: Boolean(anyGateway.isTestMode),
-        };
-      }
-      return {
-        gatewayId: fallback.paymentGatewayId as string,
-        provider: fallback.provider as string,
-        isTestMode: Boolean(fallback.isTestMode),
-      };
-    }
+      )) ??
+      (await queryOne<DbPaymentGateway>(
+        'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
+      ));
 
-    return {
-      gatewayId: row.paymentGatewayId as string,
-      provider: row.provider as string,
-      isTestMode: Boolean(row.isTestMode),
-    };
+    if (!row) return null;
+    return { gatewayId: row.paymentGatewayId, provider: row.provider, isTestMode: Boolean(row.isTestMode) };
   }
 
   private buildWhereClause(filters?: PaymentFilters): { whereClause: string; params: unknown[] } {
