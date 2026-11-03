@@ -25,7 +25,7 @@ describe('ApproveTaxExemptionUseCase', () => {
       status: 'approved',
       isVerified: true,
       verifiedBy: 'admin-1',
-      verifiedAt: expect.any(Number),
+      verifiedAt: expect.any(Date),
     });
   });
 

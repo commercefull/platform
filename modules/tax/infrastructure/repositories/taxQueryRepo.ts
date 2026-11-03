@@ -42,9 +42,9 @@ import type { TaxRate as DbTaxRate, TaxZone as DbTaxZone, TaxCategory as DbTaxCa
 class TaxQueryRepo {
   // Tax Rate query methods
   async findTaxRateById(id: string): Promise<TaxRate | null> {
-    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
+    const result = await queryOne<DbTaxRate>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
     if (!result) return null;
-    return { ...result, id: result.taxRateId } as TaxRate;
+    return { ...result, id: result.taxRateId, rate: Number(result.rate) } as TaxRate;
   }
 
   async findAllTaxRates(status?: boolean, country?: string, region?: string, limit: number = 50, offset: number = 0): Promise<TaxRate[]> {
@@ -75,8 +75,8 @@ class TaxQueryRepo {
     sql += ` ORDER BY tr."priority" DESC, tr."rate" ASC
              LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
-    const results = await query<Record<string, unknown>[]>(sql, params);
-    return (results || []).map(r => ({ ...r, id: r.taxRateId })) as unknown as TaxRate[];
+    const results = await query<DbTaxRate[]>(sql, params);
+    return (results || []).map(r => ({ ...r, id: r.taxRateId, rate: Number(r.rate) })) as TaxRate[];
   }
 
   async findTaxRatesByCategoryAndZone(categoryId: string, zoneId: string, status: TaxRate['isActive'] = true): Promise<TaxRate[]> {
@@ -89,18 +89,18 @@ class TaxQueryRepo {
       [categoryId, zoneId, status],
     );
 
-    return (results || []).map(r => ({ ...r, id: r.taxRateId })) as unknown as TaxRate[];
+    return (results || []).map(r => ({ ...r, id: r.taxRateId, rate: Number(r.rate) })) as TaxRate[];
   }
 
   // Tax Zone query methods
   async findTaxZoneById(id: string): Promise<TaxZone | null> {
-    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
+    const result = await queryOne<DbTaxZone>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
     if (!result) return null;
     return { ...result, id: result.taxZoneId } as TaxZone;
   }
 
   async findTaxZoneByCode(code: string): Promise<TaxZone | null> {
-    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxZone" WHERE "code" = $1`, [code]);
+    const result = await queryOne<DbTaxZone>(`SELECT * FROM "taxZone" WHERE "code" = $1`, [code]);
     if (!result) return null;
     return { ...result, id: result.taxZoneId } as TaxZone;
   }
@@ -114,7 +114,7 @@ class TaxQueryRepo {
       [status, limit, offset],
     );
 
-    return (results || []).map(r => ({ ...r, id: r.taxZoneId })) as unknown as TaxZone[];
+    return (results || []).map(r => ({ ...r, id: r.taxZoneId })) as TaxZone[];
   }
 
   async findTaxZoneForAddress(country: string, state?: string, postalCode?: string, city?: string): Promise<TaxZone | null> {
@@ -160,19 +160,19 @@ class TaxQueryRepo {
     }
     sql += ` jsonb_array_length("countries") ASC, "isDefault" DESC`;
 
-    const results = await query<Record<string, unknown>[]>(sql, params);
+    const results = await query<DbTaxZone[]>(sql, params);
     return (results || []).map(result => ({ ...result, id: result.taxZoneId }) as TaxZone);
   }
 
   // Tax Category query methods
   async findTaxCategoryById(id: string): Promise<TaxCategory | null> {
-    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxCategory" WHERE "taxCategoryId" = $1`, [id]);
+    const result = await queryOne<DbTaxCategory>(`SELECT * FROM "taxCategory" WHERE "taxCategoryId" = $1`, [id]);
     if (!result) return null;
     return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
 
   async findTaxCategoryByCode(code: string): Promise<TaxCategory | null> {
-    const result = await queryOne<Record<string, unknown>>(`SELECT * FROM "taxCategory" WHERE "code" = $1`, [code]);
+    const result = await queryOne<DbTaxCategory>(`SELECT * FROM "taxCategory" WHERE "code" = $1`, [code]);
     if (!result) return null;
     return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
@@ -186,13 +186,13 @@ class TaxQueryRepo {
       [status, limit, offset],
     );
 
-    return (results || []).map(r => ({ ...r, id: r.taxCategoryId })) as unknown as TaxCategory[];
+    return (results || []).map(r => ({ ...r, id: r.taxCategoryId })) as TaxCategory[];
   }
 
   async findDefaultTaxCategory(): Promise<TaxCategory | null> {
-    const result = await queryOne<Record<string, unknown>>(
-      `SELECT * 
-       FROM "taxCategory" 
+    const result = await queryOne<DbTaxCategory>(
+      `SELECT *
+       FROM "taxCategory"
        WHERE "isDefault" = true AND "isActive" = true
        LIMIT 1`,
     );
@@ -213,7 +213,7 @@ class TaxQueryRepo {
       );
 
       return (results || []).map(r => {
-        const parsed = { ...r, id: r.customerTaxExemptionId } as unknown as CustomerTaxExemption;
+        const parsed = { ...r, id: r.customerTaxExemptionId, exemptionPercent: Number(r.exemptionPercent) } as CustomerTaxExemption;
         // Parse jsonb applicableTaxCategoryIds if present (comes as string from pg)
         if (typeof r.applicableTaxCategoryIds === 'string') {
           try {
@@ -251,7 +251,7 @@ class TaxQueryRepo {
       [customerId, taxCategoryId, status],
     );
 
-    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as unknown as CustomerTaxExemption[];
+    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId, exemptionPercent: Number(r.exemptionPercent) })) as CustomerTaxExemption[];
   }
 
   /**
@@ -267,8 +267,8 @@ class TaxQueryRepo {
     }
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
-    const results = await query<Record<string, unknown>[]>(sql, params);
-    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as unknown as CustomerTaxExemption[];
+    const results = await query<DbCustomerTaxExemption[]>(sql, params);
+    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId, exemptionPercent: Number(r.exemptionPercent) })) as CustomerTaxExemption[];
   }
 
   /**

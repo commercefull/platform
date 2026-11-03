@@ -12,8 +12,8 @@ function existingZone(): TaxZone {
     isDefault: false,
     countries: ['US'],
     isActive: true,
-    createdAt: 0,
-    updatedAt: 0,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
   };
 }
 

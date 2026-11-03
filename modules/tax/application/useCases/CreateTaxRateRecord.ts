@@ -22,7 +22,7 @@ export interface CreateTaxRateRecordCommand {
   isCompound?: boolean;
   includeInPrice?: boolean;
   isShippingTaxable?: boolean;
-  startDate?: number;
+  startDate?: Date;
 }
 
 interface TaxRateWritePort {
@@ -64,7 +64,7 @@ export class CreateTaxRateRecordUseCase {
       isCompound: isCompound !== undefined ? isCompound : false,
       includeInPrice: includeInPrice !== undefined ? includeInPrice : false,
       isShippingTaxable: isShippingTaxable !== undefined ? isShippingTaxable : false,
-      startDate: startDate || Math.floor(Date.now() / 1000),
+      startDate: startDate || new Date(),
     });
   }
 }

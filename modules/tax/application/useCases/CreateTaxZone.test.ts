@@ -8,7 +8,7 @@ function createPort(): jest.Mocked<Port> {
   const port: jest.Mocked<Port> = {
     createTaxZone: jest.fn(),
   };
-  port.createTaxZone.mockImplementation(z => Promise.resolve({ ...z, id: 'tz1', createdAt: 0, updatedAt: 0 } as TaxZone));
+  port.createTaxZone.mockImplementation(z => Promise.resolve({ ...z, id: 'tz1', createdAt: new Date(0), updatedAt: new Date(0) } as TaxZone));
   return port;
 }
 

@@ -23,7 +23,7 @@ export class ApproveTaxExemptionUseCase {
       status: 'approved',
       isVerified: true,
       verifiedBy,
-      verifiedAt: Date.now(),
+      verifiedAt: new Date(),
     });
   }
 }
