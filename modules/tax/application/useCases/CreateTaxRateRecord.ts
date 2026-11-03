@@ -22,8 +22,18 @@ export interface CreateTaxRateRecordCommand {
   isCompound?: boolean;
   includeInPrice?: boolean;
   isShippingTaxable?: boolean;
-  startDate?: Date;
+  startDate?: Date | string | number;
 }
+
+// JSON bodies carry dates as ISO strings or epoch numbers — coerce to Date.
+// Values below 1e12 are treated as epoch seconds, larger values as milliseconds.
+const coerceDate = (value: Date | string | number): Date => {
+  const date = value instanceof Date ? value : typeof value === 'number' ? new Date(value < 1e12 ? value * 1000 : value) : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new TaxValidationError('startDate must be a valid date');
+  }
+  return date;
+};
 
 interface TaxRateWritePort {
   createTaxRate(rate: Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'>): Promise<TaxRate>;
@@ -64,7 +74,7 @@ export class CreateTaxRateRecordUseCase {
       isCompound: isCompound !== undefined ? isCompound : false,
       includeInPrice: includeInPrice !== undefined ? includeInPrice : false,
       isShippingTaxable: isShippingTaxable !== undefined ? isShippingTaxable : false,
-      startDate: startDate || new Date(),
+      startDate: startDate ? coerceDate(startDate) : new Date(),
     });
   }
 }
