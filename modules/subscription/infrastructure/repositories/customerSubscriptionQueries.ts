@@ -7,6 +7,7 @@ import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError } from '../../
 import type { CustomerSubscription, SubscriptionPlan, SubscriptionPause, SubscriptionStatus } from './subscriptionTypes';
 import { mapToCustomerSubscription, mapToSubscriptionPause, generateSubscriptionNumber, calculateNextBillingDate } from './subscriptionHelpers';
 import { getSubscriptionPlan } from './subscriptionPlanQueries';
+import type { CustomerSubscription as DbCustomerSubscription } from '../../../../libs/db/types';
 
 export async function getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
@@ -47,8 +48,7 @@ export async function getCustomerSubscriptions(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "customerSubscription" WHERE ${whereClause} 
+  const rows = await query<DbCustomerSubscription[]>(`SELECT * FROM "customerSubscription" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -60,8 +60,7 @@ export async function getCustomerSubscriptions(
 }
 
 export async function getSubscriptionsDueBilling(beforeDate: Date): Promise<CustomerSubscription[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "customerSubscription" 
+  const rows = await query<DbCustomerSubscription[]>(`SELECT * FROM "customerSubscription" 
      WHERE "status" IN ('active', 'trialing') 
      AND "nextBillingAt" <= $1 
      ORDER BY "nextBillingAt" ASC`,

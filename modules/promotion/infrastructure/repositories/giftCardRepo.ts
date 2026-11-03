@@ -5,6 +5,10 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type {
+  PromotionGiftCard as DbPromotionGiftCard,
+  PromotionGiftCardTransaction as DbPromotionGiftCardTransaction,
+} from '../../../../libs/db/types';
 import {
   GiftCardNotFoundError,
   GiftCardNotActiveError,
@@ -36,12 +40,12 @@ const GIFT_CARD_TRANSACTION_TABLE = Table.PromotionGiftCardTransaction;
 // ============================================================================
 
 export async function getGiftCard(giftCardId: string): Promise<PromotionGiftCard | null> {
-  const row = await queryOne<Record<string, unknown>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`, [giftCardId]);
+  const row = await queryOne<DbPromotionGiftCard>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`, [giftCardId]);
   return row ? mapToGiftCard(row) : null;
 }
 
 export async function getGiftCardByCode(code: string): Promise<PromotionGiftCard | null> {
-  const row = await queryOne<Record<string, unknown>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`, [code.toUpperCase()]);
+  const row = await queryOne<DbPromotionGiftCard>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`, [code.toUpperCase()]);
   return row ? mapToGiftCard(row) : null;
 }
 
@@ -71,7 +75,7 @@ export async function getGiftCards(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbPromotionGiftCard[]>(
     `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -101,7 +105,7 @@ export async function createGiftCard(giftCard: {
   const now = new Date().toISOString();
   const code = generateGiftCardCode();
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbPromotionGiftCard>(
     `INSERT INTO "${GIFT_CARD_TABLE}" (
       "code", "type", "initialBalanceCents", "currentBalanceCents", "currencyCode", "status",
       "purchasedBy", "purchaseOrderId", "recipientEmail", "recipientName",
@@ -306,7 +310,7 @@ async function createTransaction(transaction: {
   const now = new Date().toISOString();
   const referenceNumber = `GCT${Date.now()}`;
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbPromotionGiftCardTransaction>(
     `INSERT INTO "${GIFT_CARD_TRANSACTION_TABLE}" (
       "promotionGiftCardId", "type", "amountCents", "balanceBeforeCents", "balanceAfterCents", "currencyCode",
       "orderId", "customerId", "performedBy", "performedByType", "notes",
@@ -334,7 +338,7 @@ async function createTransaction(transaction: {
 }
 
 export async function getTransactions(giftCardId: string): Promise<PromotionGiftCardTransaction[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbPromotionGiftCardTransaction[]>(
     `SELECT * FROM "${GIFT_CARD_TRANSACTION_TABLE}" WHERE "promotionGiftCardId" = $1 ORDER BY "createdAt" DESC`,
     [giftCardId],
   );

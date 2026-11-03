@@ -10,6 +10,7 @@ import { SystemConfigPort } from '../../application/ports/SystemConfigPort';
 import { Store, type StoreProps } from '../../domain/entities/Store';
 import { StoreNotFoundError, StoreSlugAlreadyExistsError, StoreValidationError } from '../../domain/errors/StoreErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 // ============================================================================
 // Command
 // ============================================================================
@@ -222,7 +223,7 @@ export class CreateStoreUseCase {
   }
 
   private generateStoreId(): string {
-    return crypto.randomUUID();
+    return generateUUID();
   }
 
   private generateSlug(name: string): string {

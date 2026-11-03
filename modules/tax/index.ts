@@ -15,3 +15,6 @@ export { taxBusinessRouter } from './interface/routers/taxBusinessRouter';
 export { taxTypeDefs } from './interface/graphql/typeDefs';
 export { taxResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { TaxExemptionProps, TaxExemption } from './domain/entities/TaxExemption';

@@ -5,6 +5,7 @@
  */
 
 import { FulfillmentValidationError } from '../errors/FulfillmentErrors';
+import { generateUUID } from '../../../../libs/uuid';
 
 export interface FulfillmentItemProps {
   fulfillmentItemId: string;
@@ -177,8 +178,6 @@ export class FulfillmentItem {
   }
 }
 
-import { randomUUID } from 'node:crypto';
-
 function generateFulfillmentItemId(): string {
-  return randomUUID();
+  return generateUUID();
 }

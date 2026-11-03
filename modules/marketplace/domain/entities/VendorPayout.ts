@@ -1,6 +1,7 @@
-import { randomUUID } from 'crypto';
+
 import { PayoutStatusError, MarketplaceValidationError } from '../errors/MarketplaceErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export type PayoutStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
 export type PayoutMethod = 'bank_transfer' | 'paypal' | 'stripe' | 'manual';
 
@@ -98,7 +99,7 @@ export class VendorPayout {
     const commissionAmountCents = lineItems.reduce((sum, li) => sum + li.commissionAmountCents, 0);
     const netAmountCents = grossAmountCents - commissionAmountCents;
     return new VendorPayout({
-      payoutId: randomUUID(),
+      payoutId: generateUUID(),
       vendorId: input.vendorId,
       organizationId: input.organizationId,
       payoutNumber: `PO-${year}${month}-${seq}`,

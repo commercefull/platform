@@ -15,6 +15,7 @@ import {
   ThemeAssetConfig,
 } from '../../domain/entities/Theme';
 import { ThemeOverride, ThemeOverrideProps } from '../../domain/entities/ThemeOverride';
+import type { Theme as DbTheme, ThemeOverride as DbThemeOverride } from '../../../../libs/db/types';
 
 export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme CRUD ──────────────────────────────────────────────
@@ -55,17 +56,17 @@ export class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-    const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "theme" ${where} ORDER BY "createdAt" ASC`, params);
+    const rows = await query<DbTheme[]>(`SELECT * FROM "theme" ${where} ORDER BY "createdAt" ASC`, params);
     return (rows || []).map(row => this.mapToTheme(row));
   }
 
   async findActive(): Promise<Theme[]> {
-    const rows = await query<Record<string, unknown>[]>('SELECT * FROM "theme" WHERE status = $1 ORDER BY "createdAt" ASC', ['active']);
+    const rows = await query<DbTheme[]>('SELECT * FROM "theme" WHERE status = $1 ORDER BY "createdAt" ASC', ['active']);
     return (rows || []).map(row => this.mapToTheme(row));
   }
 
   async findBuiltIn(): Promise<Theme[]> {
-    const rows = await query<Record<string, unknown>[]>('SELECT * FROM "theme" WHERE type = $1 ORDER BY "createdAt" ASC', ['built_in']);
+    const rows = await query<DbTheme[]>('SELECT * FROM "theme" WHERE type = $1 ORDER BY "createdAt" ASC', ['built_in']);
     return (rows || []).map(row => this.mapToTheme(row));
   }
 
@@ -163,15 +164,14 @@ export class ThemeRepositoryImpl implements ThemeRepository {
   }
 
   async findOverridesByTheme(themeId: string): Promise<ThemeOverride[]> {
-    const rows = await query<Record<string, unknown>[]>('SELECT * FROM "themeOverride" WHERE "themeId" = $1 ORDER BY "createdAt" DESC', [
+    const rows = await query<DbThemeOverride[]>('SELECT * FROM "themeOverride" WHERE "themeId" = $1 ORDER BY "createdAt" DESC', [
       themeId,
     ]);
     return (rows || []).map(row => this.mapToOverride(row));
   }
 
   async findOverridesByOrganization(organizationId: string): Promise<ThemeOverride[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "themeOverride" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbThemeOverride[]>('SELECT * FROM "themeOverride" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToOverride(row));

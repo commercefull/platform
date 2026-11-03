@@ -23,3 +23,7 @@ export { handleGatewayWebhook } from './interface/controllers/webhookController'
 export { paymentTypeDefs } from './interface/graphql/typeDefs';
 export { paymentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { PaymentRefundProps, PaymentRefund } from './domain/entities/PaymentRefund';
+export { PaymentTransactionProps, PaymentTransaction } from './domain/entities/PaymentTransaction';

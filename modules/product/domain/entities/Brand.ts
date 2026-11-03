@@ -1,3 +1,5 @@
+import { generateUUID } from '../../../../libs/uuid';
+
 export interface BrandProps {
   brandId: string;
   organizationId: string;
@@ -38,7 +40,7 @@ export class Brand {
     const now = new Date();
     const slug = props.slug || Brand.generateSlug(props.name);
     return new Brand({
-      brandId: crypto.randomUUID(),
+      brandId: generateUUID(),
       organizationId: props.organizationId,
       name: props.name,
       slug,

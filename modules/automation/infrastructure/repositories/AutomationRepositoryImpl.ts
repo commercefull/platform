@@ -3,7 +3,7 @@ import type { AutomationRuleRepository, ExecutionLogRepository } from '../../dom
 import { AutomationRule } from '../../domain/entities/AutomationRule';
 import type { TriggerType, RuleCondition, ConditionMatchMode, RuleAction, ActionExecutionMode } from '../../domain/entities/AutomationRule';
 import { AutomationValidationError } from '../../domain/errors/AutomationErrors';
-import type { AutomationRule as DbAutomationRule } from '../../../../libs/db/types';
+import type {AutomationRule as DbAutomationRule, AutomationExecutionLog as DbAutomationExecutionLog} from '../../../../libs/db/types';
 
 type RuleDbRow = DbAutomationRule;
 
@@ -206,22 +206,21 @@ export class ExecutionLogRepositoryImpl implements ExecutionLogRepository {
   }
 
   async findByRule(ruleId: string, limit = 50): Promise<unknown[]> {
-    const rows = await query<unknown[]>(
-      `SELECT * FROM "automationExecutionLog" WHERE "automationRuleId" = $1 ORDER BY "startedAt" DESC LIMIT $2`,
+    const rows = await query<DbAutomationExecutionLog[]>(`SELECT * FROM "automationExecutionLog" WHERE "automationRuleId" = $1 ORDER BY "startedAt" DESC LIMIT $2`,
       [ruleId, limit],
     );
     return rows || [];
   }
 
   async findByCorrelationId(correlationId: string): Promise<unknown[]> {
-    const rows = await query<unknown[]>(`SELECT * FROM "automationExecutionLog" WHERE "correlationId" = $1 ORDER BY "startedAt" DESC`, [
+    const rows = await query<DbAutomationExecutionLog[]>(`SELECT * FROM "automationExecutionLog" WHERE "correlationId" = $1 ORDER BY "startedAt" DESC`, [
       correlationId,
     ]);
     return rows || [];
   }
 
   async findRecent(limit = 50): Promise<unknown[]> {
-    const rows = await query<unknown[]>(`SELECT * FROM "automationExecutionLog" ORDER BY "startedAt" DESC LIMIT $1`, [limit]);
+    const rows = await query<DbAutomationExecutionLog[]>(`SELECT * FROM "automationExecutionLog" ORDER BY "startedAt" DESC LIMIT $1`, [limit]);
     return rows || [];
   }
 

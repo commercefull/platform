@@ -7,6 +7,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import type { StorePickupLocation as DbStorePickupLocation } from '../../../../libs/db/types';
 
 export interface PickupLocation {
   pickupLocationId: string;
@@ -183,7 +184,7 @@ export async function updateLocation(pickupLocationId: string, params: UpdatePic
  * Delete a pickup location
  */
 export async function deleteLocation(pickupLocationId: string): Promise<boolean> {
-  const result = await query<Record<string, unknown>[]>('DELETE FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [
+  const result = await query<DbStorePickupLocation[]>('DELETE FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [
     pickupLocationId,
   ]);
 
@@ -194,8 +195,7 @@ export async function deleteLocation(pickupLocationId: string): Promise<boolean>
  * Get active pickup locations for a store
  */
 async function getActiveLocations(storeId: string): Promise<PickupLocation[]> {
-  const result = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "storePickupLocation" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "name" ASC',
+  const result = await query<DbStorePickupLocation[]>('SELECT * FROM "storePickupLocation" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "name" ASC',
     [storeId],
   );
 

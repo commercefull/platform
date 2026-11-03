@@ -2,11 +2,13 @@ import { queryOne, query } from '../../../../libs/db';
 import { compareString, hashString } from '../../../../libs/hash';
 import crypto from 'crypto';
 
+import { generateUUID } from '../../../../libs/uuid';
 import type {
   Organization as DbOrganization,
   OrganizationAddress as DbOrganizationAddress,
   OrganizationPaymentInfo as DbOrganizationPaymentInfo,
   OrganizationPasswordReset as DbOrganizationPasswordReset,
+  Store as DbStore,
 } from '../../../../libs/db/types';
 import {
   OrganizationNotFoundError,
@@ -194,7 +196,7 @@ export class OrganizationRepo {
   }
 
   async getStoresByOrganization(organizationId: string): Promise<unknown[]> {
-    const result = await query<unknown[]>('SELECT * FROM "store" WHERE "organizationId" = $1 ORDER BY name ASC', [organizationId]);
+    const result = await query<DbStore[]>('SELECT * FROM "store" WHERE "organizationId" = $1 ORDER BY name ASC', [organizationId]);
     return result ?? [];
   }
 
@@ -409,7 +411,7 @@ export class OrganizationRepo {
       .replace(/^-+|-+$/g, '')
       .substring(0, 100);
 
-    return base || crypto.randomUUID();
+    return base || generateUUID();
   }
 }
 

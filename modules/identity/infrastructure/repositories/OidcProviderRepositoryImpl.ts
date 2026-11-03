@@ -5,6 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { OidcProvider, OidcProviderProps, OidcClaimMapping } from '../../domain/entities/OidcProvider';
 import { OidcProviderRepository } from '../../domain/repositories/SsoProviderRepository';
+import type { IdentityOidcProvider as DbIdentityOidcProvider } from '../../../../libs/db/types';
 
 export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   async findById(providerId: string): Promise<OidcProvider | null> {
@@ -13,16 +14,14 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   }
 
   async findByOrganizationId(organizationId: string): Promise<OidcProvider[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentityOidcProvider[]>('SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
   async findActiveByOrganizationId(organizationId: string): Promise<OidcProvider[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentityOidcProvider[]>('SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));

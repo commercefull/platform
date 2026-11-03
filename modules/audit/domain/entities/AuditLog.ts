@@ -5,9 +5,10 @@
  * Each record is hash-chained to the previous record for tamper detection.
  */
 
-import { createHash, randomUUID } from 'crypto';
+import { createHash } from 'crypto';
 import type { AuditAction, ActorType, ResourceType } from '../enums/AuditAction';
 
+import { generateUUID } from '../../../../libs/uuid';
 export interface AuditLogProps {
   auditLogId: string;
   createdAt: Date;
@@ -213,12 +214,4 @@ function computeHash(data: {
   );
 
   return createHash('sha256').update(canonical).digest('hex');
-}
-
-function generateUUID(): string {
-  // Use crypto.randomUUID if available (Node 19+), otherwise fallback
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return randomUUID();
 }

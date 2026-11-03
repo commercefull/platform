@@ -16,6 +16,7 @@ import type { IContentNavigationRepository } from '../../domain/repositories/Con
 import type { IContentMediaRepository } from '../../domain/repositories/ContentMediaRepository';
 import type { IContentRedirectRepository } from '../../domain/repositories/ContentRedirectRepository';
 import type { ContentPageVersion, ContentPageTranslation, ContentCategorization, ContentMediaUsage } from '../../../../libs/db/types';
+import { InternalServerError } from '../../../../libs/errors';
 
 interface ContentVersionReadPort {
   findVersionsByPageId(pageId: string, limit?: number, offset?: number): Promise<ContentPageVersion[]>;
@@ -166,7 +167,7 @@ export class ManageContentUseCase {
 
   private requireDep<K extends keyof ManageContentDeps>(key: K): NonNullable<ManageContentDeps[K]> {
     const dep = this.deps[key];
-    if (!dep) throw new Error(`ManageContentUseCase: '${key}' repository not wired`);
+    if (!dep) throw new InternalServerError(`ManageContentUseCase: '${key}' repository not wired`);
     return dep;
   }
 

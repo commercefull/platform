@@ -5,6 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { SubscriptionOrder, SubscriptionOrderStatus } from './subscriptionTypes';
 import { mapToSubscriptionOrder } from './subscriptionHelpers';
+import type { SubscriptionOrder as DbSubscriptionOrder } from '../../../../libs/db/types';
 
 export async function getSubscriptionOrder(subscriptionOrderId: string): Promise<SubscriptionOrder | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
@@ -14,16 +15,14 @@ export async function getSubscriptionOrder(subscriptionOrderId: string): Promise
 }
 
 export async function getSubscriptionOrders(customerSubscriptionId: string): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
+  const rows = await query<DbSubscriptionOrder[]>('SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
     [customerSubscriptionId],
   );
   return (rows || []).map(mapToSubscriptionOrder);
 }
 
 export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionOrder" 
+  const rows = await query<DbSubscriptionOrder[]>(`SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'pending' 
      ORDER BY "scheduledAt" ASC`,
   );
@@ -31,8 +30,7 @@ export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[
 }
 
 export async function getFailedSubscriptionPayments(): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionOrder" 
+  const rows = await query<DbSubscriptionOrder[]>(`SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'failed' 
      ORDER BY "failedAt" DESC 
      LIMIT 100`,

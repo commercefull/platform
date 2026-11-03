@@ -4,30 +4,31 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { Store as DbStore } from '../../../../libs/db/types';
 import { StoreRepository as IStoreRepository, StoreFilters } from '../../domain/repositories/StoreRepository';
 import { Store, type StoreProps } from '../../domain/entities/Store';
 import { StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
 class StoreRepo implements IStoreRepository {
   async findById(storeId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
+    const row = await queryOne<DbStore>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE slug = $1', [slug]);
+    const row = await queryOne<DbStore>('SELECT * FROM store WHERE slug = $1', [slug]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findByUrl(storeUrl: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
+    const row = await queryOne<DbStore>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findAll(filters?: StoreFilters): Promise<Store[]> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const rows = await query<Record<string, unknown>[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
+    const rows = await query<DbStore[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
 
     return (rows || []).map(row => this.mapToStore(row));
   }

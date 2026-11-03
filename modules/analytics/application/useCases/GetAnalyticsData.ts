@@ -1,5 +1,6 @@
 import type { AnalyticsDataPort } from '../../domain/repositories/AnalyticsDataPort';
 import { logger } from '../../../../libs/logger';
+import { InternalServerError } from '../../../../libs/errors';
 
 export interface ChurnPredictorPort {
   predictCustomerChurn(
@@ -69,7 +70,7 @@ export class GetAnalyticsDataUseCase {
    */
   async analyzeCustomerChurnRisk(limit: number, historyDays = 30) {
     if (!this.churnPredictor) {
-      throw new Error('Churn predictor is not configured');
+      throw new InternalServerError('Churn predictor is not configured');
     }
     const predictor = this.churnPredictor;
 

@@ -28,3 +28,8 @@ export { scimRouter } from './interface/routers/scimRouter';
 export { identityTypeDefs } from './interface/graphql/typeDefs';
 export { identityResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { SocialProvider, SocialAccountProps, SocialProfileData, SocialAccount } from './domain/entities/SocialAccount';
+export { UserType, UserStatus, UserProps, User } from './domain/entities/User';
+export { StoreRole, UserStoreAssignmentProps, UserStoreAssignment } from './domain/entities/UserStoreAssignment';

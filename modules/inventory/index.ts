@@ -15,3 +15,9 @@ export { inventoryBusinessRouter } from './interface/routers/businessRouter';
 export { inventoryTypeDefs } from './interface/graphql/typeDefs';
 export { inventoryResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { InventoryLocation, InventoryMovement, Inventory } from './domain/entities/Inventory';
+export { AllocationRuleScope, AllocationStrategy, ReservationPolicy, InventoryAllocationRuleProps, AllocationEvaluationContext, AllocationRuleEvaluationResult, InventoryAllocationRule } from './domain/entities/InventoryAllocationRule';
+export { InventoryItem, InventoryItemProps } from './domain/entities/InventoryItem';
+export { DispatchStatus, StoreDispatchItemProps, StoreDispatchProps, StoreDispatch } from './domain/entities/StoreDispatch';

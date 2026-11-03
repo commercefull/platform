@@ -4,6 +4,7 @@ import type { StoreCreditRepository } from '../../domain/repositories/ReturnRepo
 import { StoreCreditLedgerEntry } from '../../domain/entities/StoreCredit';
 import type { StoreCreditEntryType, CustomerStoreCreditBalance } from '../../domain/entities/StoreCredit';
 import { ReturnValidationError } from '../../domain/errors/ReturnErrors';
+import type { StoreCreditLedger as DbStoreCreditLedger } from '../../../../libs/db/types';
 
 export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   async getBalance(customerId: string): Promise<CustomerStoreCreditBalance> {
@@ -94,8 +95,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   }
 
   async getLedger(customerId: string, limit = 50): Promise<StoreCreditLedgerEntry[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      `SELECT * FROM "storeCreditLedger" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
+    const rows = await query<DbStoreCreditLedger[]>(`SELECT * FROM "storeCreditLedger" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
       [customerId, limit],
     );
     return (rows || []).map((row: Record<string, unknown>) =>

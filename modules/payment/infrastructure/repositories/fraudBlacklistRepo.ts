@@ -4,6 +4,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import type { BlacklistType, FraudBlacklist } from '../../domain/entities/FraudRule';
+import type { FraudBlacklist as DbFraudBlacklist } from '../../../../libs/db/types';
 
 export async function getBlacklistEntry(fraudBlacklistId: string): Promise<FraudBlacklist | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1', [fraudBlacklistId]);
@@ -32,8 +33,7 @@ export async function getBlacklist(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "fraudBlacklist" WHERE ${whereClause}
+  const rows = await query<DbFraudBlacklist[]>(`SELECT * FROM "fraudBlacklist" WHERE ${whereClause}
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );

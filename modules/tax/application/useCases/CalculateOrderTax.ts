@@ -49,6 +49,7 @@ import type { CalculateOrderTaxCommand, CalculateOrderTaxResponse, OrderLineItem
 import { taxQuoteMessage, TAX_POLICY_VERSION } from './orderTaxTypes';
 import type { TaxRateInfo } from './orderTaxTypes';
 
+import { generateUUID } from '../../../../libs/uuid';
 // ============================================================================
 // Use Case
 // ============================================================================
@@ -409,7 +410,7 @@ export class CalculateOrderTaxUseCase {
     },
   ): PolicyDecisionRecord {
     return {
-      decisionId: crypto.randomUUID(),
+      decisionId: generateUUID(),
       domain: 'tax',
       decision: 'tax_quote',
       allowed: true,

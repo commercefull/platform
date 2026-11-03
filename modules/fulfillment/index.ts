@@ -16,3 +16,7 @@ export { fulfillmentLocationRouter } from './interface/routers/fulfillmentLocati
 export { fulfillmentTypeDefs } from './interface/graphql/typeDefs';
 export { fulfillmentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { FulfillmentStatus, SourceType, Address, FulfillmentProps, Fulfillment } from './domain/entities/Fulfillment';
+export { FulfillmentItemProps, FulfillmentItem } from './domain/entities/FulfillmentItem';

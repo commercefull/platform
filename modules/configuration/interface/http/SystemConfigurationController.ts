@@ -4,14 +4,14 @@ import { jsonResponse } from 'libs/apiResponse';
  * Handles system configuration-related HTTP requests
  */
 
-import { randomUUID } from 'crypto';
+
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { manageSystemConfigurationUseCase, updateSystemConfigurationUseCase } from '../../application/wired';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
-import { isUuid } from '../../../../libs/uuid';
+import { generateUUID, isUuid } from '../../../../libs/uuid';
 
 interface CreateConfigBody {
   configId?: string;
@@ -61,7 +61,7 @@ export class SystemConfigurationController {
         return jsonResponse(res, 400, { success: false, message: 'supportEmail is required' });
       }
       const config = SystemConfiguration.create({
-        configId: body.configId || randomUUID(),
+        configId: body.configId || generateUUID(),
         platformName: body.platformName,
         platformDomain: body.platformDomain,
         supportEmail: body.supportEmail,

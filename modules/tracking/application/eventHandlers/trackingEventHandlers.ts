@@ -9,6 +9,7 @@
 
 import { eventBus, EventPayload, EventType } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
+import { AppError } from '../../../../libs/errors';
 import { TrackingConfigRepository } from '../../domain/repositories/TrackingConfigRepository';
 import { ProcessTrackingEventUseCase } from '../../application/useCases/ProcessTrackingEvent';
 import { TrackingEcommerceData } from '../../domain/entities/TrackingEvent';
@@ -105,10 +106,12 @@ export function registerTrackingEventHandlers(trackingRepo: TrackingConfigReposi
         });
       } catch (err) {
         // Tracking errors should never break the main flow
-        logger.error('Tracking event handler error', {
-          type: payload.type,
-          error: (err as Error).message,
-        });
+        const error = err as Error;
+        if (error instanceof AppError && error.isExpected) {
+          logger.debug('Tracking event skipped', { type: payload.type, error: error.message });
+        } else {
+          logger.error('Tracking event handler error', { type: payload.type, error: error.message });
+        }
       }
     });
   }

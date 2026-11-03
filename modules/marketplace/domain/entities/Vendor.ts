@@ -1,6 +1,7 @@
-import { randomUUID } from 'crypto';
+
 import { VendorStatusError, MarketplaceValidationError } from '../errors/MarketplaceErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export type VendorStatus = 'pending' | 'approved' | 'suspended' | 'terminated';
 export type VendorTier = 'standard' | 'premium' | 'enterprise';
 
@@ -119,7 +120,7 @@ export class Vendor {
   }): Vendor {
     const now = new Date();
     return new Vendor({
-      vendorId: randomUUID(),
+      vendorId: generateUUID(),
       organizationId: input.organizationId,
       name: input.name,
       legalName: input.legalName,

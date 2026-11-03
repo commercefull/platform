@@ -10,7 +10,7 @@ import type {
   OrderReturnCreateParams,
   OrderReturnUpdateParams,
 } from '../../domain/repositories/OrderReturnRepository';
-import type { OrderReturn as DbOrderReturn } from '../../../../libs/db/types';
+import type {OrderReturn as DbOrderReturn, Order as DbOrder} from '../../../../libs/db/types';
 
 /** Columns stored nullable in the DB but optional (undefined) in the domain type. */
 const NULLABLE_RETURN_FIELDS = [
@@ -540,7 +540,7 @@ class OrderReturnRepo {
   }
 
   async findOrderForCustomer(orderId: string, customerId: string): Promise<unknown | null> {
-    return await queryOne<unknown>(`SELECT * FROM "order" WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`, [
+    return await queryOne<DbOrder>(`SELECT * FROM "order" WHERE "orderId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`, [
       orderId,
       customerId,
     ]);

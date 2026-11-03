@@ -5,6 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { SubscriptionProduct } from './subscriptionTypes';
 import { mapToSubscriptionProduct } from './subscriptionHelpers';
+import type { SubscriptionProduct as DbSubscriptionProduct } from '../../../../libs/db/types';
 
 export async function getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1', [
@@ -24,7 +25,7 @@ export async function getSubscriptionProducts(activeOnly: boolean = true): Promi
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "subscriptionProduct" WHERE ${whereClause} ORDER BY "createdAt" DESC`);
+  const rows = await query<DbSubscriptionProduct[]>(`SELECT * FROM "subscriptionProduct" WHERE ${whereClause} ORDER BY "createdAt" DESC`);
   return (rows || []).map(mapToSubscriptionProduct);
 }
 

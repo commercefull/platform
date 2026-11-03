@@ -5,6 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { DunningAttempt, DunningStatus } from './subscriptionTypes';
 import { mapToDunningAttempt } from './subscriptionHelpers';
+import type { SubscriptionDunningAttempt as DbSubscriptionDunningAttempt } from '../../../../libs/db/types';
 
 
 export async function createDunningAttempt(attempt: {
@@ -39,16 +40,14 @@ export async function createDunningAttempt(attempt: {
 }
 
 export async function getDunningAttempts(customerSubscriptionId: string): Promise<DunningAttempt[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "subscriptionDunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
+  const rows = await query<DbSubscriptionDunningAttempt[]>('SELECT * FROM "subscriptionDunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
     [customerSubscriptionId],
   );
   return (rows || []).map(mapToDunningAttempt);
 }
 
 export async function getPendingDunningAttempts(beforeDate: Date): Promise<DunningAttempt[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionDunningAttempt" 
+  const rows = await query<DbSubscriptionDunningAttempt[]>(`SELECT * FROM "subscriptionDunningAttempt" 
      WHERE "status" = 'pending' AND "scheduledAt" <= $1 
      ORDER BY "scheduledAt" ASC`,
     [beforeDate.toISOString()],

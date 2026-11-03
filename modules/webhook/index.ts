@@ -20,3 +20,7 @@ export {
   deleteWebhook,
   viewWebhookDeliveries,
 } from './interface/controllers/adminWebhookController';
+
+// Domain entity exports
+export { DeliveryStatus, WebhookDeliveryProps, WebhookDeliveryEntity } from './domain/entities/WebhookDelivery';
+export { WebhookEndpointProps, WebhookEndpointEntity } from './domain/entities/WebhookEndpoint';

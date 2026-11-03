@@ -12,3 +12,6 @@ export { couponCustomerRouter } from './interface/routers/couponCustomerRouter';
 export { couponBusinessRouter } from './interface/routers/couponRouter';
 export { couponTypeDefs } from './interface/graphql/typeDefs';
 export { couponResolvers } from './interface/graphql/resolvers';
+
+// Domain entity exports
+export { DiscountType, CouponType, CouponStatus, CouponCondition, CouponUsage, CouponProps, Coupon } from './domain/entities/Coupon';

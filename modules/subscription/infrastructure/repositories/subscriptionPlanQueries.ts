@@ -5,6 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { SubscriptionPlan } from './subscriptionTypes';
 import { mapToSubscriptionPlan } from './subscriptionHelpers';
+import type { SubscriptionPlan as DbSubscriptionPlan } from '../../../../libs/db/types';
 
 export async function getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [
@@ -19,8 +20,7 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
     whereClause += ' AND "isActive" = true';
   }
 
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "priceCents" ASC`,
+  const rows = await query<DbSubscriptionPlan[]>(`SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "priceCents" ASC`,
     [subscriptionProductId],
   );
   return (rows || []).map(mapToSubscriptionPlan);

@@ -32,6 +32,7 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
+import type { PaymentTransaction as DbPaymentTransaction, PaymentRefund as DbPaymentRefund } from '../../../../libs/db/types';
 
 function paginatedResult<T>(rows: Record<string, unknown>[] | null | undefined, total: number, limit: number, offset: number, map: (row: Record<string, unknown>) => T): PaginatedResult<T> {
   const length = rows?.length || 0;
@@ -63,8 +64,7 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findTransactionsByOrderId(orderId: string): Promise<PaymentTransaction[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC',
+    const rows = await query<DbPaymentTransaction[]>('SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC',
       [orderId],
     );
     return (rows || []).map(row => this.mapToTransaction(row));
@@ -80,8 +80,7 @@ export class PaymentRepo implements IPaymentRepository {
     );
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, unknown>[]>(
-      `SELECT * FROM "paymentTransaction" WHERE "customerId" = $1 AND "deletedAt" IS NULL
+    const rows = await query<DbPaymentTransaction[]>(`SELECT * FROM "paymentTransaction" WHERE "customerId" = $1 AND "deletedAt" IS NULL
        ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
       [customerId, limit, offset],
     );
@@ -100,8 +99,7 @@ export class PaymentRepo implements IPaymentRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "paymentTransaction" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<Record<string, unknown>[]>(
-      `SELECT * FROM "paymentTransaction" ${whereClause}
+    const rows = await query<DbPaymentTransaction[]>(`SELECT * FROM "paymentTransaction" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
@@ -211,8 +209,7 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "paymentRefund" WHERE "paymentTransactionId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbPaymentRefund[]>('SELECT * FROM "paymentRefund" WHERE "paymentTransactionId" = $1 ORDER BY "createdAt" DESC',
       [transactionId],
     );
     return (rows || []).map(row => this.mapToRefund(row));

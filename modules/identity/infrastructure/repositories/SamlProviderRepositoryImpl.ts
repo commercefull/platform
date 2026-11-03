@@ -5,6 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { SamlProvider, SamlProviderProps, SamlBinding, SamlNameIdFormat, SamlAttributeMapping } from '../../domain/entities/SamlProvider';
 import { SamlProviderRepository } from '../../domain/repositories/SsoProviderRepository';
+import type { IdentitySamlProvider as DbIdentitySamlProvider } from '../../../../libs/db/types';
 
 export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   async findById(providerId: string): Promise<SamlProvider | null> {
@@ -13,16 +14,14 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   }
 
   async findByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentitySamlProvider[]>('SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
   async findActiveByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentitySamlProvider[]>('SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));

@@ -5,6 +5,7 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import { logger } from '../../../../libs/logger';
+import { AppError } from '../../../../libs/errors';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import multer from 'multer';
 import { processImageUseCase, downloadImageUseCase } from '../../application/wired';
@@ -18,11 +19,15 @@ interface MediaUploadBody {
 }
 
 const CLIENT_ERROR_CODES = new Set(['LIMIT_FILE_SIZE', 'LIMIT_UNEXPECTED_FILE']);
-const CLIENT_ERROR_PATTERNS = ['invalid', 'Invalid', 'Unexpected end', 'unsupported', 'Unsupported', 'JSON'];
 
 /** True when the failure was caused by the uploaded payload rather than the server. */
-function isClientUploadError(error: unknown, message: string): boolean {
-  return CLIENT_ERROR_PATTERNS.some(p => message.includes(p)) || CLIENT_ERROR_CODES.has((error as { code?: string }).code ?? '');
+function isClientUploadError(error: unknown): boolean {
+  // Domain/AppError subclasses declare their own statusCode — 4xx means client error
+  if (error instanceof AppError) return error.isExpected;
+  // Malformed JSON in multipart fields (tags/metadata)
+  if (error instanceof SyntaxError) return true;
+  // Multer upload-limit failures carry a stable code
+  return CLIENT_ERROR_CODES.has((error as { code?: string }).code ?? '');
 }
 
 interface MediaDownloadBody {
@@ -98,7 +103,7 @@ export class MediaController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      const status = isClientUploadError(error, errorMessage) ? 400 : 500;
+      const status = isClientUploadError(error) ? 400 : 500;
       jsonResponse(res, status, {
         success: false,
         message: status === 400 ? errorMessage : 'Failed to process image',

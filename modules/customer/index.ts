@@ -14,3 +14,6 @@ export { customerBusinessRouter } from './interface/routers/businessRouter';
 export { customerTypeDefs } from './interface/graphql/typeDefs';
 export { customerResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { CustomerStatus, AddressType, CustomerAddress, CustomerProps, Customer } from './domain/entities/Customer';

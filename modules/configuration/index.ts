@@ -19,3 +19,6 @@ export {
   editSystemConfigurationForm,
   updateSystemConfiguration,
 } from './interface/http/adminConfigurationController';
+
+// Domain entity exports
+export { SystemMode, SystemConfigurationProps, SystemConfiguration } from './domain/entities/SystemConfiguration';

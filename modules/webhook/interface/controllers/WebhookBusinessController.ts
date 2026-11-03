@@ -6,6 +6,7 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
+import { createHmac } from 'crypto';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
 import { listWebhooksUseCase, registerWebhookUseCase, unregisterWebhookUseCase, manageWebhooksUseCase } from '../../application/wired';
@@ -181,7 +182,6 @@ export const testWebhook = async (req: HttpRequest, res: HttpResponse): Promise<
   }
 
   // Send a test event to the endpoint
-  const { createHmac } = await import('crypto');
   const testPayload = JSON.stringify({
     event: 'webhook.test',
     data: { message: 'This is a test webhook delivery', timestamp: new Date().toISOString() },

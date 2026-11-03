@@ -1,8 +1,9 @@
-import { randomUUID } from 'crypto';
+
 import type { IntegrationRepository, IntegrationSubscriptionRepository } from '../../domain/repositories/IntegrationRepository';
 import { IntegrationEventSubscription } from '../../domain/entities/IntegrationEventSubscription';
 import { IntegrationNotFoundError, SubscriptionNotFoundError } from '../../domain/errors/IntegrationErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export class ManageSubscriptionsUseCase {
   constructor(
     private subscriptionRepo: IntegrationSubscriptionRepository,
@@ -20,7 +21,7 @@ export class ManageSubscriptionsUseCase {
     const integration = await this.integrationRepo.findById(params.integrationId);
     if (!integration) throw new IntegrationNotFoundError(params.integrationId);
     const subscription = IntegrationEventSubscription.create({
-      subscriptionId: randomUUID(),
+      subscriptionId: generateUUID(),
       integrationId: params.integrationId,
       eventType: params.eventType,
       targetAction: params.targetAction,

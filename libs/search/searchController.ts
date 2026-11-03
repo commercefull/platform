@@ -15,6 +15,7 @@
 
 import type { HttpRequest, HttpResponse } from '../http';
 import { logger } from '../logger';
+import { jsonResponse, successResponse, errorResponse } from '../apiResponse';
 import { getSearchAdapter, isSearchAdapterConfigured } from './types';
 import {
   getMerchandisingRules,
@@ -36,7 +37,7 @@ class SearchController {
    */
   async search(req: HttpRequest, res: HttpResponse): Promise<void> {
     if (!isSearchAdapterConfigured()) {
-      res.status(503).json({ success: false, error: 'Search service not available' });
+      errorResponse(res, 'Search service not available', 503);
       return;
     }
 
@@ -46,10 +47,10 @@ class SearchController {
 
     try {
       const result = await adapter.search(searchQuery);
-      res.json({ success: true, data: result });
+      successResponse(res, result);
     } catch (error) {
       logger.error('Search request failed', { error: (error as Error).message });
-      res.status(500).json({ success: false, error: 'Search failed' });
+      errorResponse(res, 'Search failed');
     }
   }
 
@@ -76,7 +77,7 @@ class SearchController {
    */
   async autocomplete(req: HttpRequest, res: HttpResponse): Promise<void> {
     if (!isSearchAdapterConfigured()) {
-      res.status(503).json({ success: false, error: 'Search service not available' });
+      errorResponse(res, 'Search service not available', 503);
       return;
     }
 
@@ -84,13 +85,13 @@ class SearchController {
     const searchTerm = (q || query) as string;
 
     if (!searchTerm || searchTerm.length < 2) {
-      res.json({ success: true, data: [] });
+      successResponse(res, []);
       return;
     }
 
     const adapter = getSearchAdapter();
     const suggestions = await adapter.autocomplete(searchTerm, limit ? parseInt(limit as string, 10) : 10);
-    res.json({ success: true, data: suggestions });
+    successResponse(res, suggestions);
   }
 
   // =========================================================================
@@ -104,7 +105,7 @@ class SearchController {
       categoryId: categoryId as string,
       isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
     });
-    res.json({ success: true, data: rules });
+    successResponse(res, rules);
   }
 
   async createMerchandisingRule(
@@ -131,7 +132,7 @@ class SearchController {
       categoryId,
       isActive: isActive ?? true,
     });
-    res.status(201).json({ success: true, data: rule });
+    successResponse(res, rule, 201);
   }
 
   async updateMerchandisingRule(
@@ -152,16 +153,16 @@ class SearchController {
     const { ruleId } = req.params;
     const rule = await updateMerchandisingRule(ruleId, req.body);
     if (!rule) {
-      res.status(404).json({ success: false, error: 'Rule not found' });
+      errorResponse(res, 'Rule not found', 404);
       return;
     }
-    res.json({ success: true, data: rule });
+    successResponse(res, rule);
   }
 
   async deleteMerchandisingRule(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { ruleId } = req.params;
     await deleteMerchandisingRule(ruleId);
-    res.json({ success: true });
+    successResponse(res, undefined);
   }
 
   // =========================================================================
@@ -171,7 +172,7 @@ class SearchController {
   async getCategoryManualOrder(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { categoryId } = req.params;
     const orders = await getCategoryManualOrderList(categoryId);
-    res.json({ success: true, data: orders });
+    successResponse(res, orders);
   }
 
   async setCategoryManualOrder(
@@ -181,13 +182,13 @@ class SearchController {
     const { categoryId } = req.params;
     const { productIds } = req.body;
     await setCategoryManualOrder(categoryId, productIds);
-    res.json({ success: true });
+    successResponse(res, undefined);
   }
 
   async deleteCategoryManualOrder(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { categoryId } = req.params;
     await deleteCategoryManualOrder(categoryId);
-    res.json({ success: true });
+    successResponse(res, undefined);
   }
 
   // =========================================================================
@@ -196,12 +197,12 @@ class SearchController {
 
   async health(_req: HttpRequest, res: HttpResponse): Promise<void> {
     if (!isSearchAdapterConfigured()) {
-      res.json({ healthy: false, details: { error: 'No search adapter configured' } });
+      jsonResponse(res, 200, { healthy: false, details: { error: 'No search adapter configured' } });
       return;
     }
     const adapter = getSearchAdapter();
     const result = await adapter.health();
-    res.json(result);
+    jsonResponse(res, 200, result);
   }
 }
 

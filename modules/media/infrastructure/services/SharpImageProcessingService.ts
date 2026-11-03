@@ -6,12 +6,21 @@
 import sharp from 'sharp';
 import { ImageProcessingService, ProcessedImage, ImageProcessingResult } from '../../domain/services/ImageProcessingService';
 import { ImageProcessingOptions, ImageProcessingOptionsBuilder } from '../../domain/valueObjects/ImageProcessingOptions';
+import { MediaValidationError } from '../../domain/errors/MediaErrors';
 
 export class SharpImageProcessingService implements ImageProcessingService {
   async processImage(
     imageBuffer: Buffer,
     options: ImageProcessingOptions = ImageProcessingOptionsBuilder.productImage(),
   ): Promise<ImageProcessingResult> {
+    try {
+      return await this.process(imageBuffer, options);
+    } catch (error) {
+      throw new MediaValidationError(error instanceof Error ? error.message : 'Image processing failed');
+    }
+  }
+
+  private async process(imageBuffer: Buffer, options: ImageProcessingOptions): Promise<ImageProcessingResult> {
     const result: ImageProcessingResult = {
       original: await this.resizeImage(imageBuffer, undefined, undefined, {
         quality: 90,

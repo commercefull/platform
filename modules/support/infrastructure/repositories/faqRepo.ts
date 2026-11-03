@@ -118,15 +118,13 @@ export async function getCategories(activeOnly: boolean = true): Promise<FaqCate
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`,
+  const rows = await query<DbSupportFaqCategory[]>(`SELECT * FROM "supportFaqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`,
   );
   return (rows || []).map(mapToCategory);
 }
 
 export async function getFeaturedCategories(): Promise<FaqCategory[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqCategory" WHERE "isActive" = true AND "isFeatured" = true 
+  const rows = await query<DbSupportFaqCategory[]>(`SELECT * FROM "supportFaqCategory" WHERE "isActive" = true AND "isFeatured" = true 
      ORDER BY "sortOrder" ASC`,
   );
   return (rows || []).map(mapToCategory);
@@ -230,8 +228,7 @@ export async function getArticles(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqArticle" WHERE ${whereClause} 
+  const rows = await query<DbSupportFaqArticle[]>(`SELECT * FROM "supportFaqArticle" WHERE ${whereClause} 
      ORDER BY "isPinned" DESC, "sortOrder" ASC, "views" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -244,8 +241,7 @@ export async function getArticles(
 }
 
 export async function searchArticles(searchQuery: string, limit: number = 10): Promise<FaqArticle[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqArticle" 
+  const rows = await query<DbSupportFaqArticle[]>(`SELECT * FROM "supportFaqArticle" 
      WHERE "isPublished" = true 
      AND ("title" ILIKE $1 OR "content" ILIKE $1 OR $2 = ANY("keywords"))
      ORDER BY "views" DESC
@@ -256,8 +252,7 @@ export async function searchArticles(searchQuery: string, limit: number = 10): P
 }
 
 export async function getPopularArticles(limit: number = 10): Promise<FaqArticle[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqArticle" WHERE "isPublished" = true 
+  const rows = await query<DbSupportFaqArticle[]>(`SELECT * FROM "supportFaqArticle" WHERE "isPublished" = true 
      ORDER BY "views" DESC LIMIT $1`,
     [limit],
   );
@@ -270,8 +265,7 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
 
   // Get explicitly related articles first
   if (article.relatedArticleIds?.length) {
-    const rows = await query<Record<string, unknown>[]>(
-      `SELECT * FROM "supportFaqArticle" 
+    const rows = await query<DbSupportFaqArticle[]>(`SELECT * FROM "supportFaqArticle" 
        WHERE "faqArticleId" = ANY($1) AND "isPublished" = true
        LIMIT $2`,
       [article.relatedArticleIds, limit],
@@ -282,8 +276,7 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
   }
 
   // Fall back to same category
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqArticle" 
+  const rows = await query<DbSupportFaqArticle[]>(`SELECT * FROM "supportFaqArticle" 
      WHERE "faqCategoryId" = $1 AND "faqArticleId" != $2 AND "isPublished" = true
      ORDER BY "views" DESC LIMIT $3`,
     [article.faqCategoryId, faqArticleId, limit],

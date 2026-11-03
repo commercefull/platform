@@ -14,3 +14,6 @@ export { analyticsBusinessRouter } from './interface/routers/analyticsBusinessRo
 export { analyticsTypeDefs } from './interface/graphql/typeDefs';
 export { analyticsResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { ReportSchedule, ReportExecution, ReportData, SalesForecast, ChurnPrediction, InventoryOptimization, ProductRecommendations, CustomerSegmentation } from './domain/entities/AnalyticsReport';

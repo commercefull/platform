@@ -2,6 +2,7 @@ export type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' 
 
 import { QuoteStatusError, QuoteExpiredError, B2BValidationError } from '../errors/B2BErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export interface QuoteLineItem {
   lineItemId: string;
   productId: string;
@@ -58,9 +59,9 @@ export class Quote {
     const now = new Date();
     const validUntil = new Date(now);
     validUntil.setDate(validUntil.getDate() + (input.validUntilDays ?? 30));
-    const quoteNumber = `QT-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const quoteNumber = `QT-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${generateUUID().slice(0, 8).toUpperCase()}`;
     return new Quote({
-      quoteId: crypto.randomUUID(),
+      quoteId: generateUUID(),
       companyId: input.companyId,
       organizationId: input.organizationId,
       quoteNumber,
@@ -154,7 +155,7 @@ export class Quote {
     if (this.props.status !== 'draft') {
       throw new QuoteStatusError(this.props.quoteId, 'add_line_items_to', this.props.status);
     }
-    this.props.lineItems.push({ ...item, lineItemId: crypto.randomUUID() });
+    this.props.lineItems.push({ ...item, lineItemId: generateUUID() });
     this.recalculate();
     this.props.updatedAt = new Date();
   }

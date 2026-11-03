@@ -9,7 +9,7 @@
  * 4. Logs the result
  */
 
-import { randomUUID } from 'crypto';
+
 import { logger } from '../../../../libs/logger';
 import { eventBus, type EventPayload } from '../../../../libs/events/eventBus';
 import type {
@@ -20,7 +20,9 @@ import type {
 } from '../../domain/repositories/IntegrationRepository';
 import { IntegrationLog } from '../../domain/entities/IntegrationLog';
 import { decryptCredential } from '../../domain/services/CredentialCrypto';
+import { IntegrationConfigurationError } from '../../domain/errors/IntegrationErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export class IntegrationEventDispatcher {
   constructor(
     private bus: typeof eventBus,
@@ -50,7 +52,7 @@ export class IntegrationEventDispatcher {
 
       const startTime = Date.now();
       const log = IntegrationLog.create({
-        logId: randomUUID(),
+        logId: generateUUID(),
         integrationId: integration.integrationId,
         subscriptionId: sub.subscriptionId,
         eventType: payload.type,
@@ -64,7 +66,7 @@ export class IntegrationEventDispatcher {
 
         const url = integration.webhookUrl ?? this.resolveProviderEndpoint(integration.provider, sub.targetAction);
         if (!url) {
-          throw new Error(`No URL configured for integration ${integration.integrationId}`);
+          throw new IntegrationConfigurationError(`No URL configured for integration ${integration.integrationId}`);
         }
 
         const headers: Record<string, string> = {

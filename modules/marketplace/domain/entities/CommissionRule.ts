@@ -1,6 +1,7 @@
-import { randomUUID } from 'crypto';
+
 import { CommissionValidationError } from '../errors/MarketplaceErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export type CommissionType = 'percentage' | 'fixed' | 'tiered';
 export type CommissionScope = 'global' | 'category' | 'vendor' | 'product';
 
@@ -95,7 +96,7 @@ export class CommissionRule {
     }
     const now = new Date();
     return new CommissionRule({
-      ruleId: randomUUID(),
+      ruleId: generateUUID(),
       organizationId: input.organizationId,
       name: input.name,
       type: input.type,

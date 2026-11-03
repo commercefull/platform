@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { TrackingConfig, TrackingConfigProps, GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
 import { TrackingConfigRepository } from '../../domain/repositories/TrackingConfigRepository';
+import type { TrackingConfig as DbTrackingConfig } from '../../../../libs/db/types';
 
 export class TrackingConfigRepositoryImpl implements TrackingConfigRepository {
   async findById(configId: string): Promise<TrackingConfig | null> {
@@ -14,8 +15,7 @@ export class TrackingConfigRepositoryImpl implements TrackingConfigRepository {
   }
 
   async findByOrganizationId(organizationId: string): Promise<TrackingConfig[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "trackingConfig" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbTrackingConfig[]>('SELECT * FROM "trackingConfig" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));

@@ -4,6 +4,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { ScimProvisioningRecord, ScimProvisioningRepository } from '../../domain/repositories/SsoProviderRepository';
+import type { IdentityScimProvisioningRecord as DbIdentityScimProvisioningRecord } from '../../../../libs/db/types';
 
 export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepository {
   async findByScimUserId(scimUserId: string): Promise<ScimProvisioningRecord | null> {
@@ -19,8 +20,7 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async findByOrganizationId(organizationId: string): Promise<ScimProvisioningRecord[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "identityScimProvisioningRecord" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentityScimProvisioningRecord[]>('SELECT * FROM "identityScimProvisioningRecord" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToRecord(row));

@@ -1,3 +1,5 @@
+import { generateUUID } from '../../../../libs/uuid';
+
 export interface ImportMappingProps {
   importMappingId: string;
   importJobId: string;
@@ -27,7 +29,7 @@ export class ImportMapping {
   }): ImportMapping {
     const now = new Date();
     return new ImportMapping({
-      importMappingId: crypto.randomUUID(),
+      importMappingId: generateUUID(),
       importJobId: props.importJobId,
       entityType: props.entityType,
       sourceId: props.sourceId,

@@ -192,7 +192,7 @@ export async function getMessages(supportTicketId: string, includeInternal: bool
     whereClause += ' AND "isInternal" = false';
   }
 
-  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`, [
+  const rows = await query<DbSupportMessage[]>(`SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`, [
     supportTicketId,
   ]);
   return (rows || []).map(mapToMessage);
@@ -297,8 +297,7 @@ export async function markMessagesRead(supportTicketId: string, readBy: string):
 }
 
 export async function getAttachments(supportTicketId: string): Promise<SupportAttachment[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
+  const rows = await query<DbSupportAttachment[]>('SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
     [supportTicketId],
   );
   return (rows || []).map(mapToAttachment);

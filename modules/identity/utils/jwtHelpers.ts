@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
-import { randomUUID } from 'crypto';
 
+
+import { generateUUID } from '../../../libs/uuid';
 type JwtTokenUse = 'access' | 'refresh';
 
 const JWT_ALGORITHM = 'HS256';
@@ -60,7 +61,7 @@ export function generateAccessToken(options: AccessTokenOptions): string {
     email: options.userEmail,
     role: options.userRole,
     tokenUse: options.tokenUse ?? 'access',
-    jti: randomUUID(),
+    jti: generateUUID(),
   };
 
   return jwt.sign(payload, options.jwtSecret, { expiresIn: options.expiresIn, algorithm: JWT_ALGORITHM } as SignOptions);

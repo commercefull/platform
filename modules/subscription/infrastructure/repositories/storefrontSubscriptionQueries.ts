@@ -3,6 +3,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { CustomerSubscription as DbCustomerSubscription } from '../../../../libs/db/types';
 
 export async function findActivePlansWithProduct(): Promise<unknown[]> {
   const results = await query<unknown[]>(
@@ -41,8 +42,7 @@ export async function findByIdWithPlan(subscriptionId: string, customerId: strin
 }
 
 export async function findActiveByCustomerId(subscriptionId: string, customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(
-    `SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1 AND "customerId" = $2 AND "status" = 'active'`,
+  return await queryOne<DbCustomerSubscription>(`SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1 AND "customerId" = $2 AND "status" = 'active'`,
     [subscriptionId, customerId],
   );
 }
