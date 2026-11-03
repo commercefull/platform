@@ -1,12 +1,6 @@
 import { query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
-import {
-  getCategoryFacets,
-  getBrandFacets,
-  getPriceRangeFacets,
-  getAttributeFacets,
-  type FacetTables,
-} from './productSearchFacets';
+import { getCategoryFacets, getBrandFacets, getPriceRangeFacets, getAttributeFacets, type FacetTables } from './productSearchFacets';
 import type { Product as DbProduct } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
 import { createCache } from '../../../../libs/cache';

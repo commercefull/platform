@@ -15,9 +15,9 @@ export class TrackingConfigRepositoryImpl implements TrackingConfigRepository {
   }
 
   async findByOrganizationId(organizationId: string): Promise<TrackingConfig[]> {
-    const rows = await query<DbTrackingConfig[]>('SELECT * FROM "trackingConfig" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
-      [organizationId],
-    );
+    const rows = await query<DbTrackingConfig[]>('SELECT * FROM "trackingConfig" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC', [
+      organizationId,
+    ]);
     return (rows || []).map(row => this.mapToEntity(row));
   }
 

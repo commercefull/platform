@@ -341,11 +341,7 @@ export class CreatePaymentIntentUseCase {
   // Create order in PAYMENT_PENDING status — or resume the order a prior
   // attempt already placed (its id was attached to the session). A
   // cancelled order from a failed attempt is superseded by a fresh one.
-  private async placeOrResumeOrder(
-    session: CheckoutSession,
-    basket: BasketSnapshot,
-    orderInput: OrderInput,
-  ): Promise<OrderSnapshot> {
+  private async placeOrResumeOrder(session: CheckoutSession, basket: BasketSnapshot, orderInput: OrderInput): Promise<OrderSnapshot> {
     let orderResponse: OrderSnapshot | null = session.orderId ? await this.deps.orderPlacementPort.findOrder(session.orderId) : null;
     if (orderResponse?.status === 'cancelled') {
       orderResponse = null;
@@ -366,11 +362,7 @@ export class CreatePaymentIntentUseCase {
     return orderResponse;
   }
 
-  private async createPendingOrder(
-    session: CheckoutSession,
-    basket: BasketSnapshot,
-    orderInput: OrderInput,
-  ): Promise<OrderSnapshot> {
+  private async createPendingOrder(session: CheckoutSession, basket: BasketSnapshot, orderInput: OrderInput): Promise<OrderSnapshot> {
     return this.deps.orderPlacementPort.createOrder(buildCreateOrderRequest(session, basket, orderInput));
   }
 

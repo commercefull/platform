@@ -15,7 +15,7 @@ import {
   ThemeAssetConfig,
 } from '../../domain/entities/Theme';
 import { ThemeOverride, ThemeOverrideProps } from '../../domain/entities/ThemeOverride';
-import type { Theme as DbTheme, ThemeOverride as DbThemeOverride, ThemeAssignment as DbThemeAssignment} from '../../../../libs/db/types';
+import type { Theme as DbTheme, ThemeOverride as DbThemeOverride, ThemeAssignment as DbThemeAssignment } from '../../../../libs/db/types';
 
 export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme CRUD ──────────────────────────────────────────────
@@ -152,9 +152,7 @@ export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme Override CRUD ─────────────────────────────────────
 
   async findOverrideByStore(storeId: string): Promise<ThemeOverride | null> {
-    const row = await queryOne<DbThemeOverride>('SELECT * FROM "themeOverride" WHERE "storeId" = $1 AND "isActive" = true', [
-      storeId,
-    ]);
+    const row = await queryOne<DbThemeOverride>('SELECT * FROM "themeOverride" WHERE "storeId" = $1 AND "isActive" = true', [storeId]);
     return row ? this.mapToOverride(row) : null;
   }
 
@@ -164,16 +162,14 @@ export class ThemeRepositoryImpl implements ThemeRepository {
   }
 
   async findOverridesByTheme(themeId: string): Promise<ThemeOverride[]> {
-    const rows = await query<DbThemeOverride[]>('SELECT * FROM "themeOverride" WHERE "themeId" = $1 ORDER BY "createdAt" DESC', [
-      themeId,
-    ]);
+    const rows = await query<DbThemeOverride[]>('SELECT * FROM "themeOverride" WHERE "themeId" = $1 ORDER BY "createdAt" DESC', [themeId]);
     return (rows || []).map(row => this.mapToOverride(row));
   }
 
   async findOverridesByOrganization(organizationId: string): Promise<ThemeOverride[]> {
-    const rows = await query<DbThemeOverride[]>('SELECT * FROM "themeOverride" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
-      [organizationId],
-    );
+    const rows = await query<DbThemeOverride[]>('SELECT * FROM "themeOverride" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC', [
+      organizationId,
+    ]);
     return (rows || []).map(row => this.mapToOverride(row));
   }
 
@@ -181,9 +177,10 @@ export class ThemeRepositoryImpl implements ThemeRepository {
     const now = new Date().toISOString();
     const json = override.toJSON();
 
-    const existing = await queryOne<Pick<DbThemeOverride, 'overrideId'>>('SELECT "overrideId" FROM "themeOverride" WHERE "overrideId" = $1', [
-      override.overrideId,
-    ]);
+    const existing = await queryOne<Pick<DbThemeOverride, 'overrideId'>>(
+      'SELECT "overrideId" FROM "themeOverride" WHERE "overrideId" = $1',
+      [override.overrideId],
+    );
 
     if (existing) {
       await query(
@@ -245,9 +242,10 @@ export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme Assignment ────────────────────────────────────────
 
   async findThemeAssignment(storeId: string): Promise<{ themeId: string; overrideId?: string } | null> {
-    const row = await queryOne<Pick<DbThemeAssignment, 'themeId' | 'overrideId'>>('SELECT "themeId", "overrideId" FROM "themeAssignment" WHERE "storeId" = $1', [
-      storeId,
-    ]);
+    const row = await queryOne<Pick<DbThemeAssignment, 'themeId' | 'overrideId'>>(
+      'SELECT "themeId", "overrideId" FROM "themeAssignment" WHERE "storeId" = $1',
+      [storeId],
+    );
     if (!row) return null;
     return {
       themeId: row.themeId as string,
@@ -257,7 +255,9 @@ export class ThemeRepositoryImpl implements ThemeRepository {
 
   async assignThemeToStore(storeId: string, themeId: string, organizationId: string): Promise<void> {
     const now = new Date().toISOString();
-    const existing = await queryOne<Pick<DbThemeAssignment, 'storeId'>>('SELECT "storeId" FROM "themeAssignment" WHERE "storeId" = $1', [storeId]);
+    const existing = await queryOne<Pick<DbThemeAssignment, 'storeId'>>('SELECT "storeId" FROM "themeAssignment" WHERE "storeId" = $1', [
+      storeId,
+    ]);
 
     if (existing) {
       await query('UPDATE "themeAssignment" SET "themeId" = $1, "organizationId" = $2, "updatedAt" = $3 WHERE "storeId" = $4', [

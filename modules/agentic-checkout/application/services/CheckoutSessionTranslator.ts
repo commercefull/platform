@@ -95,10 +95,7 @@ function buildTotals(checkout: ChannelCheckoutSnapshot | null, basketItems: Chan
   return totals;
 }
 
-function buildFulfillmentDetails(
-  session: ChannelSession,
-  checkout: ChannelCheckoutSnapshot | null,
-): Record<string, unknown> | undefined {
+function buildFulfillmentDetails(session: ChannelSession, checkout: ChannelCheckoutSnapshot | null): Record<string, unknown> | undefined {
   const fd = session.fulfillmentDetails;
   const sa = checkout?.shippingAddress;
   if (!fd && !sa) return undefined;

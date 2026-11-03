@@ -195,7 +195,8 @@ export async function deleteLocation(pickupLocationId: string): Promise<boolean>
  * Get active pickup locations for a store
  */
 async function getActiveLocations(storeId: string): Promise<PickupLocation[]> {
-  const result = await query<DbStorePickupLocation[]>('SELECT * FROM "storePickupLocation" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "name" ASC',
+  const result = await query<DbStorePickupLocation[]>(
+    'SELECT * FROM "storePickupLocation" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "name" ASC',
     [storeId],
   );
 

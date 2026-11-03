@@ -50,4 +50,3 @@ export type PaymentRefundCreateParams = MakeOptional<
   | 'metadata'
 >;
 export type PaymentRefundUpdateParams = Partial<PaymentRefundCreateParams>;
-

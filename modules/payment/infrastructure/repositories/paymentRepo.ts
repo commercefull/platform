@@ -459,7 +459,6 @@ export class PaymentRepo {
   processRefund(refundData: Parameters<typeof processRefundMock>[1]) {
     return processRefundMock(this, refundData);
   }
-
 }
 
 export default new PaymentRepo();

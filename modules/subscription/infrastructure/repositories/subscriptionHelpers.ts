@@ -18,7 +18,6 @@ import type {
   DunningAttempt,
 } from './subscriptionTypes';
 
-
 export async function generateSubscriptionNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const result = await queryOne<{ count: string }>(
@@ -265,4 +264,3 @@ export function mapToDunningAttempt(row: Record<string, unknown>): DunningAttemp
     updatedAt: new Date(row.updatedAt as string),
   };
 }
-

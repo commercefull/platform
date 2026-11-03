@@ -87,9 +87,7 @@ export async function deleteVariant(variantId: string): Promise<void> {
 }
 
 export async function getDefaultVariant(productId: string): Promise<ProductVariant | null> {
-  const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true', [
-    productId,
-  ]);
+  const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true', [productId]);
   return row ? mapToVariant(row) : null;
 }
 
@@ -114,7 +112,10 @@ export async function addProductImage(productId: string, image: ProductImage): P
   );
 }
 
-export async function updateProductImage(imageId: string, updates: { altText?: string; position?: number; isPrimary?: boolean }): Promise<void> {
+export async function updateProductImage(
+  imageId: string,
+  updates: { altText?: string; position?: number; isPrimary?: boolean },
+): Promise<void> {
   const setClauses: string[] = ['"updatedAt" = $1'];
   const params: unknown[] = [new Date().toISOString()];
   let paramIndex = 2;
@@ -150,4 +151,3 @@ export async function reorderProductImages(productId: string, imageIds: string[]
     ]);
   }
 }
-

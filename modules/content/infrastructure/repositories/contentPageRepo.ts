@@ -7,11 +7,7 @@ import { queryOne, query } from '../../../../libs/db';
 import { ContentPage, ContentPagePublication } from '../../../../libs/db/types';
 import type { ContentPublicationContext } from '../../domain/repositories/ContentRepository';
 import { unixTimestamp } from '../../../../libs/date';
-import {
-  ContentPageNotFoundError,
-  FailedToCreateContentError,
-  SlugAlreadyExistsError,
-} from '../../domain/errors/ContentErrors';
+import { ContentPageNotFoundError, FailedToCreateContentError, SlugAlreadyExistsError } from '../../domain/errors/ContentErrors';
 import type { ContentPage as DbContentPage } from '../../../../libs/db/types';
 import type { ContentPagePublication as DbContentPagePublication } from '../../../../libs/db/types';
 import type { ContentPageTranslation as DbContentPageTranslation } from '../../../../libs/db/types';

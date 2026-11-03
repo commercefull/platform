@@ -57,7 +57,15 @@ async function findExisting(customerId: string, productId: string): Promise<Wish
      WHERE cw."customerId" = $1 AND w."productId" = $2`,
     [customerId, productId],
   );
-  return row ? { wishlistItemId: row.customerWishlistItemId, customerId, productId: row.productId, createdAt: row.createdAt, updatedAt: row.updatedAt } : null;
+  return row
+    ? {
+        wishlistItemId: row.customerWishlistItemId,
+        customerId,
+        productId: row.productId,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      }
+    : null;
 }
 
 async function create(customerId: string, productId: string): Promise<WishlistItem | null> {
@@ -67,7 +75,9 @@ async function create(customerId: string, productId: string): Promise<WishlistIt
      VALUES ($1, $2, 1, NOW(), NOW()) RETURNING "customerWishlistItemId", "createdAt", "updatedAt"`,
     [wishlistId, productId],
   );
-  return row ? { wishlistItemId: row.customerWishlistItemId, customerId, productId, createdAt: row.createdAt, updatedAt: row.updatedAt } : null;
+  return row
+    ? { wishlistItemId: row.customerWishlistItemId, customerId, productId, createdAt: row.createdAt, updatedAt: row.updatedAt }
+    : null;
 }
 
 async function remove(customerId: string, productId: string): Promise<WishlistItem | null> {
@@ -78,7 +88,9 @@ async function remove(customerId: string, productId: string): Promise<WishlistIt
      RETURNING "customerWishlistItemId", "createdAt", "updatedAt"`,
     [customerId, productId],
   );
-  return row ? { wishlistItemId: row.customerWishlistItemId, customerId, productId, createdAt: row.createdAt, updatedAt: row.updatedAt } : null;
+  return row
+    ? { wishlistItemId: row.customerWishlistItemId, customerId, productId, createdAt: row.createdAt, updatedAt: row.updatedAt }
+    : null;
 }
 
 export default { findByCustomer, findExisting, create, remove };

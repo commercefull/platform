@@ -12,7 +12,11 @@ import type {
   SenderType,
   SupportTicketProps,
 } from '../../domain/entities/SupportTicket';
-import type { SupportAttachment as DbSupportAttachment, SupportMessage as DbSupportMessage, SupportTicket as DbSupportTicket} from '../../../../libs/db/types';
+import type {
+  SupportAttachment as DbSupportAttachment,
+  SupportMessage as DbSupportMessage,
+  SupportTicket as DbSupportTicket,
+} from '../../../../libs/db/types';
 
 export type SupportTicket = SupportTicketProps;
 type SupportMessage = DbSupportMessage;
@@ -22,7 +26,6 @@ export async function getTicket(supportTicketId: string): Promise<SupportTicket 
   const row = await queryOne<DbSupportTicket>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
   return row ? mapToTicket(row) : null;
 }
-
 
 export function mapToTicket(row: Record<string, unknown>): SupportTicket {
   return {
@@ -297,7 +300,8 @@ export async function markMessagesRead(supportTicketId: string, readBy: string):
 }
 
 export async function getAttachments(supportTicketId: string): Promise<SupportAttachment[]> {
-  const rows = await query<DbSupportAttachment[]>('SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
+  const rows = await query<DbSupportAttachment[]>(
+    'SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
     [supportTicketId],
   );
   return (rows || []).map(mapToAttachment);

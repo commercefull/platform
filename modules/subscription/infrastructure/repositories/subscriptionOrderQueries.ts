@@ -15,7 +15,8 @@ export async function getSubscriptionOrder(subscriptionOrderId: string): Promise
 }
 
 export async function getSubscriptionOrders(customerSubscriptionId: string): Promise<SubscriptionOrder[]> {
-  const rows = await query<DbSubscriptionOrder[]>('SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
+  const rows = await query<DbSubscriptionOrder[]>(
+    'SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
     [customerSubscriptionId],
   );
   return (rows || []).map(mapToSubscriptionOrder);
@@ -24,8 +25,7 @@ export async function getSubscriptionOrders(customerSubscriptionId: string): Pro
 export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[]> {
   const rows = await query<DbSubscriptionOrder[]>(`SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'pending' 
-     ORDER BY "scheduledAt" ASC`,
-  );
+     ORDER BY "scheduledAt" ASC`);
   return (rows || []).map(mapToSubscriptionOrder);
 }
 
@@ -33,8 +33,7 @@ export async function getFailedSubscriptionPayments(): Promise<SubscriptionOrder
   const rows = await query<DbSubscriptionOrder[]>(`SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'failed' 
      ORDER BY "failedAt" DESC 
-     LIMIT 100`,
-  );
+     LIMIT 100`);
   return (rows || []).map(mapToSubscriptionOrder);
 }
 
@@ -117,4 +116,3 @@ export async function updateSubscriptionOrderStatus(
   params.push(subscriptionOrderId);
   await query(`UPDATE "subscriptionOrder" SET ${setClause} WHERE "subscriptionOrderId" = $${paramIndex}`, params);
 }
-

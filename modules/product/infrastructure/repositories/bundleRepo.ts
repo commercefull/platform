@@ -169,11 +169,7 @@ export async function saveBundle(
 }
 
 /** Column values from "name" through "metadata", shared by insert and update. */
-function bundleFieldValues(
-  bundle: Partial<ProductBundle> & { name: string },
-  slug: string,
-  isActive: boolean,
-): unknown[] {
+function bundleFieldValues(bundle: Partial<ProductBundle> & { name: string }, slug: string, isActive: boolean): unknown[] {
   return [
     bundle.name,
     slug,

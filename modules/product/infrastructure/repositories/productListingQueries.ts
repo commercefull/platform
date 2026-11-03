@@ -94,12 +94,7 @@ export async function findRelated(
 /**
  * Update product rating
  */
-export async function updateRating(
-  tableName: string,
-  productId: string,
-  averageRating: number,
-  reviewCount: number,
-): Promise<Product> {
+export async function updateRating(tableName: string, productId: string, averageRating: number, reviewCount: number): Promise<Product> {
   const sql = `
     UPDATE "${tableName}"
     SET "averageRating" = $2, "reviewCount" = $3, "updatedAt" = now()

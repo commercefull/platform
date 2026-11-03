@@ -14,14 +14,16 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   }
 
   async findByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
-    const rows = await query<DbIdentitySamlProvider[]>('SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentitySamlProvider[]>(
+      'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
   async findActiveByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
-    const rows = await query<DbIdentitySamlProvider[]>('SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentitySamlProvider[]>(
+      'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
@@ -29,9 +31,10 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
 
   async save(provider: SamlProvider): Promise<SamlProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Pick<DbIdentitySamlProvider, 'providerId'>>('SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1', [
-      props.providerId,
-    ]);
+    const existing = await queryOne<Pick<DbIdentitySamlProvider, 'providerId'>>(
+      'SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1',
+      [props.providerId],
+    );
 
     if (existing) {
       await query(

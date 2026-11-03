@@ -1,8 +1,3 @@
-/**
- * Payment Repository Implementation
- * PostgreSQL implementation using camelCase column names (matching migrations)
- */
-
 import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import {
@@ -32,9 +27,20 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
-import type { PaymentTransaction as DbPaymentTransaction, PaymentRefund as DbPaymentRefund, PaymentGateway as DbPaymentGateway, PaymentMethodConfig as DbPaymentMethodConfig } from '../../../../libs/db/types';
+import type {
+  PaymentTransaction as DbPaymentTransaction,
+  PaymentRefund as DbPaymentRefund,
+  PaymentGateway as DbPaymentGateway,
+  PaymentMethodConfig as DbPaymentMethodConfig,
+} from '../../../../libs/db/types';
 
-function paginatedResult<T>(rows: Record<string, unknown>[] | null | undefined, total: number, limit: number, offset: number, map: (row: Record<string, unknown>) => T): PaginatedResult<T> {
+function paginatedResult<T>(
+  rows: Record<string, unknown>[] | null | undefined,
+  total: number,
+  limit: number,
+  offset: number,
+  map: (row: Record<string, unknown>) => T,
+): PaginatedResult<T> {
   const length = rows?.length || 0;
   return {
     data: (rows || []).map(map),
@@ -64,7 +70,8 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findTransactionsByOrderId(orderId: string): Promise<PaymentTransaction[]> {
-    const rows = await query<DbPaymentTransaction[]>('SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC',
+    const rows = await query<DbPaymentTransaction[]>(
+      'SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC',
       [orderId],
     );
     return (rows || []).map(row => this.mapToTransaction(row));
@@ -80,7 +87,8 @@ export class PaymentRepo implements IPaymentRepository {
     );
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<DbPaymentTransaction[]>(`SELECT * FROM "paymentTransaction" WHERE "customerId" = $1 AND "deletedAt" IS NULL
+    const rows = await query<DbPaymentTransaction[]>(
+      `SELECT * FROM "paymentTransaction" WHERE "customerId" = $1 AND "deletedAt" IS NULL
        ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
       [customerId, limit, offset],
     );
@@ -99,7 +107,8 @@ export class PaymentRepo implements IPaymentRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "paymentTransaction" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<DbPaymentTransaction[]>(`SELECT * FROM "paymentTransaction" ${whereClause}
+    const rows = await query<DbPaymentTransaction[]>(
+      `SELECT * FROM "paymentTransaction" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
@@ -142,9 +151,7 @@ export class PaymentRepo implements IPaymentRepository {
     } else {
       const orderPaymentId = generateUUID();
 
-      // Create orderPayment + paymentTransaction atomically
       await withTransaction(async () => {
-        // Create orderPayment record first (FK constraint)
         await query(
           `INSERT INTO "orderPayment" (
             "orderPaymentId", "orderId", "type", "provider",
@@ -202,14 +209,14 @@ export class PaymentRepo implements IPaymentRepository {
     return parseInt(result?.count || '0');
   }
 
-  // Refunds
   async findRefundById(refundId: string): Promise<PaymentRefund | null> {
     const row = await queryOne<DbPaymentRefund>('SELECT * FROM "paymentRefund" WHERE "paymentRefundId" = $1', [refundId]);
     return row ? this.mapToRefund(row) : null;
   }
 
   async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
-    const rows = await query<DbPaymentRefund[]>('SELECT * FROM "paymentRefund" WHERE "paymentTransactionId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbPaymentRefund[]>(
+      'SELECT * FROM "paymentRefund" WHERE "paymentTransactionId" = $1 ORDER BY "createdAt" DESC',
       [transactionId],
     );
     return (rows || []).map(row => this.mapToRefund(row));
@@ -218,9 +225,10 @@ export class PaymentRepo implements IPaymentRepository {
   async saveRefund(refund: PaymentRefund): Promise<PaymentRefund> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<{ paymentRefundId: string }>('SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1', [
-      refund.refundId,
-    ]);
+    const existing = await queryOne<{ paymentRefundId: string }>(
+      'SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1',
+      [refund.refundId],
+    );
 
     if (existing) {
       await query(
@@ -263,7 +271,6 @@ export class PaymentRepo implements IPaymentRepository {
     return refund;
   }
 
-  // Payment Methods
   async getEnabledPaymentMethods(
     organizationId: string,
     currency?: string,
@@ -303,7 +310,6 @@ export class PaymentRepo implements IPaymentRepository {
     }));
   }
 
-  // Gateways
   async getDefaultGateway(organizationId: string): Promise<{
     gatewayId: string;
     provider: string;
@@ -347,7 +353,6 @@ export class PaymentRepo implements IPaymentRepository {
     };
   }
 
-  // Helpers
   private buildWhereClause(filters?: PaymentFilters): { whereClause: string; params: unknown[] } {
     const conditions: string[] = ['"deletedAt" IS NULL'];
     const params: unknown[] = [];
@@ -421,10 +426,6 @@ export class PaymentRepo implements IPaymentRepository {
       updatedAt: new Date(row.updatedAt as string),
     });
   }
-
-  // ==========================================================================
-  // Settings / Webhooks / Stored Methods
-  // ==========================================================================
 
   findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
     return qFindSettingsByMerchant(organizationId);

@@ -1,6 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
-import type { MembershipPlan as DbMembershipPlan, MembershipPlanBenefit as DbMembershipPlanBenefit, MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
+import type {
+  MembershipPlan as DbMembershipPlan,
+  MembershipPlanBenefit as DbMembershipPlanBenefit,
+  MembershipSubscription as DbMembershipSubscription,
+} from '../../../../libs/db/types';
 
 type MembershipPlanWithCountRow = DbMembershipPlan & { benefitCount: string };
 type MembershipWithPlanRow = DbMembershipSubscription & {
@@ -28,7 +32,8 @@ export async function findPlanById(planId: string): Promise<unknown | null> {
 }
 
 export async function findBenefitsByPlanId(planId: string): Promise<unknown[]> {
-  const results = await query<DbMembershipPlanBenefit[]>(`SELECT mb.* FROM "membershipPlanBenefit" mpb
+  const results = await query<DbMembershipPlanBenefit[]>(
+    `SELECT mb.* FROM "membershipPlanBenefit" mpb
      JOIN "membershipBenefit" mb ON mpb."benefitId" = mb."membershipBenefitId"
      WHERE mpb."planId" = $1 AND mpb."isActive" = true AND mb."isActive" = true
      ORDER BY mpb."priority"`,
@@ -49,7 +54,10 @@ export async function findActiveMembershipWithPlan(customerId: string): Promise<
 }
 
 export async function findActiveMembershipByCustomerId(customerId: string): Promise<unknown | null> {
-  return await queryOne<DbMembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active'`, [customerId]);
+  return await queryOne<DbMembershipSubscription>(
+    `SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active'`,
+    [customerId],
+  );
 }
 
 export async function createMembership(customerId: string, planId: string): Promise<void> {

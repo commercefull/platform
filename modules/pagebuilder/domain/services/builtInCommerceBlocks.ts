@@ -163,5 +163,4 @@ export const BUILT_IN_COMMERCE_BLOCKS = {
     ],
     isBuiltIn: true,
   },
-
 } satisfies Record<string, BlockTypeDefinition>;

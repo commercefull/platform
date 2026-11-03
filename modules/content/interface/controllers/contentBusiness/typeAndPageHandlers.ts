@@ -1,12 +1,25 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {publishPageUseCase, unpublishPageUseCase, schedulePageUseCase, duplicatePageUseCase, manageContentUseCase} from '../../../application/useCases/wired';
-import {PublishPageCommand} from '../../../application/useCases/PublishPage';
-import {UnpublishPageCommand} from '../../../application/useCases/page/UnpublishPage';
-import {SchedulePageCommand} from '../../../application/useCases/page/SchedulePage';
-import {DuplicatePageCommand} from '../../../application/useCases/page/DuplicatePage';
-import {manageSalesChannelsUseCase} from '../../../../store/application/useCases/wired';
-import type {CreateContentTypeBody, UpdateContentTypeBody, CreatePageBody, UpdatePageBody, SchedulePageBody, DuplicatePageBody} from './types';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import {
+  publishPageUseCase,
+  unpublishPageUseCase,
+  schedulePageUseCase,
+  duplicatePageUseCase,
+  manageContentUseCase,
+} from '../../../application/useCases/wired';
+import { PublishPageCommand } from '../../../application/useCases/PublishPage';
+import { UnpublishPageCommand } from '../../../application/useCases/page/UnpublishPage';
+import { SchedulePageCommand } from '../../../application/useCases/page/SchedulePage';
+import { DuplicatePageCommand } from '../../../application/useCases/page/DuplicatePage';
+import { manageSalesChannelsUseCase } from '../../../../store/application/useCases/wired';
+import type {
+  CreateContentTypeBody,
+  UpdateContentTypeBody,
+  CreatePageBody,
+  UpdatePageBody,
+  SchedulePageBody,
+  DuplicatePageBody,
+} from './types';
 
 /** Content type, page, page-action, and page-publication handlers. */
 export class TypeAndPageHandlers {

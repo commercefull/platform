@@ -1,13 +1,29 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {createRedirectUseCase, updateRedirectUseCase, deleteRedirectUseCase, createPageVersionUseCase, restorePageVersionUseCase, createPageTranslationUseCase, updatePageTranslationUseCase, deletePageTranslationUseCase, manageContentUseCase} from '../../../application/useCases/wired';
-import {CreateRedirectCommand} from '../../../application/useCases/redirect/CreateRedirect';
-import {UpdateRedirectCommand} from '../../../application/useCases/redirect/UpdateRedirect';
-import {CreatePageVersionCommand} from '../../../application/useCases/page/CreatePageVersion';
-import {RestorePageVersionCommand} from '../../../application/useCases/page/RestorePageVersion';
-import {CreatePageTranslationCommand} from '../../../application/useCases/translation/CreatePageTranslation';
-import {UpdatePageTranslationCommand} from '../../../application/useCases/translation/UpdatePageTranslation';
-import type {CreateRedirectBody, UpdateRedirectBody, CreatePageVersionBody, CreatePageTranslationBody, UpdatePageTranslationBody} from './types';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import {
+  createRedirectUseCase,
+  updateRedirectUseCase,
+  deleteRedirectUseCase,
+  createPageVersionUseCase,
+  restorePageVersionUseCase,
+  createPageTranslationUseCase,
+  updatePageTranslationUseCase,
+  deletePageTranslationUseCase,
+  manageContentUseCase,
+} from '../../../application/useCases/wired';
+import { CreateRedirectCommand } from '../../../application/useCases/redirect/CreateRedirect';
+import { UpdateRedirectCommand } from '../../../application/useCases/redirect/UpdateRedirect';
+import { CreatePageVersionCommand } from '../../../application/useCases/page/CreatePageVersion';
+import { RestorePageVersionCommand } from '../../../application/useCases/page/RestorePageVersion';
+import { CreatePageTranslationCommand } from '../../../application/useCases/translation/CreatePageTranslation';
+import { UpdatePageTranslationCommand } from '../../../application/useCases/translation/UpdatePageTranslation';
+import type {
+  CreateRedirectBody,
+  UpdateRedirectBody,
+  CreatePageVersionBody,
+  CreatePageTranslationBody,
+  UpdatePageTranslationBody,
+} from './types';
 
 /** Redirect, page-version, and page-translation handlers. */
 export class RedirectVersionTranslationHandlers {

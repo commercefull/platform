@@ -5,14 +5,8 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { SupportTicketNotFoundError } from '../../domain/errors/SupportErrors';
-import type {
-  TicketStatus,
-  TicketPriority,
-  TicketCategory,
-  TicketChannel,
-} from '../../domain/entities/SupportTicket';
+import type { TicketStatus, TicketPriority, TicketCategory, TicketChannel } from '../../domain/entities/SupportTicket';
 import type { SupportAgent, AgentRole } from '../../domain/repositories/SupportRepository';
-
 
 export type {
   TicketStatus,
@@ -50,7 +44,6 @@ async function getAvailableAgent(_category?: string): Promise<SupportAgent | nul
   );
   return row ? mapToAgent(row) : null;
 }
-
 
 // ============================================================================
 // Support Tickets
@@ -117,8 +110,6 @@ function mapToAgent(row: Record<string, unknown>): SupportAgent {
   };
 }
 
-
-
 export async function getAgentByEmail(email: string): Promise<SupportAgent | null> {
   const row = await queryOne<DbSupportAgent>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
   return row ? mapToAgent(row) : null;
@@ -142,9 +133,7 @@ export async function getAgents(filters?: { isActive?: boolean; isAvailable?: bo
     params.push(filters.department);
   }
 
-  const rows = await query<DbSupportAgent[]>(`SELECT * FROM "supportAgent" WHERE ${whereClause} ORDER BY "lastName", "firstName"`,
-    params,
-  );
+  const rows = await query<DbSupportAgent[]>(`SELECT * FROM "supportAgent" WHERE ${whereClause} ORDER BY "lastName", "firstName"`, params);
   return (rows || []).map(mapToAgent);
 }
 
@@ -235,7 +224,8 @@ export async function getTickets(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<DbSupportTicket[]>(`SELECT * FROM "supportTicket" WHERE ${whereClause}
+  const rows = await query<DbSupportTicket[]>(
+    `SELECT * FROM "supportTicket" WHERE ${whereClause}
      ORDER BY
        CASE "priority" WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
        "createdAt" DESC

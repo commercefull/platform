@@ -16,4 +16,13 @@ export { analyticsResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
 // Domain entity exports
-export { ReportSchedule, ReportExecution, ReportData, SalesForecast, ChurnPrediction, InventoryOptimization, ProductRecommendations, CustomerSegmentation } from './domain/entities/AnalyticsReport';
+export {
+  ReportSchedule,
+  ReportExecution,
+  ReportData,
+  SalesForecast,
+  ChurnPrediction,
+  InventoryOptimization,
+  ProductRecommendations,
+  CustomerSegmentation,
+} from './domain/entities/AnalyticsReport';

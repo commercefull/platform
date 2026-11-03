@@ -33,7 +33,8 @@ export async function getBlacklist(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<DbFraudBlacklist[]>(`SELECT * FROM "fraudBlacklist" WHERE ${whereClause}
+  const rows = await query<DbFraudBlacklist[]>(
+    `SELECT * FROM "fraudBlacklist" WHERE ${whereClause}
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );

@@ -2,7 +2,6 @@
  * Subscription repository domain types.
  */
 
-
 export type BillingInterval = 'day' | 'week' | 'month' | 'year';
 export type BillingAnchor = 'subscription_start' | 'month_start' | 'specific_day';
 export type SubscriptionStatus = 'pending' | 'trialing' | 'active' | 'paused' | 'past_due' | 'cancelled' | 'expired';
@@ -191,4 +190,3 @@ export interface DunningAttempt {
   createdAt: Date;
   updatedAt: Date;
 }
-

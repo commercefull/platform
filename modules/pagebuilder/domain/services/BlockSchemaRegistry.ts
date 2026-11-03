@@ -151,6 +151,5 @@ export const blockSchemaRegistry = new BlockSchemaRegistry();
 
 import { BUILT_IN_BLOCK_TYPES } from './builtInBlockTypes';
 
-
 // Register built-in block types after definitions are available
 blockSchemaRegistry.registerBuiltIns();

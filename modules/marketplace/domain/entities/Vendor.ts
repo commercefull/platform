@@ -1,4 +1,3 @@
-
 import { VendorStatusError, MarketplaceValidationError } from '../errors/MarketplaceErrors';
 
 import { generateUUID } from '../../../../libs/uuid';

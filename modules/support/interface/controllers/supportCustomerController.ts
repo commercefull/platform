@@ -1,13 +1,13 @@
-import {jsonResponse} from 'libs/apiResponse';
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Support Customer Controller
  * Handles customer-facing support operations
  */
 
-import type {HttpNext, HttpRequest, HttpResponse} from 'libs/http';
-import {manageCustomerTicketsUseCase, manageFaqUseCase, manageStockAlertsUseCase} from '../../application/wired';
-import {toMinorUnits} from '../../../../libs/money';
-import {AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory} from '../../application/wired';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
+import { manageCustomerTicketsUseCase, manageFaqUseCase, manageStockAlertsUseCase } from '../../application/wired';
+import { toMinorUnits } from '../../../../libs/money';
+import { AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory } from '../../application/wired';
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 

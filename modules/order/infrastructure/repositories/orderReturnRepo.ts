@@ -10,7 +10,7 @@ import type {
   OrderReturnCreateParams,
   OrderReturnUpdateParams,
 } from '../../domain/repositories/OrderReturnRepository';
-import type {OrderReturn as DbOrderReturn, Order as DbOrder, OrderItem as DbOrderItem} from '../../../../libs/db/types';
+import type { OrderReturn as DbOrderReturn, Order as DbOrder, OrderItem as DbOrderItem } from '../../../../libs/db/types';
 
 type OrderReturnWithOrderNumberRow = DbOrderReturn & { orderNumber: string };
 type OrderItemWithProductRow = DbOrderItem & { productName: string | null; sku: string | null };

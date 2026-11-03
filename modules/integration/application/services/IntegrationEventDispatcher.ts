@@ -9,7 +9,6 @@
  * 4. Logs the result
  */
 
-
 import { logger } from '../../../../libs/logger';
 import { eventBus, type EventPayload } from '../../../../libs/events/eventBus';
 import type {

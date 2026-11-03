@@ -36,11 +36,7 @@ RETURNING *`;
 /** Falsy → fallback (nullable column default). */
 const dbDefault = (value: unknown, fallback: unknown = null): unknown => value || fallback;
 
-function buildFulfillmentInsertParams(
-  params: OrderFulfillmentCreateParams,
-  fulfillmentNumber: string,
-  now: unknown,
-): unknown[] {
+function buildFulfillmentInsertParams(params: OrderFulfillmentCreateParams, fulfillmentNumber: string, now: unknown): unknown[] {
   return [
     params.orderId,
     fulfillmentNumber,

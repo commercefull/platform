@@ -1,4 +1,3 @@
-
 import type { IntegrationRepository, IntegrationCredentialRepository } from '../../domain/repositories/IntegrationRepository';
 import { Integration, type IntegrationProvider } from '../../domain/entities/Integration';
 import { IntegrationCredential, type CredentialType } from '../../domain/entities/IntegrationCredential';

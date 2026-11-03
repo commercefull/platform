@@ -8,9 +8,7 @@ import { mapToSubscriptionPlan } from './subscriptionHelpers';
 import type { SubscriptionPlan as DbSubscriptionPlan } from '../../../../libs/db/types';
 
 export async function getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null> {
-  const row = await queryOne<DbSubscriptionPlan>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [
-    subscriptionPlanId,
-  ]);
+  const row = await queryOne<DbSubscriptionPlan>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [subscriptionPlanId]);
   return row ? mapToSubscriptionPlan(row) : null;
 }
 
@@ -20,7 +18,8 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
     whereClause += ' AND "isActive" = true';
   }
 
-  const rows = await query<DbSubscriptionPlan[]>(`SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "priceCents" ASC`,
+  const rows = await query<DbSubscriptionPlan[]>(
+    `SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "priceCents" ASC`,
     [subscriptionProductId],
   );
   return (rows || []).map(mapToSubscriptionPlan);
@@ -170,4 +169,3 @@ export async function deleteSubscriptionPlan(subscriptionPlanId: string): Promis
     subscriptionPlanId,
   ]);
 }
-

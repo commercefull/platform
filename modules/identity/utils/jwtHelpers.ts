@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
 
-
 import { generateUUID } from '../../../libs/uuid';
 type JwtTokenUse = 'access' | 'refresh';
 

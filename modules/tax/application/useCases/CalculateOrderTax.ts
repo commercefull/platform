@@ -15,7 +15,6 @@ import type { AddressInput, CustomerTaxExemption, ExemptionVerdict, TaxExemption
 import type { PolicyDecisionRecord } from '../../../../libs/rules/policyEngine';
 import { isInEuVatArea } from '../../../../libs/geo';
 
-
 export interface TaxQueryPort {
   getTaxRateForAddress(address: AddressInput): Promise<number>;
   getTaxRateForAddressAndCategory(address: AddressInput, taxCategoryId?: string): Promise<number>;
@@ -45,7 +44,14 @@ export {
   CalculateOrderTaxCommand,
   CalculateOrderTaxResponse,
 } from './orderTaxTypes';
-import type { CalculateOrderTaxCommand, CalculateOrderTaxResponse, OrderLineItem, TaxLineItem, LineTaxContext, QuoteContext } from './orderTaxTypes';
+import type {
+  CalculateOrderTaxCommand,
+  CalculateOrderTaxResponse,
+  OrderLineItem,
+  TaxLineItem,
+  LineTaxContext,
+  QuoteContext,
+} from './orderTaxTypes';
 import { taxQuoteMessage, TAX_POLICY_VERSION } from './orderTaxTypes';
 import type { TaxRateInfo } from './orderTaxTypes';
 

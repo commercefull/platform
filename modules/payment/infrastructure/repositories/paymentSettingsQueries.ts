@@ -112,10 +112,9 @@ export async function findStoredMethodsByCustomer(customerId: string): Promise<S
 }
 
 export async function findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-  return queryOne<StoredPaymentMethodRow>(
-    `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`,
-    [storedPaymentMethodId],
-  );
+  return queryOne<StoredPaymentMethodRow>(`SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`, [
+    storedPaymentMethodId,
+  ]);
 }
 
 export async function createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {

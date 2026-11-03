@@ -140,13 +140,7 @@ export class BasketRepo implements BasketRepository {
         "lastActivityAt" = $11,
         "discountAmountCents" = $12
       WHERE "basketId" = $13`,
-      [
-        ...this.basketColumnValues(basket),
-        now,
-        basket.lastActivityAt.toISOString(),
-        basket.discountAmountCents,
-        basket.basketId,
-      ],
+      [...this.basketColumnValues(basket), now, basket.lastActivityAt.toISOString(), basket.discountAmountCents, basket.basketId],
     );
   }
 
@@ -158,14 +152,7 @@ export class BasketRepo implements BasketRepository {
         metadata, "expiresAt", "convertedToOrderId",
         "createdAt", "updatedAt", "lastActivityAt", "discountAmountCents"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-      [
-        basket.basketId,
-        ...this.basketColumnValues(basket),
-        now,
-        now,
-        now,
-        basket.discountAmountCents,
-      ],
+      [basket.basketId, ...this.basketColumnValues(basket), now, now, now, basket.discountAmountCents],
     );
   }
 

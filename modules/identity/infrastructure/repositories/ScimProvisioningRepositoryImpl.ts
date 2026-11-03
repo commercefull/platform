@@ -15,12 +15,15 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async findByUserId(userId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<DbIdentityScimProvisioningRecord>('SELECT * FROM "identityScimProvisioningRecord" WHERE "userId" = $1', [userId]);
+    const row = await queryOne<DbIdentityScimProvisioningRecord>('SELECT * FROM "identityScimProvisioningRecord" WHERE "userId" = $1', [
+      userId,
+    ]);
     return row ? this.mapToRecord(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<ScimProvisioningRecord[]> {
-    const rows = await query<DbIdentityScimProvisioningRecord[]>('SELECT * FROM "identityScimProvisioningRecord" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentityScimProvisioningRecord[]>(
+      'SELECT * FROM "identityScimProvisioningRecord" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToRecord(row));

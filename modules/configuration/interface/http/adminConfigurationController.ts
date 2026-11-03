@@ -4,7 +4,6 @@ import { redirectResponse } from 'libs/apiResponse';
  * Admin views for managing system configuration
  */
 
-
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageSystemConfigurationUseCase } from '../../application/wired';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';

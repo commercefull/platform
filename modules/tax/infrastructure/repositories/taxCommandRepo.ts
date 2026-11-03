@@ -17,7 +17,13 @@ import {
   TaxExemptionNotFoundError,
   TaxSettingsNotFoundError,
 } from '../../domain/errors/TaxErrors';
-import type { CustomerTaxExemption as DbCustomerTaxExemption, TaxCategory as DbTaxCategory, TaxRate as DbTaxRate, TaxSettings as DbTaxSettings, TaxZone as DbTaxZone } from '../../../../libs/db/types';
+import type {
+  CustomerTaxExemption as DbCustomerTaxExemption,
+  TaxCategory as DbTaxCategory,
+  TaxRate as DbTaxRate,
+  TaxSettings as DbTaxSettings,
+  TaxZone as DbTaxZone,
+} from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -191,10 +197,11 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<DbTaxRate>(
-      `UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`,
-      [id, ...params, unixTimestamp()],
-    );
+    const result = await queryOne<DbTaxRate>(`UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`, [
+      id,
+      ...params,
+      unixTimestamp(),
+    ]);
 
     if (!result) {
       throw new TaxRateNotFoundError(id);
@@ -313,10 +320,11 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<DbTaxZone>(
-      `UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`,
-      [id, ...params, unixTimestamp()],
-    );
+    const result = await queryOne<DbTaxZone>(`UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`, [
+      id,
+      ...params,
+      unixTimestamp(),
+    ]);
 
     if (!result) {
       throw new TaxZoneNotFoundError(id);

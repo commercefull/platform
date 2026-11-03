@@ -1,13 +1,7 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { isAdminLoggedIn } from '../../libs/auth';
-import {
-  getAdminDashboard,
-  getAdminLogin,
-  getAdminProfile,
-  postAdminLogin,
-  postAdminLogout,
-} from '../../modules/identity';
+import { getAdminDashboard, getAdminLogin, getAdminProfile, postAdminLogin, postAdminLogout } from '../../modules/identity';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerCommerceRoutes } from './routes/commerce';
 import { registerOperationsRoutes } from './routes/operations';

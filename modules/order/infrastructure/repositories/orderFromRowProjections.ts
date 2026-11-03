@@ -88,7 +88,12 @@ function orderContextFromRow(row: DbOrder) {
   };
 }
 
-export function mapOrderRow(row: DbOrder, items: OrderItem[], shippingAddress: OrderAddress | null, billingAddress: OrderAddress | null): Order {
+export function mapOrderRow(
+  row: DbOrder,
+  items: OrderItem[],
+  shippingAddress: OrderAddress | null,
+  billingAddress: OrderAddress | null,
+): Order {
   const currency = row.currencyCode || 'USD';
 
   return Order.reconstitute({

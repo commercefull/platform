@@ -13,14 +13,7 @@ import { query, queryOne } from '../../../../libs/db';
 
 import { isBlacklisted } from './fraudBlacklistRepo';
 import type { FraudRule as DbFraudRule, FraudCheck as DbFraudCheck } from '../../../../libs/db/types';
-import type {
-  RuleType,
-  RuleAction,
-  CheckStatus,
-  RiskLevel,
-  FraudRule,
-  FraudCheck,
-} from '../../domain/entities/FraudRule';
+import type { RuleType, RuleAction, CheckStatus, RiskLevel, FraudRule, FraudCheck } from '../../domain/entities/FraudRule';
 export type {
   RuleType,
   RuleAction,
@@ -47,8 +40,7 @@ export async function getRules(activeOnly: boolean = true): Promise<FraudRule[]>
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<DbFraudRule[]>(`SELECT * FROM "fraudRule" WHERE ${whereClause} ORDER BY "priority" DESC, "riskScore" DESC`,
-  );
+  const rows = await query<DbFraudRule[]>(`SELECT * FROM "fraudRule" WHERE ${whereClause} ORDER BY "priority" DESC, "riskScore" DESC`);
   return (rows || []).map(mapToRule);
 }
 
@@ -137,9 +129,7 @@ export async function getCheck(fraudCheckId: string): Promise<FraudCheck | null>
 }
 
 export async function getCheckByOrderId(orderId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<DbFraudCheck>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [
-    orderId,
-  ]);
+  const row = await queryOne<DbFraudCheck>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [orderId]);
   return row ? mapToCheck(row) : null;
 }
 
@@ -169,7 +159,8 @@ export async function getChecks(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<DbFraudCheck[]>(`SELECT * FROM "fraudCheck" WHERE ${whereClause} 
+  const rows = await query<DbFraudCheck[]>(
+    `SELECT * FROM "fraudCheck" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -182,8 +173,7 @@ export async function getChecks(
 
 export async function getPendingReviews(): Promise<FraudCheck[]> {
   const rows = await query<DbFraudCheck[]>(`SELECT * FROM "fraudCheck" WHERE "status" IN ('flagged', 'blocked') 
-     AND "reviewedAt" IS NULL ORDER BY "riskScore" DESC, "createdAt" ASC`,
-  );
+     AND "reviewedAt" IS NULL ORDER BY "riskScore" DESC, "createdAt" ASC`);
   return (rows || []).map(mapToCheck);
 }
 
@@ -480,4 +470,3 @@ function mapToCheck(row: Record<string, unknown>): FraudCheck {
     updatedAt: new Date(row.updatedAt as string),
   };
 }
-

@@ -95,7 +95,8 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   }
 
   async getLedger(customerId: string, limit = 50): Promise<StoreCreditLedgerEntry[]> {
-    const rows = await query<DbStoreCreditLedger[]>(`SELECT * FROM "storeCreditLedger" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
+    const rows = await query<DbStoreCreditLedger[]>(
+      `SELECT * FROM "storeCreditLedger" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
       [customerId, limit],
     );
     return (rows || []).map((row: Record<string, unknown>) =>
@@ -119,10 +120,10 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   }
 
   async findByReference(referenceType: string, referenceId: string): Promise<StoreCreditLedgerEntry | null> {
-    const row = await queryOne<DbStoreCreditLedger>(
-      `SELECT * FROM "storeCreditLedger" WHERE "referenceType" = $1 AND "referenceId" = $2`,
-      [referenceType, referenceId],
-    );
+    const row = await queryOne<DbStoreCreditLedger>(`SELECT * FROM "storeCreditLedger" WHERE "referenceType" = $1 AND "referenceId" = $2`, [
+      referenceType,
+      referenceId,
+    ]);
     if (!row) return null;
     return StoreCreditLedgerEntry.reconstitute({
       storeCreditLedgerId: row.storeCreditLedgerId as string,

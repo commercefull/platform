@@ -76,13 +76,7 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   }
 
   private isWithinRadius(store: ActiveStore, deliverySettings: LocalDeliverySettings, address: DeliveryAddress): boolean {
-    if (
-      !deliverySettings.radiusKm ||
-      !address.latitude ||
-      !address.longitude ||
-      !store.address?.latitude ||
-      !store.address?.longitude
-    ) {
+    if (!deliverySettings.radiusKm || !address.latitude || !address.longitude || !store.address?.latitude || !store.address?.longitude) {
       return false;
     }
     const distance = this.calculateDistance(address.latitude, address.longitude, store.address.latitude, store.address.longitude);

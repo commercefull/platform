@@ -95,4 +95,3 @@ export async function deleteAction(actionId: string): Promise<boolean> {
   );
   return !!result;
 }
-

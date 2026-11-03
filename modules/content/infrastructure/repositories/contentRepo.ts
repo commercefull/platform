@@ -1,4 +1,11 @@
-import type { ContentBlock, ContentBlockType, ContentPage, ContentPagePublication, ContentTemplate, ContentType } from '../../../../libs/db/types';
+import type {
+  ContentBlock,
+  ContentBlockType,
+  ContentPage,
+  ContentPagePublication,
+  ContentTemplate,
+  ContentType,
+} from '../../../../libs/db/types';
 import type { ContentPublicationContext, IContentRepository } from '../../domain/repositories/ContentRepository';
 import { ContentTypeRepo, ContentTypeCreateParams, ContentTypeUpdateParams } from './contentTypeRepo';
 import { ContentPageRepo, ContentPageCreateParams, ContentPageUpdateParams } from './contentPageRepo';

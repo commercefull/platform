@@ -7,13 +7,7 @@
 
 import { query } from '../db';
 import { Table } from '../db/types';
-import type {
-  SearchQuery,
-  SearchFacets,
-  SearchFacetValue,
-  SearchPriceRangeFacet,
-  SearchAttributeFacet,
-} from './types';
+import type { SearchQuery, SearchFacets, SearchFacetValue, SearchPriceRangeFacet, SearchAttributeFacet } from './types';
 
 const PRODUCT_TABLE = Table.Product;
 const CATEGORY_MAP_TABLE = Table.ProductCategoryMap;
@@ -23,11 +17,7 @@ const ATTRIBUTE_VALUE_TABLE = Table.ProductAttributeValue;
 const CATEGORY_TABLE = Table.ProductCategory;
 
 export async function computeFtsFacets(_searchQuery: SearchQuery): Promise<SearchFacets> {
-  const [categories, priceRanges, attributes] = await Promise.all([
-    getCategoryFacets(),
-    getPriceRangeFacets(),
-    getAttributeFacets(),
-  ]);
+  const [categories, priceRanges, attributes] = await Promise.all([getCategoryFacets(), getPriceRangeFacets(), getAttributeFacets()]);
 
   return { categories, priceRanges, attributes };
 }

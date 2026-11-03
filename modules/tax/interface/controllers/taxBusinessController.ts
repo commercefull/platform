@@ -1,12 +1,18 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {TaxRate, TaxCategory} from '../../taxTypes';
-import type {CreateTaxRateRecordCommand} from '../../application/useCases/CreateTaxRateRecord';
-import type {CreateTaxCategoryCommand} from '../../application/useCases/CreateTaxCategory';
-import type {CreateTaxZoneCommand} from '../../application/useCases/CreateTaxZone';
-import type {UpdateTaxZoneCommand} from '../../application/useCases/UpdateTaxZone';
-import {manageTaxRecordsUseCase, createTaxRateRecordUseCase, createTaxCategoryUseCase, createTaxZoneUseCase, updateTaxZoneUseCase} from '../../application/wired';
-import {isUuid} from '../../../../libs/uuid';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import { TaxRate, TaxCategory } from '../../taxTypes';
+import type { CreateTaxRateRecordCommand } from '../../application/useCases/CreateTaxRateRecord';
+import type { CreateTaxCategoryCommand } from '../../application/useCases/CreateTaxCategory';
+import type { CreateTaxZoneCommand } from '../../application/useCases/CreateTaxZone';
+import type { UpdateTaxZoneCommand } from '../../application/useCases/UpdateTaxZone';
+import {
+  manageTaxRecordsUseCase,
+  createTaxRateRecordUseCase,
+  createTaxCategoryUseCase,
+  createTaxZoneUseCase,
+  updateTaxZoneUseCase,
+} from '../../application/wired';
+import { isUuid } from '../../../../libs/uuid';
 
 export const getTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;

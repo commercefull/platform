@@ -32,7 +32,8 @@ export async function getVatRegistration(vatRegistrationId: string): Promise<Vat
 }
 
 export async function getVatRegistrationsByMerchant(organizationId: string): Promise<VatRegistration[]> {
-  const rows = await query<DbTaxVatRegistration[]>('SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 ORDER BY "countryCode" ASC',
+  const rows = await query<DbTaxVatRegistration[]>(
+    'SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 ORDER BY "countryCode" ASC',
     [organizationId],
   );
   return (rows || []).map(mapToVatRegistration);
@@ -63,9 +64,7 @@ function isoOpt(value: Date | string | null | undefined): string | undefined {
   return value instanceof Date ? value.toISOString() : (value ?? undefined);
 }
 
-function vatUpdateValues(
-  data: Partial<VatRegistration> & { organizationId: string; countryCode: string; vatNumber: string },
-): unknown[] {
+function vatUpdateValues(data: Partial<VatRegistration> & { organizationId: string; countryCode: string; vatNumber: string }): unknown[] {
   return [
     data.vatNumber,
     data.tradingName,
@@ -107,11 +106,7 @@ export async function saveVatRegistration(
         "annualThresholdCents" = $12, "thresholdCurrency" = $13, "currentYearSalesCents" = $14, "thresholdExceeded" = $15,
         "isActive" = $16, "notes" = $17, "certificateUrl" = $18, "updatedAt" = $19
       WHERE "vatRegistrationId" = $20`,
-      [
-        ...vatUpdateValues(data),
-        now,
-        data.vatRegistrationId,
-      ],
+      [...vatUpdateValues(data), now, data.vatRegistrationId],
     );
     return (await getVatRegistration(data.vatRegistrationId))!;
   } else {
@@ -223,7 +218,8 @@ export async function getRecentValidation(
 }
 
 export async function getValidationHistory(vatNumber: string, limit: number = 10): Promise<VatValidationLog[]> {
-  const rows = await query<DbTaxVatValidationLog[]>(`SELECT * FROM "taxVatValidationLog" 
+  const rows = await query<DbTaxVatValidationLog[]>(
+    `SELECT * FROM "taxVatValidationLog" 
      WHERE "vatNumber" = $1
      ORDER BY "validatedAt" DESC LIMIT $2`,
     [vatNumber, limit],

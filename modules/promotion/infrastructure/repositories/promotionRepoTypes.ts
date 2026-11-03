@@ -22,7 +22,6 @@ export type RuleCondition =
  */
 export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
 
-
 /**
  * Input for creating a promotion rule
  */
@@ -44,4 +43,3 @@ export interface CreateActionInput {
   targetId?: string;
   metadata?: unknown;
 }
-

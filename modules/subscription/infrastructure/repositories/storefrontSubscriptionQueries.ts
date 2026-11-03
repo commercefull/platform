@@ -61,7 +61,8 @@ export async function findByIdWithPlan(subscriptionId: string, customerId: strin
 }
 
 export async function findActiveByCustomerId(subscriptionId: string, customerId: string): Promise<unknown | null> {
-  return await queryOne<DbCustomerSubscription>(`SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1 AND "customerId" = $2 AND "status" = 'active'`,
+  return await queryOne<DbCustomerSubscription>(
+    `SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1 AND "customerId" = $2 AND "status" = 'active'`,
     [subscriptionId, customerId],
   );
 }

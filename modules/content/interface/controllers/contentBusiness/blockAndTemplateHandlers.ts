@@ -1,11 +1,23 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import type {ContentBlockType} from '../../../../../libs/db/types';
-import {reorderPageBlocksUseCase, createTemplateUseCase, duplicateTemplateUseCase, manageContentUseCase} from '../../../application/useCases/wired';
-import {ReorderPageBlocksCommand} from '../../../application/useCases/block/ReorderPageBlocks';
-import {CreateTemplateCommand} from '../../../application/useCases/template/CreateTemplate';
-import {DuplicateTemplateCommand} from '../../../application/useCases/template/DuplicateTemplate';
-import type {CreateBlockBody, UpdateBlockBody, ReorderBlocksBody, CreateTemplateBody, UpdateTemplateBody, DuplicateTemplateBody} from './types';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import type { ContentBlockType } from '../../../../../libs/db/types';
+import {
+  reorderPageBlocksUseCase,
+  createTemplateUseCase,
+  duplicateTemplateUseCase,
+  manageContentUseCase,
+} from '../../../application/useCases/wired';
+import { ReorderPageBlocksCommand } from '../../../application/useCases/block/ReorderPageBlocks';
+import { CreateTemplateCommand } from '../../../application/useCases/template/CreateTemplate';
+import { DuplicateTemplateCommand } from '../../../application/useCases/template/DuplicateTemplate';
+import type {
+  CreateBlockBody,
+  UpdateBlockBody,
+  ReorderBlocksBody,
+  CreateTemplateBody,
+  UpdateTemplateBody,
+  DuplicateTemplateBody,
+} from './types';
 
 /** Required fields defined on the block type schema that are missing from content. */
 function missingRequiredFields(blockType: ContentBlockType, content: Record<string, unknown>): string[] {

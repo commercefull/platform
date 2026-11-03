@@ -17,7 +17,12 @@ import {
 } from '../../taxTypes';
 import taxNexusRepo from './taxNexusRepo';
 import { getVatRegistrationsByMerchant, validateVatNumberFormat, extractCountryFromVat } from './taxVatRegistrationRepo';
-import type { TaxRate as DbTaxRate, TaxZone as DbTaxZone, TaxCategory as DbTaxCategory, CustomerTaxExemption as DbCustomerTaxExemption } from '../../../../libs/db/types';
+import type {
+  TaxRate as DbTaxRate,
+  TaxZone as DbTaxZone,
+  TaxCategory as DbTaxCategory,
+  CustomerTaxExemption as DbCustomerTaxExemption,
+} from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -80,7 +85,8 @@ class TaxQueryRepo {
   }
 
   async findTaxRatesByCategoryAndZone(categoryId: string, zoneId: string, status: TaxRate['isActive'] = true): Promise<TaxRate[]> {
-    const results = await query<DbTaxRate[]>(`SELECT * 
+    const results = await query<DbTaxRate[]>(
+      `SELECT * 
        FROM "taxRate" 
        WHERE "taxCategoryId" = $1 
        AND "taxZoneId" = $2 
@@ -106,7 +112,8 @@ class TaxQueryRepo {
   }
 
   async findAllTaxZones(status: TaxZone['isActive'] = true, limit: number = 50, offset: number = 0): Promise<TaxZone[]> {
-    const results = await query<DbTaxZone[]>(`SELECT * 
+    const results = await query<DbTaxZone[]>(
+      `SELECT * 
        FROM "taxZone" 
        WHERE "isActive" = $1
        ORDER BY "isDefault" DESC, "name" ASC
@@ -178,7 +185,8 @@ class TaxQueryRepo {
   }
 
   async findAllTaxCategories(status: TaxCategory['isActive'] = true, limit: number = 50, offset: number = 0): Promise<TaxCategory[]> {
-    const results = await query<DbTaxCategory[]>(`SELECT * 
+    const results = await query<DbTaxCategory[]>(
+      `SELECT * 
        FROM "taxCategory" 
        WHERE "isActive" = $1
        ORDER BY "sortOrder" ASC, "name" ASC
@@ -203,7 +211,8 @@ class TaxQueryRepo {
   // Customer Tax Exemption query methods
   async findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus = 'approved'): Promise<CustomerTaxExemption[]> {
     try {
-      const results = await query<DbCustomerTaxExemption[]>(`SELECT * 
+      const results = await query<DbCustomerTaxExemption[]>(
+        `SELECT * 
          FROM "customerTaxExemption" 
          WHERE "customerId" = $1 
          AND "status" = $2
@@ -241,7 +250,8 @@ class TaxQueryRepo {
     taxCategoryId: string,
     status: TaxExemptionStatus = 'active',
   ): Promise<CustomerTaxExemption[]> {
-    const results = await query<DbCustomerTaxExemption[]>(`SELECT *
+    const results = await query<DbCustomerTaxExemption[]>(
+      `SELECT *
        FROM "customerTaxExemption"
        WHERE "customerId" = $1
        AND ("applicableTaxCategoryIds" IS NULL OR "applicableTaxCategoryIds" ? $2)
@@ -251,7 +261,11 @@ class TaxQueryRepo {
       [customerId, taxCategoryId, status],
     );
 
-    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId, exemptionPercent: Number(r.exemptionPercent) })) as CustomerTaxExemption[];
+    return (results || []).map(r => ({
+      ...r,
+      id: r.customerTaxExemptionId,
+      exemptionPercent: Number(r.exemptionPercent),
+    })) as CustomerTaxExemption[];
   }
 
   /**
@@ -268,7 +282,11 @@ class TaxQueryRepo {
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
     const results = await query<DbCustomerTaxExemption[]>(sql, params);
-    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId, exemptionPercent: Number(r.exemptionPercent) })) as CustomerTaxExemption[];
+    return (results || []).map(r => ({
+      ...r,
+      id: r.customerTaxExemptionId,
+      exemptionPercent: Number(r.exemptionPercent),
+    })) as CustomerTaxExemption[];
   }
 
   /**

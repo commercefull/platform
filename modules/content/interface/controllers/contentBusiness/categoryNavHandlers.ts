@@ -1,16 +1,39 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {createCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, moveCategoryUseCase, createNavigationUseCase, updateNavigationUseCase, addNavigationItemUseCase, assignPageToCategoryUseCase, removePageFromCategoryUseCase, setPrimaryCategoryUseCase, manageContentUseCase} from '../../../application/useCases/wired';
-import {CreateCategoryCommand} from '../../../application/useCases/category/CreateCategory';
-import {UpdateCategoryCommand} from '../../../application/useCases/category/UpdateCategory';
-import {MoveCategoryCommand} from '../../../application/useCases/category/MoveCategory';
-import {CreateNavigationCommand} from '../../../application/useCases/navigation/CreateNavigation';
-import {UpdateNavigationCommand} from '../../../application/useCases/navigation/UpdateNavigation';
-import {AddNavigationItemCommand} from '../../../application/useCases/navigation/AddNavigationItem';
-import {AssignPageToCategoryCommand} from '../../../application/useCases/categorization/AssignPageToCategory';
-import {RemovePageFromCategoryCommand} from '../../../application/useCases/categorization/RemovePageFromCategory';
-import {SetPrimaryCategoryCommand} from '../../../application/useCases/categorization/SetPrimaryCategory';
-import type {CreateCategoryBody, UpdateCategoryBody, MoveCategoryBody, CreateNavigationBody, UpdateNavigationBody, AddNavigationItemBody, UpdateNavigationItemBody, ReorderNavigationItemsBody, AssignCategoryBody, SetPrimaryCategoryBody} from './types';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import {
+  createCategoryUseCase,
+  updateCategoryUseCase,
+  deleteCategoryUseCase,
+  moveCategoryUseCase,
+  createNavigationUseCase,
+  updateNavigationUseCase,
+  addNavigationItemUseCase,
+  assignPageToCategoryUseCase,
+  removePageFromCategoryUseCase,
+  setPrimaryCategoryUseCase,
+  manageContentUseCase,
+} from '../../../application/useCases/wired';
+import { CreateCategoryCommand } from '../../../application/useCases/category/CreateCategory';
+import { UpdateCategoryCommand } from '../../../application/useCases/category/UpdateCategory';
+import { MoveCategoryCommand } from '../../../application/useCases/category/MoveCategory';
+import { CreateNavigationCommand } from '../../../application/useCases/navigation/CreateNavigation';
+import { UpdateNavigationCommand } from '../../../application/useCases/navigation/UpdateNavigation';
+import { AddNavigationItemCommand } from '../../../application/useCases/navigation/AddNavigationItem';
+import { AssignPageToCategoryCommand } from '../../../application/useCases/categorization/AssignPageToCategory';
+import { RemovePageFromCategoryCommand } from '../../../application/useCases/categorization/RemovePageFromCategory';
+import { SetPrimaryCategoryCommand } from '../../../application/useCases/categorization/SetPrimaryCategory';
+import type {
+  CreateCategoryBody,
+  UpdateCategoryBody,
+  MoveCategoryBody,
+  CreateNavigationBody,
+  UpdateNavigationBody,
+  AddNavigationItemBody,
+  UpdateNavigationItemBody,
+  ReorderNavigationItemsBody,
+  AssignCategoryBody,
+  SetPrimaryCategoryBody,
+} from './types';
 
 /** Category, navigation, and page-categorization handlers. */
 export class CategoryNavHandlers {

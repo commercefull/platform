@@ -19,10 +19,7 @@ export async function findTransactionById(loyaltyTransactionId: string): Promise
   return await queryOne<DbLoyaltyTransaction>(sql, [loyaltyTransactionId]);
 }
 
-export async function findTransactionByOrderAndAction(
-  orderId: string,
-  action: 'credit' | 'debit',
-): Promise<LoyaltyTransaction | null> {
+export async function findTransactionByOrderAndAction(orderId: string, action: 'credit' | 'debit'): Promise<LoyaltyTransaction | null> {
   const sql = `
     SELECT * FROM "loyaltyTransaction"
     WHERE "orderId" = $1 AND "action" = $2

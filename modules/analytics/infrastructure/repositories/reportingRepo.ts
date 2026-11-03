@@ -520,4 +520,3 @@ function reportSnapshotMetricFields(row: AnalyticsReportSnapshotRow) {
     monthlyRecurringRevenueCents: Number(row.monthlyRecurringRevenueCents ?? 0),
   };
 }
-

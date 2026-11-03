@@ -1,5 +1,9 @@
 import { query, queryOne } from '../../../../libs/db';
-import type { LoyaltyPoints as DbLoyaltyPoints, LoyaltyTransaction as DbLoyaltyTransaction, LoyaltyReward as DbLoyaltyReward } from '../../../../libs/db/types';
+import type {
+  LoyaltyPoints as DbLoyaltyPoints,
+  LoyaltyTransaction as DbLoyaltyTransaction,
+  LoyaltyReward as DbLoyaltyReward,
+} from '../../../../libs/db/types';
 
 type MemberWithTierRow = DbLoyaltyPoints & {
   pointsBalance: number;
@@ -23,7 +27,8 @@ async function findMemberWithTier(customerId: string): Promise<unknown | null> {
 }
 
 async function findCustomerTransactions(customerId: string, limit: number, offset: number): Promise<unknown[]> {
-  const results = await query<DbLoyaltyTransaction[]>(`SELECT * FROM "loyaltyTransaction" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
+  const results = await query<DbLoyaltyTransaction[]>(
+    `SELECT * FROM "loyaltyTransaction" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
     [customerId, limit, offset],
   );
   return results || [];
@@ -37,7 +42,8 @@ async function countCustomerTransactions(customerId: string): Promise<number> {
 }
 
 async function findAvailableRewards(pointsBalance: number): Promise<unknown[]> {
-  const results = await query<DbLoyaltyReward[]>(`SELECT * FROM "loyaltyReward" WHERE "isActive" = true AND "pointsCost" <= $1 ORDER BY "pointsCost" ASC`,
+  const results = await query<DbLoyaltyReward[]>(
+    `SELECT * FROM "loyaltyReward" WHERE "isActive" = true AND "pointsCost" <= $1 ORDER BY "pointsCost" ASC`,
     [pointsBalance],
   );
   return results || [];
@@ -48,7 +54,9 @@ async function findRewardById(rewardId: string): Promise<unknown | null> {
 }
 
 async function findMemberByCustomerId(customerId: string): Promise<unknown | null> {
-  return await queryOne<PointsBalanceRow>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [customerId]);
+  return await queryOne<PointsBalanceRow>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [
+    customerId,
+  ]);
 }
 
 async function deductPoints(customerId: string, points: number): Promise<void> {

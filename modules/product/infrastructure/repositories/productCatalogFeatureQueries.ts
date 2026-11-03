@@ -5,7 +5,11 @@
 import { query } from '../../../../libs/db';
 import type { CatalogFeature } from '../../domain/entities/CatalogFeature';
 
-export async function listCatalogFeatureRows(params: { organizationId?: string; afterProductId?: string; limit?: number }): Promise<CatalogFeature[]> {
+export async function listCatalogFeatureRows(params: {
+  organizationId?: string;
+  afterProductId?: string;
+  limit?: number;
+}): Promise<CatalogFeature[]> {
   const limit = params.limit ?? 500;
   const rows = await query<
     Array<{
@@ -73,4 +77,3 @@ export async function listCatalogFeatureRows(params: { organizationId?: string; 
     };
   });
 }
-

@@ -1,14 +1,25 @@
-import {jsonResponse} from 'libs/apiResponse';
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Fulfillment Controller
  *
  * HTTP interface for fulfillment management.
  */
 
-import type {HttpRequest, HttpResponse} from 'libs/http';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
-import {FulfillmentStatus, SourceType, Address} from '../../domain/entities/Fulfillment';
-import {cancelFulfillmentUseCase, createFulfillmentUseCase, getFulfillmentUseCase, initiateReturnUseCase, manageFulfillmentsUseCase, markDeliveredUseCase, processPackingUseCase, processPickingUseCase, shipOrderUseCase, updateTrackingUseCase} from '../../application/wired';
+import { FulfillmentStatus, SourceType, Address } from '../../domain/entities/Fulfillment';
+import {
+  cancelFulfillmentUseCase,
+  createFulfillmentUseCase,
+  getFulfillmentUseCase,
+  initiateReturnUseCase,
+  manageFulfillmentsUseCase,
+  markDeliveredUseCase,
+  processPackingUseCase,
+  processPickingUseCase,
+  shipOrderUseCase,
+  updateTrackingUseCase,
+} from '../../application/wired';
 
 // ============================================================================
 // Request Body Interfaces

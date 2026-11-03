@@ -125,7 +125,8 @@ export async function getStockAlerts(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<DbInventoryStockAlert[]>(`SELECT * FROM "inventoryStockAlert" WHERE ${whereClause} 
+  const rows = await query<DbInventoryStockAlert[]>(
+    `SELECT * FROM "inventoryStockAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -250,7 +251,8 @@ export async function getPriceAlerts(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<DbSupportPriceAlert[]>(`SELECT * FROM "supportPriceAlert" WHERE ${whereClause} 
+  const rows = await query<DbSupportPriceAlert[]>(
+    `SELECT * FROM "supportPriceAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -262,7 +264,8 @@ export async function getPriceAlerts(
 }
 
 export async function getPriceAlertsToNotify(productId: string, newPriceCents: number): Promise<PriceAlert[]> {
-  const rows = await query<DbSupportPriceAlert[]>(`SELECT * FROM "supportPriceAlert" 
+  const rows = await query<DbSupportPriceAlert[]>(
+    `SELECT * FROM "supportPriceAlert" 
      WHERE "productId" = $1 AND "status" = 'active'
      AND (
        ("alertType" = 'target' AND "targetPriceCents" >= $2)

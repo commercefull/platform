@@ -5,11 +5,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getCheckoutPorts } from '../../application/wired';
-import {
-  getPickupSlotsUseCase,
-  manageCheckoutSessionUseCase,
-  setPickupLocationUseCase,
-} from '../../application/useCases/wired';
+import { getPickupSlotsUseCase, manageCheckoutSessionUseCase, setPickupLocationUseCase } from '../../application/useCases/wired';
 import { respond, respondError } from './CheckoutController';
 
 type CheckoutPorts = ReturnType<typeof getCheckoutPorts>;
@@ -162,10 +158,7 @@ export const getLocalDeliveryOptions = async (req: HttpRequest, res: HttpRespons
 };
 
 /** Inspect the basket to detect digital vs physical items (best-effort). */
-async function detectItemTypes(
-  ports: CheckoutPorts,
-  basketId: string,
-): Promise<{ hasDigitalItems: boolean; hasPhysicalItems: boolean }> {
+async function detectItemTypes(ports: CheckoutPorts, basketId: string): Promise<{ hasDigitalItems: boolean; hasPhysicalItems: boolean }> {
   try {
     const basket = await ports.basketSnapshot.getSnapshot(basketId);
     if (!basket) return { hasDigitalItems: false, hasPhysicalItems: false };

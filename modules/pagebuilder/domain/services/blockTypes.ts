@@ -77,4 +77,3 @@ export interface BlockTypeDefinition {
   /** Whether this block type is built-in (cannot be deleted) */
   isBuiltIn?: boolean;
 }
-

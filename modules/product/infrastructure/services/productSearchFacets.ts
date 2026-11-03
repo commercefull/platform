@@ -184,4 +184,3 @@ export async function getAttributeFacets(t: FacetTables): Promise<AttributeFacet
 
   return Array.from(attributeMap.values());
 }
-

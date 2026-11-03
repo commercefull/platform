@@ -17,5 +17,11 @@ export * from './interface/controllers';
 
 // Domain entity exports
 export { ShippingMethodType, CarrierType, ShippingMethodProps, ShippingMethod } from './domain/entities/ShippingMethod';
-export { SurchargeType, SurchargeCalculationType, ShippingSurchargeProps, SurchargeContext, ShippingSurcharge } from './domain/entities/ShippingSurcharge';
+export {
+  SurchargeType,
+  SurchargeCalculationType,
+  ShippingSurchargeProps,
+  SurchargeContext,
+  ShippingSurcharge,
+} from './domain/entities/ShippingSurcharge';
 export { ZoneLocation, ShippingZoneProps, ShippingZone } from './domain/entities/ShippingZone';

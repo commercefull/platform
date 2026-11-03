@@ -92,4 +92,3 @@ export interface CreateLoyaltyTransactionInput {
   description?: string;
   referenceId?: string;
 }
-

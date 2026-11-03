@@ -1,7 +1,7 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {manageUserMembershipsUseCase, manageMembershipTiersUseCase, manageTierBenefitsUseCase} from '../../application/wired';
-import {LegacyMembershipBenefit as _MembershipBenefit} from '../../application/wired';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import { manageUserMembershipsUseCase, manageMembershipTiersUseCase, manageTierBenefitsUseCase } from '../../application/wired';
+import { LegacyMembershipBenefit as _MembershipBenefit } from '../../application/wired';
 
 // Request body interfaces
 interface CreateTierBody {

@@ -1,6 +1,13 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {type CreateCouponInput, type UpdateCouponInput, createCouponUseCase, validateCouponCodeUseCase, calculateCouponDiscountUseCase, manageCouponsUseCase} from '../../application/wired';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import {
+  type CreateCouponInput,
+  type UpdateCouponInput,
+  createCouponUseCase,
+  validateCouponCodeUseCase,
+  calculateCouponDiscountUseCase,
+  manageCouponsUseCase,
+} from '../../application/wired';
 
 interface ValidateCouponBody {
   code: string;

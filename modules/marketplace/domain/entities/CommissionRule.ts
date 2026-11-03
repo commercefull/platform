@@ -1,4 +1,3 @@
-
 import { CommissionValidationError } from '../errors/MarketplaceErrors';
 
 import { generateUUID } from '../../../../libs/uuid';

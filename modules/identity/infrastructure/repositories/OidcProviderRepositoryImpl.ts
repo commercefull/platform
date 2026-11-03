@@ -14,14 +14,16 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   }
 
   async findByOrganizationId(organizationId: string): Promise<OidcProvider[]> {
-    const rows = await query<DbIdentityOidcProvider[]>('SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentityOidcProvider[]>(
+      'SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
   async findActiveByOrganizationId(organizationId: string): Promise<OidcProvider[]> {
-    const rows = await query<DbIdentityOidcProvider[]>('SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
+    const rows = await query<DbIdentityOidcProvider[]>(
+      'SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
@@ -29,9 +31,10 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
 
   async save(provider: OidcProvider): Promise<OidcProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Pick<DbIdentityOidcProvider, 'providerId'>>('SELECT "providerId" FROM "identityOidcProvider" WHERE "providerId" = $1', [
-      props.providerId,
-    ]);
+    const existing = await queryOne<Pick<DbIdentityOidcProvider, 'providerId'>>(
+      'SELECT "providerId" FROM "identityOidcProvider" WHERE "providerId" = $1',
+      [props.providerId],
+    );
 
     if (existing) {
       await query(

@@ -13,16 +13,12 @@ export async function getOrderAddresses(orderId: string): Promise<OrderAddress[]
 }
 
 export async function getShippingAddress(orderId: string): Promise<OrderAddress | null> {
-  const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`, [
-    orderId,
-  ]);
+  const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`, [orderId]);
   return row ? mapToOrderAddress(row) : null;
 }
 
 export async function getBillingAddress(orderId: string): Promise<OrderAddress | null> {
-  const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`, [
-    orderId,
-  ]);
+  const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`, [orderId]);
   return row ? mapToOrderAddress(row) : null;
 }
 

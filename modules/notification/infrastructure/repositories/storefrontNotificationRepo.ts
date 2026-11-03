@@ -3,11 +3,10 @@ import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import type { Notification as DbNotification } from '../../../../libs/db/types';
 
 async function findByUserId(userId: string, limit: number, offset: number): Promise<unknown[]> {
-  const results = await query<DbNotification[]>(`SELECT * FROM "notification" WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`, [
-    userId,
-    limit,
-    offset,
-  ]);
+  const results = await query<DbNotification[]>(
+    `SELECT * FROM "notification" WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
+    [userId, limit, offset],
+  );
   return results || [];
 }
 
