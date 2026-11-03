@@ -1,7 +1,7 @@
 /**
  * Admin Programs Repository
  * Handles dashboard queries for membership, subscription, and loyalty programs
- * in the admin hub using legacy table names (userMembership, membershipTier, subscription, etc.)
+ * in the admin hub
  */
 
 import { query, queryOne } from '../../../../libs/db';
@@ -20,7 +20,7 @@ export async function getMembershipStats(): Promise<{
       COUNT(*) as "totalMembers",
       SUM(CASE WHEN "status" = 'active' THEN 1 ELSE 0 END) as "activeMembers",
       SUM(CASE WHEN "endDate" IS NOT NULL AND "endDate" <= NOW() + INTERVAL '30 days' THEN 1 ELSE 0 END) as "expiringThisMonth"
-     FROM "userMembership"`,
+     FROM "membershipSubscription"`,
   );
 
   return {
@@ -33,12 +33,12 @@ export async function getMembershipStats(): Promise<{
 export async function findMembershipTiersWithCounts(): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
-      `SELECT mt.*, COUNT(um."userMembershipId") as "memberCount"
-       FROM "membershipTier" mt
-       LEFT JOIN "userMembership" um ON mt."membershipTierId" = um."membershipTierId"
-       WHERE mt."deletedAt" IS NULL
-       GROUP BY mt."membershipTierId"
-       ORDER BY mt."sortOrder", mt."priceCents"`,
+      `SELECT mt.*, COUNT(um."membershipSubscriptionId") as "memberCount"
+       FROM "membershipPlan" mt
+       LEFT JOIN "membershipSubscription" um ON mt."membershipPlanId" = um."membershipPlanId"
+       WHERE mt."isActive" = true
+       GROUP BY mt."membershipPlanId"
+       ORDER BY mt."priority", mt."priceCents"`,
     )) || []
   );
 }
@@ -46,10 +46,10 @@ export async function findMembershipTiersWithCounts(): Promise<unknown[]> {
 export async function findRecentMemberships(limit: number = 20): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
-      `SELECT um.*, mt."name" as "tierName", c."email", 
+      `SELECT um.*, mt."name" as "tierName", c."email",
               COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
-       FROM "userMembership" um
-       LEFT JOIN "membershipTier" mt ON um."membershipTierId" = mt."membershipTierId"
+       FROM "membershipSubscription" um
+       LEFT JOIN "membershipPlan" mt ON um."membershipPlanId" = mt."membershipPlanId"
        LEFT JOIN "customer" c ON um."customerId" = c."customerId"
        ORDER BY um."createdAt" DESC
        LIMIT $1`,
@@ -71,12 +71,12 @@ export async function getSubscriptionStats(): Promise<{
     `SELECT 
       COUNT(*) as "totalSubscriptions",
       SUM(CASE WHEN "status" = 'active' THEN 1 ELSE 0 END) as "activeSubscriptions"
-     FROM "subscription"`,
+     FROM "customerSubscription"`,
   );
 
   const mrrResult = await queryOne<{ mrr: string }>(
     `SELECT COALESCE(SUM(sp."priceCents"), 0) as "mrr"
-     FROM "subscription" s
+     FROM "customerSubscription" s
      JOIN "subscriptionPlan" sp ON s."subscriptionPlanId" = sp."subscriptionPlanId"
      WHERE s."status" = 'active' AND sp."billingInterval" = 'month'`,
   );
@@ -91,9 +91,9 @@ export async function getSubscriptionStats(): Promise<{
 export async function findSubscriptionPlansWithCounts(): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
-      `SELECT sp.*, COUNT(s."subscriptionId") as "subscriberCount"
+      `SELECT sp.*, COUNT(s."customerSubscriptionId") as "subscriberCount"
        FROM "subscriptionPlan" sp
-       LEFT JOIN "subscription" s ON sp."subscriptionPlanId" = s."subscriptionPlanId"
+       LEFT JOIN "customerSubscription" s ON sp."subscriptionPlanId" = s."subscriptionPlanId"
        WHERE sp."isActive" = true
        GROUP BY sp."subscriptionPlanId"
        ORDER BY sp."priceCents"`,
@@ -106,7 +106,7 @@ export async function findRecentSubscriptions(limit: number = 20): Promise<unkno
     (await query<unknown[]>(
       `SELECT s.*, sp."name" as "planName", c."email",
               COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
-       FROM "subscription" s
+       FROM "customerSubscription" s
        LEFT JOIN "subscriptionPlan" sp ON s."subscriptionPlanId" = sp."subscriptionPlanId"
        LEFT JOIN "customer" c ON s."customerId" = c."customerId"
        ORDER BY s."createdAt" DESC
@@ -128,8 +128,8 @@ export async function getLoyaltyStats(): Promise<{
   const result = await queryOne<{ totalMembers: string; totalPointsIssued: string; totalPointsRedeemed: string }>(
     `SELECT 
       COUNT(DISTINCT "customerId") as "totalMembers",
-      SUM(CASE WHEN "type" = 'earn' THEN "points" ELSE 0 END) as "totalPointsIssued",
-      SUM(CASE WHEN "type" = 'redeem' THEN "points" ELSE 0 END) as "totalPointsRedeemed"
+      SUM(CASE WHEN "action" = 'credit' THEN "points" ELSE 0 END) as "totalPointsIssued",
+      SUM(CASE WHEN "action" = 'debit' THEN "points" ELSE 0 END) as "totalPointsRedeemed"
      FROM "loyaltyTransaction"`,
   );
 

@@ -31,7 +31,7 @@ async function getOperationsStats(): Promise<OperationsStats> {
     ),
     queryOne<{ activeWarehouses: string }>(
       `SELECT COUNT(*) as "activeWarehouses"
-       FROM "warehouse"
+       FROM "distributionWarehouse"
        WHERE "isActive" = true`,
     ),
     queryOne<{ abandonedCarts: string }>(
@@ -80,9 +80,9 @@ async function findWarehousesWithCounts(): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
       `SELECT w.*, COUNT(il."inventoryLevelId") as "productCount"
-       FROM "warehouse" w
-       LEFT JOIN "inventoryLevel" il ON w."warehouseId" = il."locationId"
-       GROUP BY w."warehouseId"
+       FROM "distributionWarehouse" w
+       LEFT JOIN "inventoryLevel" il ON w."distributionWarehouseId" = il."distributionWarehouseId"
+       GROUP BY w."distributionWarehouseId"
        ORDER BY w."name"`,
     )) || []
   );

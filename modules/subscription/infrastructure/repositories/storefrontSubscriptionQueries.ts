@@ -56,7 +56,7 @@ export async function cancelSubscriptionStorefront(subscriptionId: string, reaso
 
 export async function findBillingHistory(subscriptionId: string): Promise<unknown[]> {
   const results = await query<unknown[]>(
-    `SELECT * FROM "subscriptionBilling" WHERE "customerSubscriptionId" = $1 ORDER BY "billingDate" DESC LIMIT 12`,
+    `SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "periodStart" DESC LIMIT 12`,
     [subscriptionId],
   );
   return results || [];

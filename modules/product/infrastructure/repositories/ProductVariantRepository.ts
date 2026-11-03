@@ -12,7 +12,7 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 interface VariantAttributeRow {
   attributeId: string;
   attributeName: string;
-  value: string;
+  value: string | null;
   displayValue: string | null;
 }
 
@@ -186,29 +186,33 @@ export class ProductVariantRepository {
   // Helper methods
   private async getVariantAttributes(variantId: string): Promise<VariantAttribute[]> {
     const rows = await query<VariantAttributeRow[]>(
-      'SELECT * FROM "productVariantAttribute" WHERE "variantId" = $1 ORDER BY "displayOrder" ASC',
+      `SELECT pav."attributeId", pa."name" AS "attributeName", pav."value", pav."valueText" AS "displayValue"
+       FROM "productAttributeValueMap" pav
+       JOIN "productAttribute" pa ON pa."productAttributeId" = pav."attributeId"
+       WHERE pav."productVariantId" = $1
+       ORDER BY pa."name" ASC`,
       [variantId],
     );
 
     return (rows || []).map(row => ({
       attributeId: row.attributeId,
       attributeName: row.attributeName,
-      value: row.value,
+      value: row.value ?? row.displayValue ?? '',
       displayValue: row.displayValue ?? undefined,
     }));
   }
 
   private async syncVariantAttributes(variant: ProductVariant): Promise<void> {
     // Remove existing attributes
-    await query('DELETE FROM "productVariantAttribute" WHERE "variantId" = $1', [variant.variantId]);
+    await query('DELETE FROM "productAttributeValueMap" WHERE "productVariantId" = $1', [variant.variantId]);
 
     // Insert new attributes
     for (const attr of variant.attributes) {
       await query(
-        `INSERT INTO "productVariantAttribute" (
-          "variantId", "attributeId", "attributeName", "value", "displayValue"
-        ) VALUES ($1, $2, $3, $4, $5)`,
-        [variant.variantId, attr.attributeId, attr.attributeName, attr.value, attr.displayValue || attr.value],
+        `INSERT INTO "productAttributeValueMap" (
+          "productId", "productVariantId", "attributeId", "value", "valueText", "isSystem", "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, false, NOW(), NOW())`,
+        [variant.productId, variant.variantId, attr.attributeId, attr.value, attr.displayValue || attr.value],
       );
     }
   }
