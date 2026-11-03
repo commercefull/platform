@@ -14,6 +14,7 @@ export * from './domain/repositories/StoreRepository';
 export * from './domain/repositories/StoreCurrencyRepository';
 export * from './domain/repositories/SalesChannelRepository';
 export * from './domain/repositories/MarketRepository';
+export * from './domain/repositories/PickupLocationRepository';
 export * from './application/ports/MarketReadinessFactsPort';
 export * from './domain/events/StoreEvents';
 export * from './domain/errors/StoreErrors';

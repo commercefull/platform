@@ -9,10 +9,10 @@
  */
 
 import { OrganizationLookupPort, OrganizationSummary } from '../../application/ports/OrganizationLookupPort';
-import type organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
+import type { OrganizationRepository } from '../../../organization';
 
 export class OrganizationLookupAdapter implements OrganizationLookupPort {
-  constructor(private readonly orgRepo: Pick<typeof organizationRepo, 'findById' | 'findAll'>) {}
+  constructor(private readonly orgRepo: Pick<OrganizationRepository, 'findById' | 'findAll'>) {}
 
   async findById(id: string): Promise<OrganizationSummary | null> {
     const org = await this.orgRepo.findById(id);

@@ -45,5 +45,6 @@ export interface CouponRepository {
     code: string,
     orderValueCents: number,
     customerId?: string,
+    organizationId?: string,
   ): Promise<{ valid: boolean; coupon?: Coupon; discountAmountCents?: number; error?: string }>;
 }

@@ -4,7 +4,7 @@
  * All amounts crossing this boundary are integer cents.
  */
 
-import productBasePriceRepo from '../../../pricing/infrastructure/repositories/productBasePriceRepo';
+import type { ProductBasePriceRepository } from '../../../pricing';
 import type { ProductBasePrice } from '../../../pricing/domain/catalogPrice';
 import type { ProductPricingPort, ProductPriceInfo, SetProductBasePriceInput } from '../../application/ports/ProductPricingPort';
 
@@ -23,23 +23,25 @@ function toPriceInfo(row: ProductBasePrice): ProductPriceInfo {
 }
 
 export class ProductPricingAdapter implements ProductPricingPort {
+  constructor(private readonly productBasePriceRepo: ProductBasePriceRepository) {}
+
   async getBasePrice(productId: string, productVariantId?: string | null, currencyCode?: string): Promise<ProductPriceInfo | null> {
-    const row = await productBasePriceRepo.findEffective(productId, productVariantId ?? undefined, currencyCode);
+    const row = await this.productBasePriceRepo.findEffective(productId, productVariantId ?? undefined, currencyCode);
     return row ? toPriceInfo(row) : null;
   }
 
   async getBasePrices(productIds: string[], currencyCode?: string): Promise<ProductPriceInfo[]> {
-    const rows = await productBasePriceRepo.findForProducts(productIds, currencyCode);
+    const rows = await this.productBasePriceRepo.findForProducts(productIds, currencyCode);
     return rows.map(toPriceInfo);
   }
 
   async listProductPrices(productId: string): Promise<ProductPriceInfo[]> {
-    const rows = await productBasePriceRepo.findForProduct(productId);
+    const rows = await this.productBasePriceRepo.findForProduct(productId);
     return rows.map(toPriceInfo);
   }
 
   async setBasePrice(input: SetProductBasePriceInput): Promise<ProductPriceInfo> {
-    const row = await productBasePriceRepo.upsert({
+    const row = await this.productBasePriceRepo.upsert({
       productId: input.productId,
       productVariantId: input.productVariantId ?? null,
       currencyCode: input.currencyCode,
@@ -53,6 +55,6 @@ export class ProductPricingAdapter implements ProductPricingPort {
   }
 
   async deletePricesForProduct(productId: string): Promise<void> {
-    await productBasePriceRepo.deleteByProduct(productId);
+    await this.productBasePriceRepo.deleteByProduct(productId);
   }
 }

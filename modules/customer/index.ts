@@ -6,6 +6,8 @@
 export * from './application/useCases';
 export * from './domain/repositories/CustomerRepository';
 export * from './domain/repositories/CustomerCredentialRepository';
+export * from './domain/repositories/CustomerAddressRepository';
+export * from './domain/repositories/StorefrontWishlistRepository';
 export * from './domain/events/CustomerEvents';
 export * from './domain/errors/CustomerErrors';
 

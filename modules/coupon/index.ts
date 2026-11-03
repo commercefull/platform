@@ -4,6 +4,7 @@
  */
 
 export * from './application/useCases';
+export * from './application/ports/CouponEligibilityPort';
 export * from './domain/repositories/CouponRepository';
 export * from './domain/errors/CouponErrors';
 

@@ -7,25 +7,16 @@
  */
 
 import { StoreFulfillmentPort, StoreFulfillmentOption, PickupLocation } from '../../application/ports/StoreFulfillmentPort';
-import type StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
-import type {
-  PickupLocation as PickupLocationRecord,
-  getLocations,
-  getLocation,
-  findNearestLocations,
-} from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type { StoreRepository } from '../../../store';
+import type { PickupLocation as PickupLocationRecord, PickupLocationRepository } from '../../../store';
 
-type PickupLocationRepoPort = {
-  getLocations: typeof getLocations;
-  getLocation: typeof getLocation;
-  findNearestLocations: typeof findNearestLocations;
-};
+type PickupLocationRepoPort = Pick<PickupLocationRepository, 'getLocations' | 'getLocation' | 'findNearestLocations'>;
 
 // Locations without an assigned store can't be pickup targets.
 type AssignedPickupLocation = PickupLocationRecord & { storeId: string };
 const isAssignedLocation = <T extends { storeId: string | null }>(loc: T): loc is T & { storeId: string } => loc.storeId !== null;
 
-type ActiveStore = Awaited<ReturnType<typeof StoreRepo.findActive>>[number];
+type ActiveStore = Awaited<ReturnType<StoreRepository['findActive']>>[number];
 type LocalDeliverySettings = NonNullable<NonNullable<ActiveStore['settings']>['localDelivery']>;
 
 type DeliveryAddress = {
@@ -38,7 +29,7 @@ type DeliveryAddress = {
 
 export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   constructor(
-    private readonly storeRepo: Pick<typeof StoreRepo, 'findActive'>,
+    private readonly storeRepo: Pick<StoreRepository, 'findActive'>,
     private readonly pickupLocations: PickupLocationRepoPort,
   ) {}
 

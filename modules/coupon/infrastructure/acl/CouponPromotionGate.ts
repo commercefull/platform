@@ -13,33 +13,18 @@
 import { promotionRulesPass, type PromotionEvaluationContext } from '../../../promotion/domain/services/PromotionEvaluator';
 import type { Promotion, PromotionRule } from '../../../promotion/domain/repositories/PromotionRepository';
 import { logger } from '../../../../libs/logger';
-
-export interface CouponEligibilityContext {
-  subtotalCents: number;
-  currency: string;
-  customerId?: string;
-  storeId?: string;
-  channelId?: string;
-  countryCode?: string;
-  items?: Array<{
-    productId: string;
-    categoryId?: string;
-    quantity: number;
-    unitPriceCents: number;
-  }>;
-}
-
-export interface CouponEligibilityResult {
-  eligible: boolean;
-  reason?: string;
-}
+import type {
+  CouponEligibilityContext,
+  CouponEligibilityPort,
+  CouponEligibilityResult,
+} from '../../application/ports/CouponEligibilityPort';
 
 export type CouponPromotionGatePort = {
   findById(promotionId: string): Promise<Promotion | null>;
   findRulesByPromotionId(promotionId: string): Promise<PromotionRule[]>;
 };
 
-export class CouponPromotionGate {
+export class CouponPromotionGate implements CouponEligibilityPort {
   constructor(private readonly promotions: CouponPromotionGatePort) {}
 
   async isEligible(promotionId: string | undefined, context: CouponEligibilityContext): Promise<CouponEligibilityResult> {

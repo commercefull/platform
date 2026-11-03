@@ -12,13 +12,13 @@
  */
 
 import { DiscountQuoteContext, DiscountQuotePort, DiscountQuoteResult } from '../../application/ports/DiscountQuotePort';
-import { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
-import type { CouponPromotionGate } from '../../../coupon/infrastructure/acl/CouponPromotionGate';
+import type { CouponRepository } from '../../../coupon';
+import type { CouponEligibilityPort } from '../../../coupon';
 
 export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
   constructor(
     private readonly couponRepository: CouponRepository,
-    private readonly promotionGate?: CouponPromotionGate,
+    private readonly promotionGate?: Pick<CouponEligibilityPort, 'isEligible'>,
   ) {}
 
   async validateDiscount(code: string, subtotalCents: number, context?: DiscountQuoteContext): Promise<DiscountQuoteResult> {
