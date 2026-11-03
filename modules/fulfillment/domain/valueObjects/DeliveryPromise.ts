@@ -9,6 +9,8 @@
  * degraded estimate is never presented as a firm promise.
  */
 
+import { FulfillmentValidationError } from '../errors/FulfillmentErrors';
+
 export interface DeliveryPromiseProps {
   /** Fulfilling source — store id or distribution warehouse id. */
   sourceId: string;
@@ -34,7 +36,7 @@ export interface DeliveryPromiseProps {
 export class DeliveryPromise {
   private constructor(private readonly props: DeliveryPromiseProps) {
     if (props.latestDate.getTime() < props.earliestDate.getTime()) {
-      throw new Error('DeliveryPromise latestDate must be on or after earliestDate');
+      throw new FulfillmentValidationError('DeliveryPromise latestDate must be on or after earliestDate');
     }
   }
 

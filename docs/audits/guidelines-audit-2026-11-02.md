@@ -227,7 +227,17 @@ deliberate watchlist:
 - **Interface-layer `logger.error` audit** — added `logCaughtError` in
   `libs/errors.ts` (logs `AppError` at declared severity, unexpected at `error`)
   and applied it at all 35 catch sites across 17 interface files.
-- **Still deferred (watchlist)** — 5 `TranslatableEntityType` values map to
-  translation tables that don't exist in the schema (dead paths, unreachable
-  today); EJS `console.*` (~36 sites); jobs `console.*`; ~1,300 controller
-  catch blocks → `asyncHandler` + RFC 7807 (guideline Phase 2/3).
+- **`TranslatableEntityType` dead paths** — `TABLE_MAP` and the port types
+  narrowed to the four implemented entity types (`product`, `category`,
+  `contentPage`, `notificationTemplate`); `collection`/`attribute`/
+  `attributeOption` no longer compile at the call site instead of failing
+  against non-existent tables at runtime.
+- **EJS `console.*`** — all ~36 client-side debug calls removed from the 17
+  `web/admin/views/*.ejs` files. Jobs `console.*` remains the documented
+  CLI-output exception.
+- **Controller catch blocks → central middleware** — ~370 subsumed catches
+  removed across API-mounted controllers; Express 5 forwards rejections to
+  `errorMiddleware` (RFC 7807 + legacy `{ success:false, error }` fields).
+  Remaining ~229 catches are genuine recovery: admin-mount JSON responses,
+  redirects/flash renders, SCIM protocol branches, webhook 200-acks,
+  storefront fallbacks, and supplier validation-array responses.
