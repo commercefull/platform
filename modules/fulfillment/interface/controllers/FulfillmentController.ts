@@ -1,26 +1,14 @@
-import { jsonResponse } from 'libs/apiResponse';
+import {jsonResponse} from 'libs/apiResponse';
 /**
  * Fulfillment Controller
  *
  * HTTP interface for fulfillment management.
  */
 
-import type { HttpRequest, HttpResponse } from 'libs/http';
+import type {HttpRequest, HttpResponse} from 'libs/http';
 
-import { FulfillmentStatus, SourceType, Address } from '../../domain/entities/Fulfillment';
-import { AppError } from '../../../../libs/errors';
-import {
-  cancelFulfillmentUseCase,
-  createFulfillmentUseCase,
-  getFulfillmentUseCase,
-  initiateReturnUseCase,
-  manageFulfillmentsUseCase,
-  markDeliveredUseCase,
-  processPackingUseCase,
-  processPickingUseCase,
-  shipOrderUseCase,
-  updateTrackingUseCase,
-} from '../../application/wired';
+import {FulfillmentStatus, SourceType, Address} from '../../domain/entities/Fulfillment';
+import {cancelFulfillmentUseCase, createFulfillmentUseCase, getFulfillmentUseCase, initiateReturnUseCase, manageFulfillmentsUseCase, markDeliveredUseCase, processPackingUseCase, processPickingUseCase, shipOrderUseCase, updateTrackingUseCase} from '../../application/wired';
 
 // ============================================================================
 // Request Body Interfaces
@@ -277,14 +265,6 @@ export const assignFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  try {
-    const saved = await manageFulfillmentsUseCase.assign(fulfillmentId, sourceType, sourceId);
-    jsonResponse(res, 200, { success: true, data: saved });
-  } catch (error) {
-    const statusCode = error instanceof AppError ? error.statusCode : 500;
-    jsonResponse(res, statusCode, {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to assign fulfillment',
-    });
-  }
+  const saved = await manageFulfillmentsUseCase.assign(fulfillmentId, sourceType, sourceId);
+  jsonResponse(res, 200, { success: true, data: saved });
 };

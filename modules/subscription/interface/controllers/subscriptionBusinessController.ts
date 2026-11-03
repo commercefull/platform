@@ -1,20 +1,13 @@
-import { jsonResponse } from 'libs/apiResponse';
+import {jsonResponse} from 'libs/apiResponse';
 /**
  * Subscription Business Controller
  * Handles admin/merchant subscription operations
  */
 
-import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import {
-  SubscriptionPlan,
-  SubscriptionProduct,
-  SubscriptionStatus,
-  manageAdminSubscriptionsUseCase,
-  processBillingCycleUseCase,
-} from '../../application/wired';
+import type {HttpNext, HttpRequest, HttpResponse} from 'libs/http';
+import {SubscriptionPlan, SubscriptionProduct, SubscriptionStatus, manageAdminSubscriptionsUseCase, processBillingCycleUseCase} from '../../application/wired';
 
 const adminSubscriptions = manageAdminSubscriptionsUseCase;
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
@@ -220,10 +213,6 @@ export const getSubscriptionsDueBilling: AsyncHandler = async (req, res, _next) 
 };
 
 export const processBillingCycle: AsyncHandler = async (req, res, _next) => {
-  try {
-    const order = await processBillingCycleUseCase.execute(req.params.id);
-    jsonResponse(res, 200, { success: true, data: order });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  const order = await processBillingCycleUseCase.execute(req.params.id);
+  jsonResponse(res, 200, { success: true, data: order });
 };

@@ -7,7 +7,6 @@ import { jsonResponse } from 'libs/apiResponse';
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageLoyaltyAdminUseCase, adjustCustomerPointsUseCase } from '../../application/wired';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
 // ============================================================================
 // Body Interfaces
@@ -94,10 +93,6 @@ function respondError(res: HttpResponse, message: string, statusCode: number = 5
   jsonResponse(res, statusCode, { success: false, message });
 }
 
-function respondUseCaseError(res: HttpResponse, error: unknown, fallback: string): void {
-  respondError(res, getErrorMessage(error) || fallback, getErrorStatusCode(error));
-}
-
 // ============================================================================
 // Tier Management
 // ============================================================================
@@ -111,30 +106,22 @@ export const getTiers = async (req: HttpRequest, res: HttpResponse): Promise<voi
 export const getTierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    respond(res, await manageLoyaltyAdminUseCase.getTierById(id));
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to load loyalty tier');
-  }
+  respond(res, await manageLoyaltyAdminUseCase.getTierById(id));
 };
 
 export const createTier = async (req: HttpRequest<Record<string, string>, unknown, CreateTierBody>, res: HttpResponse): Promise<void> => {
   const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
-  try {
-    const tier = await manageLoyaltyAdminUseCase.createTier({
-      name,
-      description,
-      type,
-      pointsThreshold,
-      multiplier,
-      benefits,
-      isActive,
-    });
-    respondWithMessage(res, tier, 'Loyalty tier created successfully', 201);
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to create loyalty tier');
-  }
+  const tier = await manageLoyaltyAdminUseCase.createTier({
+    name,
+    description,
+    type,
+    pointsThreshold,
+    multiplier,
+    benefits,
+    isActive,
+  });
+  respondWithMessage(res, tier, 'Loyalty tier created successfully', 201);
 };
 
 export const updateTier = async (req: HttpRequest<Record<string, string>, unknown, UpdateTierBody>, res: HttpResponse): Promise<void> => {
@@ -167,11 +154,7 @@ export const getRewards = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const getRewardById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    respond(res, await manageLoyaltyAdminUseCase.getRewardById(id));
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to load loyalty reward');
-  }
+  respond(res, await manageLoyaltyAdminUseCase.getRewardById(id));
 };
 
 export const createReward = async (
@@ -191,23 +174,19 @@ export const createReward = async (
     isActive,
   } = req.body;
 
-  try {
-    const reward = await manageLoyaltyAdminUseCase.createReward({
-      name,
-      description,
-      pointsCost,
-      discountAmountCents,
-      discountPercent,
-      discountCode,
-      freeShipping,
-      productIds,
-      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-      isActive,
-    });
-    respondWithMessage(res, reward, 'Loyalty reward created successfully', 201);
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to create loyalty reward');
-  }
+  const reward = await manageLoyaltyAdminUseCase.createReward({
+    name,
+    description,
+    pointsCost,
+    discountAmountCents,
+    discountPercent,
+    discountCode,
+    freeShipping,
+    productIds,
+    expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+    isActive,
+  });
+  respondWithMessage(res, reward, 'Loyalty reward created successfully', 201);
 };
 
 export const updateReward = async (
@@ -283,12 +262,8 @@ export const adjustCustomerPoints = async (
   const { customerId } = req.params;
   const { points, reason, tierId } = req.body;
 
-  try {
-    const updatedPoints = await adjustCustomerPointsUseCase.execute({ customerId, points, reason, tierId });
-    respondWithMessage(res, updatedPoints, `Customer points ${parseInt(points) >= 0 ? 'increased' : 'decreased'} successfully`);
-  } catch (error) {
-    respondError(res, error instanceof Error ? error.message : 'Failed to adjust points', getErrorStatusCode(error));
-  }
+  const updatedPoints = await adjustCustomerPointsUseCase.execute({ customerId, points, reason, tierId });
+  respondWithMessage(res, updatedPoints, `Customer points ${parseInt(points) >= 0 ? 'increased' : 'decreased'} successfully`);
 };
 
 // ============================================================================
@@ -310,12 +285,8 @@ export const updateRedemptionStatus = async (
   const { id } = req.params;
   const { status } = req.body;
 
-  try {
-    const redemption = await manageLoyaltyAdminUseCase.updateRedemptionStatus(id, status);
-    respondWithMessage(res, redemption, `Redemption status updated to ${status}`);
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to update redemption status');
-  }
+  const redemption = await manageLoyaltyAdminUseCase.updateRedemptionStatus(id, status);
+  respondWithMessage(res, redemption, `Redemption status updated to ${status}`);
 };
 
 // ============================================================================
@@ -329,10 +300,6 @@ export const processOrderPoints = async (
   const { orderId } = req.params;
   const { orderAmount, customerId } = req.body;
 
-  try {
-    const updatedPoints = await manageLoyaltyAdminUseCase.processOrderPoints(orderId, orderAmount, customerId);
-    respondWithMessage(res, updatedPoints, 'Order points processed successfully');
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to process order points');
-  }
+  const updatedPoints = await manageLoyaltyAdminUseCase.processOrderPoints(orderId, orderAmount, customerId);
+  respondWithMessage(res, updatedPoints, 'Order points processed successfully');
 };

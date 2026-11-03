@@ -13,14 +13,6 @@ import {
   SupplierProductUpdateParams,
 } from '../../application/wired';
 
-function respondValidation(res: HttpResponse, error: unknown, fallbackStatus = 400): void {
-  if (error instanceof SupplierValidationError) {
-    validationErrorResponse(res, getErrorMessage(error).split('; '));
-    return;
-  }
-  jsonResponse(res, getErrorStatusCode(error) || fallbackStatus, { success: false, message: getErrorMessage(error) });
-}
-
 export const getSuppliers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, isActive, isApproved, minRating, category, tag, currency, search, limit = '50', offset = '0' } = req.query;
 
@@ -141,36 +133,28 @@ export const updateSupplierStatus = async (req: HttpRequest, res: HttpResponse):
   const { id } = req.params;
   const { status } = req.body as { status?: SupplierStatus };
 
-  try {
-    const supplier = await manageSupplierDirectoryUseCase.updateSupplierStatus(id, status);
+  const supplier = await manageSupplierDirectoryUseCase.updateSupplierStatus(id, status);
 
-    if (!supplier) {
-      errorResponse(res, `Supplier with ID ${id} not found`, 404);
-      return;
-    }
-
-    successResponse(res, supplier);
-  } catch (error) {
-    respondValidation(res, error);
+  if (!supplier) {
+    errorResponse(res, `Supplier with ID ${id} not found`, 404);
+    return;
   }
+
+  successResponse(res, supplier);
 };
 
 export const updateSupplierVisibility = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { isVisible } = req.body as { isVisible?: boolean };
 
-  try {
-    const supplier = await manageSupplierDirectoryUseCase.setSupplierVisibility(id, isVisible);
+  const supplier = await manageSupplierDirectoryUseCase.setSupplierVisibility(id, isVisible);
 
-    if (!supplier) {
-      errorResponse(res, `Supplier with ID ${id} not found`, 404);
-      return;
-    }
-
-    successResponse(res, supplier);
-  } catch (error) {
-    respondValidation(res, error);
+  if (!supplier) {
+    errorResponse(res, `Supplier with ID ${id} not found`, 404);
+    return;
   }
+
+  successResponse(res, supplier);
 };
 
 export const approveSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

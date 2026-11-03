@@ -1,24 +1,11 @@
-import { jsonResponse } from 'libs/apiResponse';
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../../libs/errors';
-import type { ContentBlockType } from '../../../../../libs/db/types';
-import {
-  reorderPageBlocksUseCase,
-  createTemplateUseCase,
-  duplicateTemplateUseCase,
-  manageContentUseCase,
-} from '../../../application/useCases/wired';
-import { ReorderPageBlocksCommand } from '../../../application/useCases/block/ReorderPageBlocks';
-import { CreateTemplateCommand } from '../../../application/useCases/template/CreateTemplate';
-import { DuplicateTemplateCommand } from '../../../application/useCases/template/DuplicateTemplate';
-import type {
-  CreateBlockBody,
-  UpdateBlockBody,
-  ReorderBlocksBody,
-  CreateTemplateBody,
-  UpdateTemplateBody,
-  DuplicateTemplateBody,
-} from './types';
+import {jsonResponse} from 'libs/apiResponse';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import type {ContentBlockType} from '../../../../../libs/db/types';
+import {reorderPageBlocksUseCase, createTemplateUseCase, duplicateTemplateUseCase, manageContentUseCase} from '../../../application/useCases/wired';
+import {ReorderPageBlocksCommand} from '../../../application/useCases/block/ReorderPageBlocks';
+import {CreateTemplateCommand} from '../../../application/useCases/template/CreateTemplate';
+import {DuplicateTemplateCommand} from '../../../application/useCases/template/DuplicateTemplate';
+import type {CreateBlockBody, UpdateBlockBody, ReorderBlocksBody, CreateTemplateBody, UpdateTemplateBody, DuplicateTemplateBody} from './types';
 
 /** Required fields defined on the block type schema that are missing from content. */
 function missingRequiredFields(blockType: ContentBlockType, content: Record<string, unknown>): string[] {
@@ -246,15 +233,11 @@ export class BlockAndTemplateHandlers {
       }
     }
 
-    try {
-      await reorderPageBlocksUseCase.execute(new ReorderPageBlocksCommand(pageId, blockOrders, req.user?.id));
-      jsonResponse(res, 200, {
-        success: true,
-        message: 'Content blocks reordered successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    await reorderPageBlocksUseCase.execute(new ReorderPageBlocksCommand(pageId, blockOrders, req.user?.id));
+    jsonResponse(res, 200, {
+      success: true,
+      message: 'Content blocks reordered successfully',
+    });
   };
 
   // Template Handlers
@@ -320,27 +303,23 @@ export class BlockAndTemplateHandlers {
       isActive = true,
     } = req.body;
 
-    try {
-      const result = await createTemplateUseCase.execute(
-        new CreateTemplateCommand({
-          name: name,
-          slug: slug,
-          description: description,
-          thumbnail: thumbnail,
-          htmlStructure: htmlStructure,
-          cssStyles: cssStyles,
-          jsScripts: jsScripts,
-          areas: areas,
-          defaultBlocks: defaultBlocks,
-          compatibleContentTypes: compatibleContentTypes,
-          isSystem: isSystem,
-          isActive: isActive,
-        }),
-      );
-      jsonResponse(res, 201, { success: true, data: result, message: 'Template created successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await createTemplateUseCase.execute(
+      new CreateTemplateCommand({
+        name: name,
+        slug: slug,
+        description: description,
+        thumbnail: thumbnail,
+        htmlStructure: htmlStructure,
+        cssStyles: cssStyles,
+        jsScripts: jsScripts,
+        areas: areas,
+        defaultBlocks: defaultBlocks,
+        compatibleContentTypes: compatibleContentTypes,
+        isSystem: isSystem,
+        isActive: isActive,
+      }),
+    );
+    jsonResponse(res, 201, { success: true, data: result, message: 'Template created successfully' });
   };
 
   /**
@@ -410,11 +389,7 @@ export class BlockAndTemplateHandlers {
     const { id } = req.params;
     const { name, slug } = req.body;
 
-    try {
-      const result = await duplicateTemplateUseCase.execute(new DuplicateTemplateCommand(id, name, slug));
-      jsonResponse(res, 201, { success: true, data: result, message: 'Template duplicated successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await duplicateTemplateUseCase.execute(new DuplicateTemplateCommand(id, name, slug));
+    jsonResponse(res, 201, { success: true, data: result, message: 'Template duplicated successfully' });
   };
 }

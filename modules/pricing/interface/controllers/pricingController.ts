@@ -1,15 +1,9 @@
-import { jsonResponse } from 'libs/apiResponse';
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
-import { CustomerPriceList, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps, TierPrice } from '../../domain/pricingRule';
-import {
-  managePricingAdminUseCase,
-  createPricingRuleUseCase,
-  createTierPriceUseCase,
-  addPriceToListUseCase,
-} from '../../application/wired';
-import type { CustomerPriceCreateProps } from '../../application/useCases/AddPriceToList';
-import type { TierPriceCreateProps } from '../../application/useCases/CreateTierPrice';
+import {jsonResponse} from 'libs/apiResponse';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {CustomerPriceList, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps, TierPrice} from '../../domain/pricingRule';
+import {managePricingAdminUseCase, createPricingRuleUseCase, createTierPriceUseCase, addPriceToListUseCase} from '../../application/wired';
+import type {CustomerPriceCreateProps} from '../../application/useCases/AddPriceToList';
+import type {TierPriceCreateProps} from '../../application/useCases/CreateTierPrice';
 
 interface PricingRuleBody {
   name?: string;
@@ -109,16 +103,12 @@ export const createPricingRule = async (
   req: HttpRequest<Record<string, string>, unknown, PricingRuleBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const newRule = await createPricingRuleUseCase.execute(req.body as PricingRuleCreateProps);
+  const newRule = await createPricingRuleUseCase.execute(req.body as PricingRuleCreateProps);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: newRule,
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: newRule,
+  });
 };
 
 /**
@@ -228,16 +218,12 @@ export const createTierPrice = async (
   req: HttpRequest<Record<string, string>, unknown, TierPriceBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const newTierPrice = await createTierPriceUseCase.execute(req.body as TierPriceCreateProps);
+  const newTierPrice = await createTierPriceUseCase.execute(req.body as TierPriceCreateProps);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: newTierPrice,
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: newTierPrice,
+  });
 };
 
 /**
@@ -440,14 +426,10 @@ export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Prom
 export const addPriceToList = async (req: HttpRequest<Record<string, string>, unknown, PriceBody>, res: HttpResponse): Promise<void> => {
   const { priceListId } = req.params;
 
-  try {
-    const newPrice = await addPriceToListUseCase.execute(priceListId, req.body as Omit<CustomerPriceCreateProps, 'priceListId'>);
+  const newPrice = await addPriceToListUseCase.execute(priceListId, req.body as Omit<CustomerPriceCreateProps, 'priceListId'>);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: newPrice,
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: newPrice,
+  });
 };

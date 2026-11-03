@@ -1,16 +1,14 @@
-import { jsonResponse } from 'libs/apiResponse';
+import {jsonResponse} from 'libs/apiResponse';
 /**
  * System Configuration HTTP Controller
  * Handles system configuration-related HTTP requests
  */
 
-
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
-import { UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
-import { manageSystemConfigurationUseCase, updateSystemConfigurationUseCase } from '../../application/wired';
-import { getErrorStatusCode, getErrorMessage, logCaughtError} from '../../../../libs/errors';
-import { generateUUID, isUuid } from '../../../../libs/uuid';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {SystemConfiguration} from '../../domain/entities/SystemConfiguration';
+import {UpdateSystemConfigurationCommand} from '../../application/useCases/UpdateSystemConfiguration';
+import {manageSystemConfigurationUseCase, updateSystemConfigurationUseCase} from '../../application/wired';
+import {generateUUID, isUuid} from '../../../../libs/uuid';
 
 interface CreateConfigBody {
   configId?: string;
@@ -48,41 +46,33 @@ export class SystemConfigurationController {
    * POST /business/configuration
    */
   async createSystemConfiguration(req: HttpRequest<Record<string, string>, unknown, CreateConfigBody>, res: HttpResponse) {
-    try {
-      const body = req.body;
-      if (!body.platformName || !body.platformName.trim()) {
-        return jsonResponse(res, 400, { success: false, message: 'platformName is required' });
-      }
-      if (!body.platformDomain || !body.platformDomain.trim()) {
-        return jsonResponse(res, 400, { success: false, message: 'platformDomain is required' });
-      }
-      if (!body.supportEmail || !body.supportEmail.trim()) {
-        return jsonResponse(res, 400, { success: false, message: 'supportEmail is required' });
-      }
-      const config = SystemConfiguration.create({
-        configId: body.configId || generateUUID(),
-        platformName: body.platformName,
-        platformDomain: body.platformDomain,
-        supportEmail: body.supportEmail,
-        defaultCurrency: body.defaultCurrency,
-        defaultLanguage: body.defaultLanguage,
-        timezone: body.timezone,
-        systemMode: body.systemMode,
-      });
-
-      await manageSystemConfigurationUseCase.save(config);
-
-      jsonResponse(res, 201, {
-        success: true,
-        data: config.toJSON(),
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-      jsonResponse(res, getErrorStatusCode(error), {
-        success: false,
-        message: getErrorMessage(error),
-      });
+    const body = req.body;
+    if (!body.platformName || !body.platformName.trim()) {
+      return jsonResponse(res, 400, { success: false, message: 'platformName is required' });
     }
+    if (!body.platformDomain || !body.platformDomain.trim()) {
+      return jsonResponse(res, 400, { success: false, message: 'platformDomain is required' });
+    }
+    if (!body.supportEmail || !body.supportEmail.trim()) {
+      return jsonResponse(res, 400, { success: false, message: 'supportEmail is required' });
+    }
+    const config = SystemConfiguration.create({
+      configId: body.configId || generateUUID(),
+      platformName: body.platformName,
+      platformDomain: body.platformDomain,
+      supportEmail: body.supportEmail,
+      defaultCurrency: body.defaultCurrency,
+      defaultLanguage: body.defaultLanguage,
+      timezone: body.timezone,
+      systemMode: body.systemMode,
+    });
+
+    await manageSystemConfigurationUseCase.save(config);
+
+    jsonResponse(res, 201, {
+      success: true,
+      data: config.toJSON(),
+    });
   }
 
   /**
@@ -90,44 +80,36 @@ export class SystemConfigurationController {
    * PUT /business/configuration/:configId
    */
   async updateSystemConfiguration(req: HttpRequest<Record<string, string>, unknown, UpdateConfigBody>, res: HttpResponse) {
-    try {
-      if (!isUuid(req.params.configId)) {
-        return jsonResponse(res, 400, {
-          success: false,
-          message: 'Invalid configuration ID format',
-        });
-      }
-      const body = req.body;
-      const command = new UpdateSystemConfigurationCommand(req.params.configId, {
-        platformName: body.platformName,
-        platformDomain: body.platformDomain,
-        supportEmail: body.supportEmail,
-        defaultCurrency: body.defaultCurrency,
-        defaultLanguage: body.defaultLanguage,
-        timezone: body.timezone,
-        systemMode: body.systemMode,
-        features: body.features,
-        organizationSettings: body.organizationSettings,
-        platformSettings: body.platformSettings,
-        securitySettings: body.securitySettings,
-        notificationSettings: body.notificationSettings,
-        integrationSettings: body.integrationSettings,
-        metadata: body.metadata,
-      });
-
-      const result = await this.updateSystemConfigurationUseCase.execute(command);
-
-      jsonResponse(res, 200, {
-        success: true,
-        data: result,
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-      jsonResponse(res, getErrorStatusCode(error), {
+    if (!isUuid(req.params.configId)) {
+      return jsonResponse(res, 400, {
         success: false,
-        message: getErrorMessage(error),
+        message: 'Invalid configuration ID format',
       });
     }
+    const body = req.body;
+    const command = new UpdateSystemConfigurationCommand(req.params.configId, {
+      platformName: body.platformName,
+      platformDomain: body.platformDomain,
+      supportEmail: body.supportEmail,
+      defaultCurrency: body.defaultCurrency,
+      defaultLanguage: body.defaultLanguage,
+      timezone: body.timezone,
+      systemMode: body.systemMode,
+      features: body.features,
+      organizationSettings: body.organizationSettings,
+      platformSettings: body.platformSettings,
+      securitySettings: body.securitySettings,
+      notificationSettings: body.notificationSettings,
+      integrationSettings: body.integrationSettings,
+      metadata: body.metadata,
+    });
+
+    const result = await this.updateSystemConfigurationUseCase.execute(command);
+
+    jsonResponse(res, 200, {
+      success: true,
+      data: result,
+    });
   }
 
   /**
@@ -135,36 +117,25 @@ export class SystemConfigurationController {
    * GET /business/configuration/:configId
    */
   async getSystemConfiguration(req: HttpRequest, res: HttpResponse) {
-    try {
-      if (!isUuid(req.params.configId)) {
-        return jsonResponse(res, 400, {
-          success: false,
-          message: 'Invalid configuration ID format',
-        });
-      }
-      const config = await manageSystemConfigurationUseCase.findById(req.params.configId);
-
-      if (!config) {
-        return jsonResponse(res, 404, {
-          success: false,
-          message: 'System configuration not found',
-        });
-      }
-
-      jsonResponse(res, 200, {
-        success: true,
-        data: config.toJSON(),
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      jsonResponse(res, 500, {
+    if (!isUuid(req.params.configId)) {
+      return jsonResponse(res, 400, {
         success: false,
-        message: 'Failed to get system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        message: 'Invalid configuration ID format',
       });
     }
+    const config = await manageSystemConfigurationUseCase.findById(req.params.configId);
+
+    if (!config) {
+      return jsonResponse(res, 404, {
+        success: false,
+        message: 'System configuration not found',
+      });
+    }
+
+    jsonResponse(res, 200, {
+      success: true,
+      data: config.toJSON(),
+    });
   }
 
   /**
@@ -172,30 +143,19 @@ export class SystemConfigurationController {
    * GET /business/configuration/active
    */
   async getActiveSystemConfiguration(req: HttpRequest, res: HttpResponse) {
-    try {
-      const config = await manageSystemConfigurationUseCase.findActive();
+    const config = await manageSystemConfigurationUseCase.findActive();
 
-      if (!config) {
-        return jsonResponse(res, 404, {
-          success: false,
-          message: 'No active system configuration found',
-        });
-      }
-
-      jsonResponse(res, 200, {
-        success: true,
-        data: config.toJSON(),
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      jsonResponse(res, 500, {
+    if (!config) {
+      return jsonResponse(res, 404, {
         success: false,
-        message: 'Failed to get active system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        message: 'No active system configuration found',
       });
     }
+
+    jsonResponse(res, 200, {
+      success: true,
+      data: config.toJSON(),
+    });
   }
 
   /**
@@ -203,23 +163,12 @@ export class SystemConfigurationController {
    * GET /business/configuration
    */
   async listSystemConfigurations(req: HttpRequest, res: HttpResponse) {
-    try {
-      const configs = await manageSystemConfigurationUseCase.findAll();
+    const configs = await manageSystemConfigurationUseCase.findAll();
 
-      jsonResponse(res, 200, {
-        success: true,
-        data: configs.map(config => config.toJSON()),
-        count: configs.length,
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      jsonResponse(res, 500, {
-        success: false,
-        message: 'Failed to list system configurations',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      });
-    }
+    jsonResponse(res, 200, {
+      success: true,
+      data: configs.map(config => config.toJSON()),
+      count: configs.length,
+    });
   }
 }

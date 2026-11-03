@@ -266,20 +266,16 @@ export const createReview = async (req: HttpRequest, res: HttpResponse): Promise
     reviewerEmail?: string;
   };
 
-  try {
-    const review = await manageProductReviewsUseCase.submitReview({
-      productId,
-      customerId,
-      rating,
-      title,
-      content,
-      reviewerName,
-      reviewerEmail,
-    });
-    respond(req, res, review, 201);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const review = await manageProductReviewsUseCase.submitReview({
+    productId,
+    customerId,
+    rating,
+    title,
+    content,
+    reviewerName,
+    reviewerEmail,
+  });
+  respond(req, res, review, 201);
 };
 
 export const markReviewHelpful = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -365,12 +361,9 @@ export const voteOnReview = async (req: HttpRequest, res: HttpResponse): Promise
 export const configureVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { options } = req.body as { options?: Array<{ name: string; value: string }> };
-  try {
-    const match = await configureVariantUseCase.execute(productId, options as CatalogVariantOption[]);
-    successResponse(res, match);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const match = await configureVariantUseCase.execute(productId, options as CatalogVariantOption[]);
+  successResponse(res, match);
 };
 
 // ============================================================================

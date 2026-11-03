@@ -1,23 +1,12 @@
-import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
+import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { createReceivingRecordUseCase, manageReceivingUseCase } from '../../application/wired';
 import { CreateReceivingRecordInput } from '../../application/useCases/CreateReceivingRecord';
-import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
   SupplierReceivingRecordUpdateParams,
   SupplierReceivingItemCreateParams,
   SupplierReceivingItemUpdateParams,
 } from '../../application/wired';
-
-function respondValidationOrError(res: HttpResponse, error: unknown): void {
-  if (error instanceof SupplierValidationError) {
-    validationErrorResponse(res, getErrorMessage(error).split('; '));
-    return;
-  }
-  jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-}
 
 // ---------- Receiving Record Methods ----------
 
@@ -68,33 +57,29 @@ export const createReceivingRecord = async (req: HttpRequest, res: HttpResponse)
     items, // Array of receiving items
   } = req.body as CreateReceivingRecordInput;
 
-  try {
-    const result = await createReceivingRecordUseCase.execute({
-      supplierPurchaseOrderId,
-      distributionWarehouseId,
-      supplierId,
-      status,
-      receivedDate,
-      carrierName,
-      trackingNumber,
-      packageCount,
-      notes,
-      discrepancies,
-      attachments,
-      items,
-    });
+  const result = await createReceivingRecordUseCase.execute({
+    supplierPurchaseOrderId,
+    distributionWarehouseId,
+    supplierId,
+    status,
+    receivedDate,
+    carrierName,
+    trackingNumber,
+    packageCount,
+    notes,
+    discrepancies,
+    attachments,
+    items,
+  });
 
-    successResponse(
-      res,
-      {
-        receivingRecord: result.receivingRecord,
-        items: result.items,
-      },
-      201,
-    );
-  } catch (error) {
-    respondValidationOrError(res, error);
-  }
+  successResponse(
+    res,
+    {
+      receivingRecord: result.receivingRecord,
+      items: result.items,
+    },
+    201,
+  );
 };
 
 export const updateReceivingRecord = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -135,12 +120,8 @@ export const createReceivingItem = async (req: HttpRequest, res: HttpResponse): 
   const { id } = req.params;
   const body = req.body as Omit<SupplierReceivingItemCreateParams, 'supplierReceivingRecordId'>;
 
-  try {
-    const item = await manageReceivingUseCase.createItem(id, body);
-    successResponse(res, item, 201);
-  } catch (error) {
-    respondValidationOrError(res, error);
-  }
+  const item = await manageReceivingUseCase.createItem(id, body);
+  successResponse(res, item, 201);
 };
 
 export const updateReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -175,16 +156,12 @@ export const rejectReceivingItem = async (req: HttpRequest, res: HttpResponse): 
   const { id } = req.params;
   const { reason, processedBy } = req.body as { reason?: string; processedBy?: string };
 
-  try {
-    const item = await manageReceivingUseCase.rejectItem(id, reason, processedBy);
+  const item = await manageReceivingUseCase.rejectItem(id, reason, processedBy);
 
-    if (!item) {
-      errorResponse(res, `Receiving item with ID ${id} not found`, 404);
-      return;
-    }
-
-    successResponse(res, item);
-  } catch (error) {
-    respondValidationOrError(res, error);
+  if (!item) {
+    errorResponse(res, `Receiving item with ID ${id} not found`, 404);
+    return;
   }
+
+  successResponse(res, item);
 };

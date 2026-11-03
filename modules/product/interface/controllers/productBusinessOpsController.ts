@@ -28,7 +28,6 @@ import type {
   CatalogVariantUpdateParams,
   CatalogVariantOption,
 } from '../../application/ports/CatalogVariantPort';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import type { ProductVariantUpdateProps, ProductQaStatus, ReviewFilters } from '../../application/wired';
 import type { ProductRelationType } from '../../application/useCases/ManageProductAssets';
@@ -168,22 +167,18 @@ export const createProductVariant = async (req: HttpRequest, res: HttpResponse):
     currencyCode?: string;
   };
 
-  try {
-    const result = await createCatalogVariantUseCase.execute(
-      new CreateCatalogVariantCommand({
-        productId: productId,
-        variantFields: { productId, ...variantFields } as CatalogVariantCreateParams,
-        priceCents: priceCents ?? undefined,
-        salePriceCents: salePriceCents ?? undefined,
-        compareAtPriceCents: compareAtPriceCents ?? undefined,
-        costPriceCents: costPriceCents ?? undefined,
-        currencyCode: currencyCode ?? undefined,
-      }),
-    );
-    respond(req, res, result, 201);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await createCatalogVariantUseCase.execute(
+    new CreateCatalogVariantCommand({
+      productId: productId,
+      variantFields: { productId, ...variantFields } as CatalogVariantCreateParams,
+      priceCents: priceCents ?? undefined,
+      salePriceCents: salePriceCents ?? undefined,
+      compareAtPriceCents: compareAtPriceCents ?? undefined,
+      costPriceCents: costPriceCents ?? undefined,
+      currencyCode: currencyCode ?? undefined,
+    }),
+  );
+  respond(req, res, result, 201);
 };
 
 export const updateProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -191,23 +186,19 @@ export const updateProductVariant = async (req: HttpRequest, res: HttpResponse):
   const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } =
     req.body as ProductVariantUpdateProps & VariantBody & { currencyCode?: string };
 
-  try {
-    const result = await updateCatalogVariantUseCase.execute(
-      new UpdateCatalogVariantCommand({
-        productId: req.params.productId ?? '',
-        variantId: variantId,
-        variantFields: variantFields as CatalogVariantUpdateParams,
-        priceCents: priceCents ?? undefined,
-        salePriceCents: salePriceCents ?? undefined,
-        compareAtPriceCents: compareAtPriceCents ?? undefined,
-        costPriceCents: costPriceCents ?? undefined,
-        currencyCode: currencyCode ?? undefined,
-      }),
-    );
-    respond(req, res, result);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await updateCatalogVariantUseCase.execute(
+    new UpdateCatalogVariantCommand({
+      productId: req.params.productId ?? '',
+      variantId: variantId,
+      variantFields: variantFields as CatalogVariantUpdateParams,
+      priceCents: priceCents ?? undefined,
+      salePriceCents: salePriceCents ?? undefined,
+      compareAtPriceCents: compareAtPriceCents ?? undefined,
+      costPriceCents: costPriceCents ?? undefined,
+      currencyCode: currencyCode ?? undefined,
+    }),
+  );
+  respond(req, res, result);
 };
 
 export const updateVariantInventory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -273,12 +264,9 @@ export const updateProductImage = async (req: HttpRequest, res: HttpResponse): P
     type?: string;
     isVisible?: boolean;
   };
-  try {
-    const image = await manageProductImagesUseCase.update(req.params.imageId, body);
-    respond(req, res, image);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const image = await manageProductImagesUseCase.update(req.params.imageId, body);
+  respond(req, res, image);
 };
 
 export const deleteProductImage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -288,12 +276,9 @@ export const deleteProductImage = async (req: HttpRequest, res: HttpResponse): P
 
 export const reorderProductImages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { imageIds } = req.body as ImageReorderBody;
-  try {
-    await manageProductImagesUseCase.reorder(req.params.productId, imageIds);
-    respond(req, res, { reordered: true });
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  await manageProductImagesUseCase.reorder(req.params.productId, imageIds);
+  respond(req, res, { reordered: true });
 };
 
 // ============================================================================
@@ -440,32 +425,23 @@ export const listDownloads = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const createDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  try {
-    const download = await manageProductDownloadsUseCase.create(productId, req.body as DownloadBody);
-    successResponse(res, download, 201);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const download = await manageProductDownloadsUseCase.create(productId, req.body as DownloadBody);
+  successResponse(res, download, 201);
 };
 
 export const updateDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { downloadId } = req.params;
-  try {
-    const updated = await manageProductDownloadsUseCase.update(downloadId, req.body as DownloadBody);
-    successResponse(res, updated);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const updated = await manageProductDownloadsUseCase.update(downloadId, req.body as DownloadBody);
+  successResponse(res, updated);
 };
 
 export const deleteDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { downloadId } = req.params;
-  try {
-    await manageProductDownloadsUseCase.delete(downloadId);
-    successResponse(res, { deleted: true });
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  await manageProductDownloadsUseCase.delete(downloadId);
+  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -481,32 +457,22 @@ export const listRelationships = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const createRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  try {
-    const relationship = await manageProductRelationshipsUseCase.create(productId, req.body as RelationshipBody);
-    successResponse(res, relationship, 201);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const relationship = await manageProductRelationshipsUseCase.create(productId, req.body as RelationshipBody);
+  successResponse(res, relationship, 201);
 };
 
 export const reorderRelationships = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const updates = (req.body as { updates?: Array<{ productRelatedId?: string; position?: number }> })?.updates ?? [];
-    await manageProductRelationshipsUseCase.reorder(updates);
-    successResponse(res, { reordered: true });
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const updates = (req.body as { updates?: Array<{ productRelatedId?: string; position?: number }> })?.updates ?? [];
+  await manageProductRelationshipsUseCase.reorder(updates);
+  successResponse(res, { reordered: true });
 };
 
 export const deleteRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { relationshipId } = req.params;
-  try {
-    await manageProductRelationshipsUseCase.delete(relationshipId);
-    successResponse(res, { deleted: true });
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  await manageProductRelationshipsUseCase.delete(relationshipId);
+  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -515,23 +481,17 @@ export const deleteRelationship = async (req: HttpRequest, res: HttpResponse): P
 
 export const getVariantMatrix = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  try {
-    const result = await getVariantMatrixUseCase.execute(productId);
-    successResponse(res, result);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const result = await getVariantMatrixUseCase.execute(productId);
+  successResponse(res, result);
 };
 
 export const configureVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { options } = req.body as OptionsBody;
-  try {
-    const match = await configureVariantUseCase.execute(productId, options as CatalogVariantOption[]);
-    successResponse(res, match);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+
+  const match = await configureVariantUseCase.execute(productId, options as CatalogVariantOption[]);
+  successResponse(res, match);
 };
 
 // ============================================================================
@@ -552,10 +512,6 @@ export const applyAttributeSet = async (req: HttpRequest, res: HttpResponse): Pr
   const { productId } = req.params;
   const { attributeSetId } = req.body as AttributeSetBody;
 
-  try {
-    const result = await applyAttributeSetUseCase.execute(productId, attributeSetId ?? '');
-    successResponse(res, result);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await applyAttributeSetUseCase.execute(productId, attributeSetId ?? '');
+  successResponse(res, result);
 };

@@ -1,13 +1,12 @@
-import { jsonResponse } from 'libs/apiResponse';
+import {jsonResponse} from 'libs/apiResponse';
 /**
  * Subscription Customer Controller
  * Handles customer-facing subscription operations
  */
 
-import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import { manageCustomerSubscriptionsUseCase } from '../../application/wired';
-import type { SubscriptionStatus } from '../../domain/repositories/SubscriptionRepository';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import type {HttpNext, HttpRequest, HttpResponse} from 'libs/http';
+import {manageCustomerSubscriptionsUseCase} from '../../application/wired';
+import type {SubscriptionStatus} from '../../domain/repositories/SubscriptionRepository';
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
@@ -104,26 +103,22 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
     currencyCode?: string;
   };
 
-  try {
-    const subscription = await manageCustomerSubscriptionsUseCase.subscribe({
-      customerId: customerId || '',
-      subscriptionPlanId,
-      productVariantId,
-      quantity,
-      shippingAddressId,
-      billingAddressId,
-      paymentMethodId,
-      customizations,
-      vatNumber,
-      currencyCode,
-      storeId: (res.locals.storeId as string | undefined) || undefined,
-      salesChannelId: (res.locals.channelId as string | undefined) || undefined,
-    });
+  const subscription = await manageCustomerSubscriptionsUseCase.subscribe({
+    customerId: customerId || '',
+    subscriptionPlanId,
+    productVariantId,
+    quantity,
+    shippingAddressId,
+    billingAddressId,
+    paymentMethodId,
+    customizations,
+    vatNumber,
+    currencyCode,
+    storeId: (res.locals.storeId as string | undefined) || undefined,
+    salesChannelId: (res.locals.channelId as string | undefined) || undefined,
+  });
 
-    jsonResponse(res, 201, { success: true, data: subscription });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, { success: true, data: subscription });
 };
 
 // ============================================================================
@@ -157,70 +152,50 @@ export const changePlan: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { newPlanId } = req.body as { newPlanId: string };
 
-  try {
-    await manageCustomerSubscriptionsUseCase.changePlan(customerId || '', req.params.id, newPlanId);
-    jsonResponse(res, 200, { success: true, message: 'Plan change scheduled' });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  await manageCustomerSubscriptionsUseCase.changePlan(customerId || '', req.params.id, newPlanId);
+  jsonResponse(res, 200, { success: true, message: 'Plan change scheduled' });
 };
 
 export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
 
-  try {
-    const pause = await manageCustomerSubscriptionsUseCase.pause(customerId || '', req.params.id, {
-      resumeAt: resumeAt ? new Date(resumeAt) : undefined,
-      reason,
-    });
-    jsonResponse(res, 200, { success: true, data: pause });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  const pause = await manageCustomerSubscriptionsUseCase.pause(customerId || '', req.params.id, {
+    resumeAt: resumeAt ? new Date(resumeAt) : undefined,
+    reason,
+  });
+  jsonResponse(res, 200, { success: true, data: pause });
 };
 
 export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
 
-  try {
-    await manageCustomerSubscriptionsUseCase.resume(customerId || '', req.params.id);
-    jsonResponse(res, 200, { success: true, message: 'Subscription resumed' });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  await manageCustomerSubscriptionsUseCase.resume(customerId || '', req.params.id);
+  jsonResponse(res, 200, { success: true, message: 'Subscription resumed' });
 };
 
 export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { reason, cancelAtPeriodEnd } = req.body as { reason?: string; cancelAtPeriodEnd?: boolean };
 
-  try {
-    const result = await manageCustomerSubscriptionsUseCase.cancel(customerId || '', req.params.id, {
-      reason,
-      cancelAtPeriodEnd,
-    });
+  const result = await manageCustomerSubscriptionsUseCase.cancel(customerId || '', req.params.id, {
+    reason,
+    cancelAtPeriodEnd,
+  });
 
-    jsonResponse(res, 200, {
-      success: true,
-      message: result.cancelAtPeriodEnd
-        ? 'Subscription will be cancelled at the end of the current billing period'
-        : 'Subscription cancelled immediately',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    message: result.cancelAtPeriodEnd
+      ? 'Subscription will be cancelled at the end of the current billing period'
+      : 'Subscription cancelled immediately',
+  });
 };
 
 export const reactivateMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
 
-  try {
-    await manageCustomerSubscriptionsUseCase.reactivate(customerId || '', req.params.id);
-    jsonResponse(res, 200, { success: true, message: 'Subscription reactivated' });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  await manageCustomerSubscriptionsUseCase.reactivate(customerId || '', req.params.id);
+  jsonResponse(res, 200, { success: true, message: 'Subscription reactivated' });
 };
 
 // ============================================================================
@@ -247,10 +222,6 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => 
 export const skipNextDelivery: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
 
-  try {
-    await manageCustomerSubscriptionsUseCase.skipNextDelivery(customerId || '', req.params.id);
-    jsonResponse(res, 200, { success: true, message: 'Next delivery skipped' });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  await manageCustomerSubscriptionsUseCase.skipNextDelivery(customerId || '', req.params.id);
+  jsonResponse(res, 200, { success: true, message: 'Next delivery skipped' });
 };

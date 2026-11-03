@@ -1,30 +1,13 @@
-import { jsonResponse } from 'libs/apiResponse';
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../../libs/errors';
-import {
-  createRedirectUseCase,
-  updateRedirectUseCase,
-  deleteRedirectUseCase,
-  createPageVersionUseCase,
-  restorePageVersionUseCase,
-  createPageTranslationUseCase,
-  updatePageTranslationUseCase,
-  deletePageTranslationUseCase,
-  manageContentUseCase,
-} from '../../../application/useCases/wired';
-import { CreateRedirectCommand } from '../../../application/useCases/redirect/CreateRedirect';
-import { UpdateRedirectCommand } from '../../../application/useCases/redirect/UpdateRedirect';
-import { CreatePageVersionCommand } from '../../../application/useCases/page/CreatePageVersion';
-import { RestorePageVersionCommand } from '../../../application/useCases/page/RestorePageVersion';
-import { CreatePageTranslationCommand } from '../../../application/useCases/translation/CreatePageTranslation';
-import { UpdatePageTranslationCommand } from '../../../application/useCases/translation/UpdatePageTranslation';
-import type {
-  CreateRedirectBody,
-  UpdateRedirectBody,
-  CreatePageVersionBody,
-  CreatePageTranslationBody,
-  UpdatePageTranslationBody,
-} from './types';
+import {jsonResponse} from 'libs/apiResponse';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {createRedirectUseCase, updateRedirectUseCase, deleteRedirectUseCase, createPageVersionUseCase, restorePageVersionUseCase, createPageTranslationUseCase, updatePageTranslationUseCase, deletePageTranslationUseCase, manageContentUseCase} from '../../../application/useCases/wired';
+import {CreateRedirectCommand} from '../../../application/useCases/redirect/CreateRedirect';
+import {UpdateRedirectCommand} from '../../../application/useCases/redirect/UpdateRedirect';
+import {CreatePageVersionCommand} from '../../../application/useCases/page/CreatePageVersion';
+import {RestorePageVersionCommand} from '../../../application/useCases/page/RestorePageVersion';
+import {CreatePageTranslationCommand} from '../../../application/useCases/translation/CreatePageTranslation';
+import {UpdatePageTranslationCommand} from '../../../application/useCases/translation/UpdatePageTranslation';
+import type {CreateRedirectBody, UpdateRedirectBody, CreatePageVersionBody, CreatePageTranslationBody, UpdatePageTranslationBody} from './types';
 
 /** Redirect, page-version, and page-translation handlers. */
 export class RedirectVersionTranslationHandlers {
@@ -44,26 +27,22 @@ export class RedirectVersionTranslationHandlers {
   createRedirect = async (req: HttpRequest<Record<string, string>, unknown, CreateRedirectBody>, res: HttpResponse): Promise<void> => {
     const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
-    try {
-      const result = await createRedirectUseCase.execute(
-        new CreateRedirectCommand({
-          sourceUrl: sourceUrl,
-          targetUrl: targetUrl,
-          statusCode: statusCode ? (Number(statusCode) as 301 | 302 | 303 | 307 | 308) : undefined,
-          isRegex: isRegex,
-          isActive: isActive,
-          notes: notes,
-          createdBy: req.user?.id,
-        }),
-      );
-      jsonResponse(res, 201, {
-        success: true,
-        data: { ...result, contentRedirectId: result.id },
-        message: 'Redirect created successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await createRedirectUseCase.execute(
+      new CreateRedirectCommand({
+        sourceUrl: sourceUrl,
+        targetUrl: targetUrl,
+        statusCode: statusCode ? (Number(statusCode) as 301 | 302 | 303 | 307 | 308) : undefined,
+        isRegex: isRegex,
+        isActive: isActive,
+        notes: notes,
+        createdBy: req.user?.id,
+      }),
+    );
+    jsonResponse(res, 201, {
+      success: true,
+      data: { ...result, contentRedirectId: result.id },
+      message: 'Redirect created successfully',
+    });
   };
 
   getRedirectById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -80,24 +59,17 @@ export class RedirectVersionTranslationHandlers {
     const { id } = req.params;
     const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
-    try {
-      const result = await updateRedirectUseCase.execute(
-        new UpdateRedirectCommand(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes }),
-      );
-      jsonResponse(res, 200, { success: true, data: result, message: 'Redirect updated successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await updateRedirectUseCase.execute(
+      new UpdateRedirectCommand(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes }),
+    );
+    jsonResponse(res, 200, { success: true, data: result, message: 'Redirect updated successfully' });
   };
 
   deleteRedirect = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    try {
-      await deleteRedirectUseCase.execute(id);
-      jsonResponse(res, 200, { success: true, message: 'Redirect deleted successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+
+    await deleteRedirectUseCase.execute(id);
+    jsonResponse(res, 200, { success: true, message: 'Redirect deleted successfully' });
   };
 
   // Page Version Handlers
@@ -124,23 +96,15 @@ export class RedirectVersionTranslationHandlers {
     const { pageId } = req.params;
     const { comment } = req.body;
 
-    try {
-      const version = await createPageVersionUseCase.execute(new CreatePageVersionCommand(pageId, comment));
-      jsonResponse(res, 201, { success: true, data: version, message: 'Page version created successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const version = await createPageVersionUseCase.execute(new CreatePageVersionCommand(pageId, comment));
+    jsonResponse(res, 201, { success: true, data: version, message: 'Page version created successfully' });
   };
 
   restorePageVersion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, versionId } = req.params;
 
-    try {
-      const { restoredPage, version } = await restorePageVersionUseCase.execute(new RestorePageVersionCommand(pageId, versionId));
-      jsonResponse(res, 200, { success: true, data: restoredPage, message: `Page restored to version ${version}` });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { restoredPage, version } = await restorePageVersionUseCase.execute(new RestorePageVersionCommand(pageId, versionId));
+    jsonResponse(res, 200, { success: true, data: restoredPage, message: `Page restored to version ${version}` });
   };
 
   deletePageVersion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -206,28 +170,24 @@ export class RedirectVersionTranslationHandlers {
       isPublished,
     } = req.body;
 
-    try {
-      const result = await createPageTranslationUseCase.execute(
-        new CreatePageTranslationCommand(pageId, localeId, title, {
-          slug,
-          summary,
-          content,
-          metaTitle,
-          metaDescription,
-          metaKeywords,
-          openGraphTitle,
-          openGraphDescription,
-          featuredImage,
-          isAutoTranslated,
-          translationSource,
-          isApproved,
-          isPublished,
-        }),
-      );
-      jsonResponse(res, 201, { success: true, data: result, message: 'Page translation created successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await createPageTranslationUseCase.execute(
+      new CreatePageTranslationCommand(pageId, localeId, title, {
+        slug,
+        summary,
+        content,
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        openGraphTitle,
+        openGraphDescription,
+        featuredImage,
+        isAutoTranslated,
+        translationSource,
+        isApproved,
+        isPublished,
+      }),
+    );
+    jsonResponse(res, 201, { success: true, data: result, message: 'Page translation created successfully' });
   };
 
   updatePageTranslation = async (
@@ -253,39 +213,32 @@ export class RedirectVersionTranslationHandlers {
       publishedAt,
     } = req.body;
 
-    try {
-      const result = await updatePageTranslationUseCase.execute(
-        new UpdatePageTranslationCommand(translationId, {
-          title,
-          slug,
-          summary,
-          content,
-          metaTitle,
-          metaDescription,
-          metaKeywords,
-          openGraphTitle,
-          openGraphDescription,
-          featuredImage,
-          isAutoTranslated,
-          translationSource,
-          isApproved,
-          isPublished,
-          publishedAt: publishedAt ? new Date(publishedAt) : undefined,
-        }),
-      );
-      jsonResponse(res, 200, { success: true, data: result, message: 'Page translation updated successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await updatePageTranslationUseCase.execute(
+      new UpdatePageTranslationCommand(translationId, {
+        title,
+        slug,
+        summary,
+        content,
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        openGraphTitle,
+        openGraphDescription,
+        featuredImage,
+        isAutoTranslated,
+        translationSource,
+        isApproved,
+        isPublished,
+        publishedAt: publishedAt ? new Date(publishedAt) : undefined,
+      }),
+    );
+    jsonResponse(res, 200, { success: true, data: result, message: 'Page translation updated successfully' });
   };
 
   deletePageTranslation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { translationId } = req.params;
-    try {
-      await deletePageTranslationUseCase.execute(translationId);
-      jsonResponse(res, 200, { success: true, message: 'Page translation deleted successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+
+    await deletePageTranslationUseCase.execute(translationId);
+    jsonResponse(res, 200, { success: true, message: 'Page translation deleted successfully' });
   };
 }

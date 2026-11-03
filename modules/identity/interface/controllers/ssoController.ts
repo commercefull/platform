@@ -1,4 +1,4 @@
-import { jsonResponse } from 'libs/apiResponse';
+import {jsonResponse} from 'libs/apiResponse';
 /**
  * SSO Business Controller
  *
@@ -6,281 +6,209 @@ import { jsonResponse } from 'libs/apiResponse';
  * Config routes require organization auth. SSO login routes are public.
  */
 
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage, logCaughtError} from '../../../../libs/errors';
-import { manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase } from '../../application/wired';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase} from '../../application/wired';
 
 class SsoController {
   // ── List Providers ────────────────────────────────────────────
 
   async listProviders(req: HttpRequest, res: HttpResponse) {
-    try {
-      const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
-      if (!organizationId) {
-        jsonResponse(res, 401, { success: false, message: 'Authentication required' });
-        return;
-      }
-      const providers = await listProvidersUseCase.execute(organizationId);
-      jsonResponse(res, 200, { success: true, data: providers });
-    } catch (error) {
-      logCaughtError('Error listing SSO providers:', error);
-      jsonResponse(res, 500, { success: false, message: 'Failed to list SSO providers' });
+    const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
+    if (!organizationId) {
+      jsonResponse(res, 401, { success: false, message: 'Authentication required' });
+      return;
     }
+    const providers = await listProvidersUseCase.execute(organizationId);
+    jsonResponse(res, 200, { success: true, data: providers });
   }
 
   // ── SAML Config CRUD ──────────────────────────────────────────
 
   async createSamlProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
-      if (!organizationId) {
-        jsonResponse(res, 401, { success: false, message: 'Authentication required' });
-        return;
-      }
-      const body = req.body as Record<string, unknown>;
-      const provider = await manageSamlUseCase.create({
-        organizationId,
-        name: body.name as string,
-        entityId: body.entityId as string,
-        ssoUrl: body.ssoUrl as string,
-        certificate: body.certificate as string,
-        spEntityId: body.spEntityId as string,
-        acsUrl: body.acsUrl as string,
-        binding: body.binding as 'redirect' | 'post' | undefined,
-        nameIdFormat: body.nameIdFormat as 'unspecified' | 'emailAddress' | 'persistent' | 'transient' | undefined,
-        signAuthnRequest: body.signAuthnRequest as boolean | undefined,
-        sloUrl: body.sloUrl as string | undefined,
-        spPrivateKey: body.spPrivateKey as string | undefined,
-        spCertificate: body.spCertificate as string | undefined,
-        attributeMapping: body.attributeMapping as Record<string, string> | undefined,
-      });
-      jsonResponse(res, 201, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
+    if (!organizationId) {
+      jsonResponse(res, 401, { success: false, message: 'Authentication required' });
+      return;
     }
+    const body = req.body as Record<string, unknown>;
+    const provider = await manageSamlUseCase.create({
+      organizationId,
+      name: body.name as string,
+      entityId: body.entityId as string,
+      ssoUrl: body.ssoUrl as string,
+      certificate: body.certificate as string,
+      spEntityId: body.spEntityId as string,
+      acsUrl: body.acsUrl as string,
+      binding: body.binding as 'redirect' | 'post' | undefined,
+      nameIdFormat: body.nameIdFormat as 'unspecified' | 'emailAddress' | 'persistent' | 'transient' | undefined,
+      signAuthnRequest: body.signAuthnRequest as boolean | undefined,
+      sloUrl: body.sloUrl as string | undefined,
+      spPrivateKey: body.spPrivateKey as string | undefined,
+      spCertificate: body.spCertificate as string | undefined,
+      attributeMapping: body.attributeMapping as Record<string, string> | undefined,
+    });
+    jsonResponse(res, 201, { success: true, data: provider.toJSON() });
   }
 
   async updateSamlProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const body = req.body as Record<string, unknown>;
-      const provider = await manageSamlUseCase.update(providerId, {
-        name: body.name as string | undefined,
-        entityId: body.entityId as string | undefined,
-        ssoUrl: body.ssoUrl as string | undefined,
-        sloUrl: body.sloUrl as string | undefined,
-        certificate: body.certificate as string | undefined,
-        spEntityId: body.spEntityId as string | undefined,
-        acsUrl: body.acsUrl as string | undefined,
-        binding: body.binding as 'redirect' | 'post' | undefined,
-        nameIdFormat: body.nameIdFormat as 'unspecified' | 'emailAddress' | 'persistent' | 'transient' | undefined,
-        signAuthnRequest: body.signAuthnRequest as boolean | undefined,
-      });
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const body = req.body as Record<string, unknown>;
+    const provider = await manageSamlUseCase.update(providerId, {
+      name: body.name as string | undefined,
+      entityId: body.entityId as string | undefined,
+      ssoUrl: body.ssoUrl as string | undefined,
+      sloUrl: body.sloUrl as string | undefined,
+      certificate: body.certificate as string | undefined,
+      spEntityId: body.spEntityId as string | undefined,
+      acsUrl: body.acsUrl as string | undefined,
+      binding: body.binding as 'redirect' | 'post' | undefined,
+      nameIdFormat: body.nameIdFormat as 'unspecified' | 'emailAddress' | 'persistent' | 'transient' | undefined,
+      signAuthnRequest: body.signAuthnRequest as boolean | undefined,
+    });
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   async getSamlProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const provider = await manageSamlUseCase.getById(providerId);
-      if (!provider) {
-        jsonResponse(res, 404, { success: false, message: 'SAML provider not found' });
-        return;
-      }
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      logCaughtError('Error getting SAML provider:', error);
-      jsonResponse(res, 500, { success: false, message: 'Failed to get SAML provider' });
+    const { providerId } = req.params;
+    const provider = await manageSamlUseCase.getById(providerId);
+    if (!provider) {
+      jsonResponse(res, 404, { success: false, message: 'SAML provider not found' });
+      return;
     }
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   async deleteSamlProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      await manageSamlUseCase.delete(providerId);
-      jsonResponse(res, 200, { success: true, message: 'SAML provider deleted' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    await manageSamlUseCase.delete(providerId);
+    jsonResponse(res, 200, { success: true, message: 'SAML provider deleted' });
   }
 
   async activateSamlProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const provider = await manageSamlUseCase.activate(providerId);
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const provider = await manageSamlUseCase.activate(providerId);
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   async deactivateSamlProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const provider = await manageSamlUseCase.deactivate(providerId);
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const provider = await manageSamlUseCase.deactivate(providerId);
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   // ── OIDC Config CRUD ──────────────────────────────────────────
 
   async createOidcProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
-      if (!organizationId) {
-        jsonResponse(res, 401, { success: false, message: 'Authentication required' });
-        return;
-      }
-      const body = req.body as Record<string, unknown>;
-      const provider = await manageOidcUseCase.create({
-        organizationId,
-        name: body.name as string,
-        issuerUrl: body.issuerUrl as string,
-        clientId: body.clientId as string,
-        clientSecret: body.clientSecret as string,
-        scopes: body.scopes as string[] | undefined,
-        redirectUri: body.redirectUri as string,
-        usePkce: body.usePkce as boolean | undefined,
-        useDiscovery: body.useDiscovery as boolean | undefined,
-        authorizationEndpoint: body.authorizationEndpoint as string | undefined,
-        tokenEndpoint: body.tokenEndpoint as string | undefined,
-        userinfoEndpoint: body.userinfoEndpoint as string | undefined,
-        jwksUri: body.jwksUri as string | undefined,
-        claimMapping: body.claimMapping as Record<string, string> | undefined,
-      });
-      jsonResponse(res, 201, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
+    if (!organizationId) {
+      jsonResponse(res, 401, { success: false, message: 'Authentication required' });
+      return;
     }
+    const body = req.body as Record<string, unknown>;
+    const provider = await manageOidcUseCase.create({
+      organizationId,
+      name: body.name as string,
+      issuerUrl: body.issuerUrl as string,
+      clientId: body.clientId as string,
+      clientSecret: body.clientSecret as string,
+      scopes: body.scopes as string[] | undefined,
+      redirectUri: body.redirectUri as string,
+      usePkce: body.usePkce as boolean | undefined,
+      useDiscovery: body.useDiscovery as boolean | undefined,
+      authorizationEndpoint: body.authorizationEndpoint as string | undefined,
+      tokenEndpoint: body.tokenEndpoint as string | undefined,
+      userinfoEndpoint: body.userinfoEndpoint as string | undefined,
+      jwksUri: body.jwksUri as string | undefined,
+      claimMapping: body.claimMapping as Record<string, string> | undefined,
+    });
+    jsonResponse(res, 201, { success: true, data: provider.toJSON() });
   }
 
   async updateOidcProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const body = req.body as Record<string, unknown>;
-      const provider = await manageOidcUseCase.update(providerId, {
-        name: body.name as string | undefined,
-        issuerUrl: body.issuerUrl as string | undefined,
-        clientId: body.clientId as string | undefined,
-        clientSecret: body.clientSecret as string | undefined,
-        scopes: body.scopes as string[] | undefined,
-        redirectUri: body.redirectUri as string | undefined,
-        usePkce: body.usePkce as boolean | undefined,
-        useDiscovery: body.useDiscovery as boolean | undefined,
-        authorizationEndpoint: body.authorizationEndpoint as string | undefined,
-        tokenEndpoint: body.tokenEndpoint as string | undefined,
-        userinfoEndpoint: body.userinfoEndpoint as string | undefined,
-        jwksUri: body.jwksUri as string | undefined,
-      });
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const body = req.body as Record<string, unknown>;
+    const provider = await manageOidcUseCase.update(providerId, {
+      name: body.name as string | undefined,
+      issuerUrl: body.issuerUrl as string | undefined,
+      clientId: body.clientId as string | undefined,
+      clientSecret: body.clientSecret as string | undefined,
+      scopes: body.scopes as string[] | undefined,
+      redirectUri: body.redirectUri as string | undefined,
+      usePkce: body.usePkce as boolean | undefined,
+      useDiscovery: body.useDiscovery as boolean | undefined,
+      authorizationEndpoint: body.authorizationEndpoint as string | undefined,
+      tokenEndpoint: body.tokenEndpoint as string | undefined,
+      userinfoEndpoint: body.userinfoEndpoint as string | undefined,
+      jwksUri: body.jwksUri as string | undefined,
+    });
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   async getOidcProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const provider = await manageOidcUseCase.getById(providerId);
-      if (!provider) {
-        jsonResponse(res, 404, { success: false, message: 'OIDC provider not found' });
-        return;
-      }
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      logCaughtError('Error getting OIDC provider:', error);
-      jsonResponse(res, 500, { success: false, message: 'Failed to get OIDC provider' });
+    const { providerId } = req.params;
+    const provider = await manageOidcUseCase.getById(providerId);
+    if (!provider) {
+      jsonResponse(res, 404, { success: false, message: 'OIDC provider not found' });
+      return;
     }
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   async deleteOidcProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      await manageOidcUseCase.delete(providerId);
-      jsonResponse(res, 200, { success: true, message: 'OIDC provider deleted' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    await manageOidcUseCase.delete(providerId);
+    jsonResponse(res, 200, { success: true, message: 'OIDC provider deleted' });
   }
 
   async activateOidcProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const provider = await manageOidcUseCase.activate(providerId);
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const provider = await manageOidcUseCase.activate(providerId);
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   async deactivateOidcProvider(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const provider = await manageOidcUseCase.deactivate(providerId);
-      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const provider = await manageOidcUseCase.deactivate(providerId);
+    jsonResponse(res, 200, { success: true, data: provider.toJSON() });
   }
 
   // ── SSO Login Flows (public) ──────────────────────────────────
 
   async initiateSamlLogin(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const result = await ssoLoginUseCase.initiateSamlAsync(providerId);
-      jsonResponse(res, 200, { success: true, redirectUrl: result.redirectUrl, requestId: result.requestId });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const result = await ssoLoginUseCase.initiateSamlAsync(providerId);
+    jsonResponse(res, 200, { success: true, redirectUrl: result.redirectUrl, requestId: result.requestId });
   }
 
   async samlCallback(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const body = req.body as Record<string, unknown>;
-      const samlResponse = (body.SAMLResponse as string) || (req.query.SAMLResponse as string);
-      if (!samlResponse) {
-        jsonResponse(res, 400, { success: false, message: 'SAMLResponse is required' });
-        return;
-      }
-      const result = await ssoLoginUseCase.handleSamlCallback(providerId, samlResponse, req.ip);
-      jsonResponse(res, 200, { success: true, ...result });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    const { providerId } = req.params;
+    const body = req.body as Record<string, unknown>;
+    const samlResponse = (body.SAMLResponse as string) || (req.query.SAMLResponse as string);
+    if (!samlResponse) {
+      jsonResponse(res, 400, { success: false, message: 'SAMLResponse is required' });
+      return;
     }
+    const result = await ssoLoginUseCase.handleSamlCallback(providerId, samlResponse, req.ip);
+    jsonResponse(res, 200, { success: true, ...result });
   }
 
   async initiateOidcLogin(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const result = await ssoLoginUseCase.initiateOidc(providerId);
-      jsonResponse(res, 200, { success: true, authUrl: result.authUrl, state: result.state });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { providerId } = req.params;
+    const result = await ssoLoginUseCase.initiateOidc(providerId);
+    jsonResponse(res, 200, { success: true, authUrl: result.authUrl, state: result.state });
   }
 
   async oidcCallback(req: HttpRequest, res: HttpResponse) {
-    try {
-      const { providerId } = req.params;
-      const body = req.body as Record<string, unknown>;
-      const code = (body.code as string) || (req.query.code as string);
-      const codeVerifier = body.codeVerifier as string | undefined;
-      if (!code) {
-        jsonResponse(res, 400, { success: false, message: 'Authorization code is required' });
-        return;
-      }
-      const result = await ssoLoginUseCase.handleOidcCallback(providerId, code, codeVerifier, req.ip);
-      jsonResponse(res, 200, { success: true, ...result });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    const { providerId } = req.params;
+    const body = req.body as Record<string, unknown>;
+    const code = (body.code as string) || (req.query.code as string);
+    const codeVerifier = body.codeVerifier as string | undefined;
+    if (!code) {
+      jsonResponse(res, 400, { success: false, message: 'Authorization code is required' });
+      return;
     }
+    const result = await ssoLoginUseCase.handleOidcCallback(providerId, code, codeVerifier, req.ip);
+    jsonResponse(res, 200, { success: true, ...result });
   }
 }
 

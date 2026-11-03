@@ -5,7 +5,6 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { CalculateShippingRatesCommand, ShippingAddress, OrderDetails } from '../../application/useCases/CalculateShippingRates';
 import { GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
 import {
@@ -336,13 +335,8 @@ export const estimateDelivery = async (
   req: HttpRequest<Record<string, string>, unknown, EstimateDeliveryBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const result = await estimateDeliveryWindowUseCase.execute(req.body);
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error: unknown) {
-    const status = getErrorStatusCode(error);
-    jsonResponse(res, status, { success: false, message: getErrorMessage(error) });
-  }
+  const result = await estimateDeliveryWindowUseCase.execute(req.body);
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 interface CalculateRatesBody {
@@ -471,12 +465,8 @@ export const getSurchargeById = async (req: HttpRequest, res: HttpResponse): Pro
 };
 
 export const createSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const surcharge = await manageShippingConfigurationUseCase.createSurcharge(req.body as CreateShippingSurchargeInput);
-    jsonResponse(res, 201, { success: true, data: surcharge });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  const surcharge = await manageShippingConfigurationUseCase.createSurcharge(req.body as CreateShippingSurchargeInput);
+  jsonResponse(res, 201, { success: true, data: surcharge });
 };
 
 export const updateSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

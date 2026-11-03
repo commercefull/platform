@@ -9,8 +9,6 @@ import {
   triggerAutomationRuleUseCase,
   listExecutionLogsUseCase,
 } from '../../application/useCases/wired';
-import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
-import { logCaughtError } from '../../../../libs/errors';
 
 interface CreateRuleBody {
   name: string;
@@ -66,35 +64,15 @@ class AutomationController {
   }
 
   async getRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
-    try {
-      const rule = await getAutomationRuleUseCase.execute(req.params.ruleId);
-      jsonResponse(res, 200, { success: true, data: rule.toJSON() });
-    } catch (error) {
-      if (error instanceof AutomationRuleNotFoundError) {
-        jsonResponse(res, 404, { success: false, error: error.message });
-      } else {
-        jsonResponse(res, 500, { success: false, error: 'Internal error' });
-      }
-    }
+    const rule = await getAutomationRuleUseCase.execute(req.params.ruleId);
+    jsonResponse(res, 200, { success: true, data: rule.toJSON() });
   }
 
-  async createRule(
-    req: HttpRequest<Record<string, never>, Record<string, never>, CreateRuleBody>,
-    res: HttpResponse,
-  ): Promise<void> {
-    try {
-      const fallbackUserId = (req.user as { id?: string })?.id || '';
-      const payload = normalizeCreatePayload(req.body, fallbackUserId);
-      const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
-      jsonResponse(res, 201, { success: true, data: rule.toJSON() });
-    } catch (error) {
-      logCaughtError('Automation createRule error:', error);
-      if (error instanceof InvalidAutomationRuleError) {
-        jsonResponse(res, 400, { success: false, error: error.message });
-      } else {
-        jsonResponse(res, 500, { success: false, error: 'Internal error' });
-      }
-    }
+  async createRule(req: HttpRequest<Record<string, never>, Record<string, never>, CreateRuleBody>, res: HttpResponse): Promise<void> {
+    const fallbackUserId = (req.user as { id?: string })?.id || '';
+    const payload = normalizeCreatePayload(req.body, fallbackUserId);
+    const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
+    jsonResponse(res, 201, { success: true, data: rule.toJSON() });
   }
 
   async updateRule(
@@ -115,48 +93,24 @@ class AutomationController {
     >,
     res: HttpResponse,
   ): Promise<void> {
-    try {
-      const rule = await updateAutomationRuleUseCase.execute(
-        req.params.ruleId,
-        req.body as Parameters<typeof updateAutomationRuleUseCase.execute>[1],
-      );
-      jsonResponse(res, 200, { success: true, data: rule.toJSON() });
-    } catch (error) {
-      if (error instanceof AutomationRuleNotFoundError) {
-        jsonResponse(res, 404, { success: false, error: error.message });
-      } else {
-        jsonResponse(res, 500, { success: false, error: 'Internal error' });
-      }
-    }
+    const rule = await updateAutomationRuleUseCase.execute(
+      req.params.ruleId,
+      req.body as Parameters<typeof updateAutomationRuleUseCase.execute>[1],
+    );
+    jsonResponse(res, 200, { success: true, data: rule.toJSON() });
   }
 
   async deleteRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
-    try {
-      await deleteAutomationRuleUseCase.execute(req.params.ruleId);
-      jsonResponse(res, 200, { success: true });
-    } catch (error) {
-      if (error instanceof AutomationRuleNotFoundError) {
-        jsonResponse(res, 404, { success: false, error: error.message });
-      } else {
-        jsonResponse(res, 500, { success: false, error: 'Internal error' });
-      }
-    }
+    await deleteAutomationRuleUseCase.execute(req.params.ruleId);
+    jsonResponse(res, 200, { success: true });
   }
 
   async triggerRule(
     req: HttpRequest<{ ruleId: string }, Record<string, never>, { context?: Record<string, unknown> }>,
     res: HttpResponse,
   ): Promise<void> {
-    try {
-      const result = await triggerAutomationRuleUseCase.execute(req.params.ruleId, req.body?.context);
-      jsonResponse(res, 200, { success: true, data: result });
-    } catch (error) {
-      if (error instanceof AutomationRuleNotFoundError) {
-        jsonResponse(res, 404, { success: false, error: error.message });
-      } else {
-        jsonResponse(res, 500, { success: false, error: (error as Error).message });
-      }
-    }
+    const result = await triggerAutomationRuleUseCase.execute(req.params.ruleId, req.body?.context);
+    jsonResponse(res, 200, { success: true, data: result });
   }
 
   async getExecutionLogs(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {

@@ -4,7 +4,7 @@ import { jsonResponse } from 'libs/apiResponse';
  * Handles media upload and processing requests
  */
 
-import { AppError, logCaughtError} from '../../../../libs/errors';
+import { AppError, logCaughtError } from '../../../../libs/errors';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import multer from 'multer';
 import { processImageUseCase, downloadImageUseCase } from '../../application/wired';
@@ -115,92 +115,69 @@ export class MediaController {
    * Upload and process multiple images
    */
   uploadImages = async (req: HttpRequest<Record<string, string>, unknown, MediaUploadBody>, res: HttpResponse) => {
-    try {
-      if (!req.files || !Array.isArray(req.files)) {
-        return jsonResponse(res, 400, {
-          success: false,
-          message: 'No image files provided',
-        });
-      }
-
-      const body = req.body;
-      const results = await Promise.all(
-        req.files.map(async (file: Express.Multer.File) => {
-          return this.processImageUseCase.execute({
-            file: {
-              buffer: file.buffer,
-              originalname: file.originalname,
-              mimetype: file.mimetype,
-              size: file.size,
-            },
-            altText: body.altText,
-            title: body.title,
-            description: body.description,
-            tags: body.tags ? JSON.parse(body.tags) : undefined,
-            metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
-          });
-        }),
-      );
-
-      jsonResponse(res, 200, {
-        success: true,
-        data: results.map(result => ({
-          media: result.media.toJSON(),
-          urls: result.urls,
-        })),
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      jsonResponse(res, 500, {
+    if (!req.files || !Array.isArray(req.files)) {
+      return jsonResponse(res, 400, {
         success: false,
-        message: 'Failed to process images',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        message: 'No image files provided',
       });
     }
+
+    const body = req.body;
+    const results = await Promise.all(
+      req.files.map(async (file: Express.Multer.File) => {
+        return this.processImageUseCase.execute({
+          file: {
+            buffer: file.buffer,
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size,
+          },
+          altText: body.altText,
+          title: body.title,
+          description: body.description,
+          tags: body.tags ? JSON.parse(body.tags) : undefined,
+          metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
+        });
+      }),
+    );
+
+    jsonResponse(res, 200, {
+      success: true,
+      data: results.map(result => ({
+        media: result.media.toJSON(),
+        urls: result.urls,
+      })),
+    });
   };
 
   /**
    * Download a remote image by URL, process it, and store it
    */
   downloadImage = async (req: HttpRequest<Record<string, string>, unknown, MediaDownloadBody>, res: HttpResponse) => {
-    try {
-      const body = req.body;
+    const body = req.body;
 
-      if (!body.url) {
-        return jsonResponse(res, 400, {
-          success: false,
-          message: 'No URL provided',
-        });
-      }
-
-      const result = await this.downloadImageUseCase.execute({
-        url: body.url,
-        altText: body.altText,
-        title: body.title,
-        description: body.description,
-        tags: body.tags ? JSON.parse(body.tags) : undefined,
-        metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
-      });
-
-      jsonResponse(res, 200, {
-        success: true,
-        data: {
-          media: result.media.toJSON(),
-          urls: result.urls,
-        },
-      });
-    } catch (error) {
-      logCaughtError('Error:', error);
-
-      const statusCode = (error as { statusCode?: number }).statusCode || 500;
-      const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      jsonResponse(res, statusCode, {
+    if (!body.url) {
+      return jsonResponse(res, 400, {
         success: false,
-        message: 'Failed to download image',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        message: 'No URL provided',
       });
     }
+
+    const result = await this.downloadImageUseCase.execute({
+      url: body.url,
+      altText: body.altText,
+      title: body.title,
+      description: body.description,
+      tags: body.tags ? JSON.parse(body.tags) : undefined,
+      metadata: body.metadata ? JSON.parse(body.metadata) : undefined,
+    });
+
+    jsonResponse(res, 200, {
+      success: true,
+      data: {
+        media: result.media.toJSON(),
+        urls: result.urls,
+      },
+    });
   };
 }

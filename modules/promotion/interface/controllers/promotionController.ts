@@ -1,16 +1,7 @@
-import { jsonResponse } from 'libs/apiResponse';
-import { toMinorUnits } from '../../../../libs/money';
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import {
-  CreatePromotionInput,
-  PromotionScope,
-  PromotionStatus,
-  UpdatePromotionInput,
-  createPromotionRecordUseCase,
-  changePromotionStatusUseCase,
-  managePromotionsUseCase,
-} from '../../application/wired';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import {jsonResponse} from 'libs/apiResponse';
+import {toMinorUnits} from '../../../../libs/money';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {CreatePromotionInput, PromotionScope, PromotionStatus, UpdatePromotionInput, createPromotionRecordUseCase, changePromotionStatusUseCase, managePromotionsUseCase} from '../../application/wired';
 
 interface ApplyPromotionBody {
   cartId: string;
@@ -141,17 +132,13 @@ export const createPromotion = async (
   req: HttpRequest<Record<string, string>, unknown, CreatePromotionInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const promotion = await createPromotionRecordUseCase.execute(req.body);
+  const promotion = await createPromotionRecordUseCase.execute(req.body);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: promotion,
-      message: 'Promotion created successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: promotion,
+    message: 'Promotion created successfully',
+  });
 };
 
 /**
@@ -350,17 +337,13 @@ const _validatePromotionForCart = async (
 export const activatePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedPromotion = await changePromotionStatusUseCase.activate(id);
+  const updatedPromotion = await changePromotionStatusUseCase.activate(id);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedPromotion,
-      message: 'Promotion activated successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedPromotion,
+    message: 'Promotion activated successfully',
+  });
 };
 
 /**
@@ -369,15 +352,11 @@ export const activatePromotion = async (req: HttpRequest, res: HttpResponse): Pr
 export const pausePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedPromotion = await changePromotionStatusUseCase.pause(id);
+  const updatedPromotion = await changePromotionStatusUseCase.pause(id);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedPromotion,
-      message: 'Promotion paused successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedPromotion,
+    message: 'Promotion paused successfully',
+  });
 };

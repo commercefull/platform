@@ -1,40 +1,16 @@
-import { jsonResponse } from 'libs/apiResponse';
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../../libs/errors';
-import {
-  createCategoryUseCase,
-  updateCategoryUseCase,
-  deleteCategoryUseCase,
-  moveCategoryUseCase,
-  createNavigationUseCase,
-  updateNavigationUseCase,
-  addNavigationItemUseCase,
-  assignPageToCategoryUseCase,
-  removePageFromCategoryUseCase,
-  setPrimaryCategoryUseCase,
-  manageContentUseCase,
-} from '../../../application/useCases/wired';
-import { CreateCategoryCommand } from '../../../application/useCases/category/CreateCategory';
-import { UpdateCategoryCommand } from '../../../application/useCases/category/UpdateCategory';
-import { MoveCategoryCommand } from '../../../application/useCases/category/MoveCategory';
-import { CreateNavigationCommand } from '../../../application/useCases/navigation/CreateNavigation';
-import { UpdateNavigationCommand } from '../../../application/useCases/navigation/UpdateNavigation';
-import { AddNavigationItemCommand } from '../../../application/useCases/navigation/AddNavigationItem';
-import { AssignPageToCategoryCommand } from '../../../application/useCases/categorization/AssignPageToCategory';
-import { RemovePageFromCategoryCommand } from '../../../application/useCases/categorization/RemovePageFromCategory';
-import { SetPrimaryCategoryCommand } from '../../../application/useCases/categorization/SetPrimaryCategory';
-import type {
-  CreateCategoryBody,
-  UpdateCategoryBody,
-  MoveCategoryBody,
-  CreateNavigationBody,
-  UpdateNavigationBody,
-  AddNavigationItemBody,
-  UpdateNavigationItemBody,
-  ReorderNavigationItemsBody,
-  AssignCategoryBody,
-  SetPrimaryCategoryBody,
-} from './types';
+import {jsonResponse} from 'libs/apiResponse';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {createCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, moveCategoryUseCase, createNavigationUseCase, updateNavigationUseCase, addNavigationItemUseCase, assignPageToCategoryUseCase, removePageFromCategoryUseCase, setPrimaryCategoryUseCase, manageContentUseCase} from '../../../application/useCases/wired';
+import {CreateCategoryCommand} from '../../../application/useCases/category/CreateCategory';
+import {UpdateCategoryCommand} from '../../../application/useCases/category/UpdateCategory';
+import {MoveCategoryCommand} from '../../../application/useCases/category/MoveCategory';
+import {CreateNavigationCommand} from '../../../application/useCases/navigation/CreateNavigation';
+import {UpdateNavigationCommand} from '../../../application/useCases/navigation/UpdateNavigation';
+import {AddNavigationItemCommand} from '../../../application/useCases/navigation/AddNavigationItem';
+import {AssignPageToCategoryCommand} from '../../../application/useCases/categorization/AssignPageToCategory';
+import {RemovePageFromCategoryCommand} from '../../../application/useCases/categorization/RemovePageFromCategory';
+import {SetPrimaryCategoryCommand} from '../../../application/useCases/categorization/SetPrimaryCategory';
+import type {CreateCategoryBody, UpdateCategoryBody, MoveCategoryBody, CreateNavigationBody, UpdateNavigationBody, AddNavigationItemBody, UpdateNavigationItemBody, ReorderNavigationItemsBody, AssignCategoryBody, SetPrimaryCategoryBody} from './types';
 
 /** Category, navigation, and page-categorization handlers. */
 export class CategoryNavHandlers {
@@ -61,28 +37,24 @@ export class CategoryNavHandlers {
   createCategory = async (req: HttpRequest<Record<string, string>, unknown, CreateCategoryBody>, res: HttpResponse): Promise<void> => {
     const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
-    try {
-      const result = await createCategoryUseCase.execute(
-        new CreateCategoryCommand({
-          name: name,
-          slug: slug,
-          parentId: parentId,
-          description: description,
-          featuredImage: featuredImage,
-          metaTitle: metaTitle,
-          metaDescription: metaDescription,
-          sortOrder: sortOrder,
-          isActive: isActive,
-        }),
-      );
-      jsonResponse(res, 201, {
-        success: true,
-        data: { ...result, contentCategoryId: result.id },
-        message: 'Category created successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await createCategoryUseCase.execute(
+      new CreateCategoryCommand({
+        name: name,
+        slug: slug,
+        parentId: parentId,
+        description: description,
+        featuredImage: featuredImage,
+        metaTitle: metaTitle,
+        metaDescription: metaDescription,
+        sortOrder: sortOrder,
+        isActive: isActive,
+      }),
+    );
+    jsonResponse(res, 201, {
+      success: true,
+      data: { ...result, contentCategoryId: result.id },
+      message: 'Category created successfully',
+    });
   };
 
   getCategoryById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -99,36 +71,25 @@ export class CategoryNavHandlers {
     const { id } = req.params;
     const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
-    try {
-      const result = await updateCategoryUseCase.execute(
-        new UpdateCategoryCommand(id, { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive }),
-      );
-      jsonResponse(res, 200, { success: true, data: result, message: 'Category updated successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await updateCategoryUseCase.execute(
+      new UpdateCategoryCommand(id, { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive }),
+    );
+    jsonResponse(res, 200, { success: true, data: result, message: 'Category updated successfully' });
   };
 
   deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    try {
-      await deleteCategoryUseCase.execute(id);
-      jsonResponse(res, 200, { success: true, message: 'Category deleted successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+
+    await deleteCategoryUseCase.execute(id);
+    jsonResponse(res, 200, { success: true, message: 'Category deleted successfully' });
   };
 
   moveCategory = async (req: HttpRequest<Record<string, string>, unknown, MoveCategoryBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { newParentId } = req.body;
 
-    try {
-      const result = await moveCategoryUseCase.execute(new MoveCategoryCommand(id, newParentId ?? null));
-      jsonResponse(res, 200, { success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category moved successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await moveCategoryUseCase.execute(new MoveCategoryCommand(id, newParentId ?? null));
+    jsonResponse(res, 200, { success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category moved successfully' });
   };
 
   // Navigation Handlers
@@ -142,16 +103,12 @@ export class CategoryNavHandlers {
   createNavigation = async (req: HttpRequest<Record<string, string>, unknown, CreateNavigationBody>, res: HttpResponse): Promise<void> => {
     const { name, slug, description, location, isActive } = req.body;
 
-    try {
-      const result = await createNavigationUseCase.execute(new CreateNavigationCommand({ name, slug, description, location, isActive }));
-      jsonResponse(res, 201, {
-        success: true,
-        data: { ...result, contentNavigationId: result.id },
-        message: 'Navigation created successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await createNavigationUseCase.execute(new CreateNavigationCommand({ name, slug, description, location, isActive }));
+    jsonResponse(res, 201, {
+      success: true,
+      data: { ...result, contentNavigationId: result.id },
+      message: 'Navigation created successfully',
+    });
   };
 
   getNavigationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -180,14 +137,8 @@ export class CategoryNavHandlers {
     const { id } = req.params;
     const { name, slug, description, location, isActive } = req.body;
 
-    try {
-      const result = await updateNavigationUseCase.execute(
-        new UpdateNavigationCommand(id, { name, slug, description, location, isActive }),
-      );
-      jsonResponse(res, 200, { success: true, data: result, message: 'Navigation updated successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await updateNavigationUseCase.execute(new UpdateNavigationCommand(id, { name, slug, description, location, isActive }));
+    jsonResponse(res, 200, { success: true, data: result, message: 'Navigation updated successfully' });
   };
 
   deleteNavigation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -217,33 +168,29 @@ export class CategoryNavHandlers {
       conditions,
     } = req.body;
 
-    try {
-      const result = await addNavigationItemUseCase.execute(
-        new AddNavigationItemCommand({
-          navigationId: navigationId,
-          title: title,
-          type: type as 'url' | 'page' | 'category' | 'product' | 'blog',
-          parentId: parentId,
-          url: url,
-          contentPageId: contentPageId,
-          targetId: targetId,
-          targetSlug: targetSlug,
-          icon: icon,
-          cssClasses: cssClasses,
-          openInNewTab: openInNewTab,
-          isActive: isActive,
-          sortOrder: sortOrder,
-          conditions: conditions,
-        }),
-      );
-      jsonResponse(res, 201, {
-        success: true,
-        data: { ...result, contentNavigationItemId: result.id },
-        message: 'Navigation item added successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await addNavigationItemUseCase.execute(
+      new AddNavigationItemCommand({
+        navigationId: navigationId,
+        title: title,
+        type: type as 'url' | 'page' | 'category' | 'product' | 'blog',
+        parentId: parentId,
+        url: url,
+        contentPageId: contentPageId,
+        targetId: targetId,
+        targetSlug: targetSlug,
+        icon: icon,
+        cssClasses: cssClasses,
+        openInNewTab: openInNewTab,
+        isActive: isActive,
+        sortOrder: sortOrder,
+        conditions: conditions,
+      }),
+    );
+    jsonResponse(res, 201, {
+      success: true,
+      data: { ...result, contentNavigationItemId: result.id },
+      message: 'Navigation item added successfully',
+    });
   };
 
   updateNavigationItem = async (
@@ -310,22 +257,15 @@ export class CategoryNavHandlers {
     const { pageId } = req.params;
     const { categoryId, isPrimary } = req.body;
 
-    try {
-      const result = await assignPageToCategoryUseCase.execute(new AssignPageToCategoryCommand(pageId, categoryId, isPrimary));
-      jsonResponse(res, 201, { success: true, data: result, message: 'Page assigned to category successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await assignPageToCategoryUseCase.execute(new AssignPageToCategoryCommand(pageId, categoryId, isPrimary));
+    jsonResponse(res, 201, { success: true, data: result, message: 'Page assigned to category successfully' });
   };
 
   removePageFromCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, categoryId } = req.params;
-    try {
-      await removePageFromCategoryUseCase.execute(new RemovePageFromCategoryCommand(pageId, categoryId));
-      jsonResponse(res, 200, { success: true, message: 'Page removed from category successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+
+    await removePageFromCategoryUseCase.execute(new RemovePageFromCategoryCommand(pageId, categoryId));
+    jsonResponse(res, 200, { success: true, message: 'Page removed from category successfully' });
   };
 
   setPrimaryCategory = async (
@@ -335,12 +275,8 @@ export class CategoryNavHandlers {
     const { pageId } = req.params;
     const { categorizationId } = req.body;
 
-    try {
-      const result = await setPrimaryCategoryUseCase.execute(new SetPrimaryCategoryCommand(pageId, categorizationId));
-      jsonResponse(res, 200, { success: true, data: result, message: 'Primary category set successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await setPrimaryCategoryUseCase.execute(new SetPrimaryCategoryCommand(pageId, categorizationId));
+    jsonResponse(res, 200, { success: true, data: result, message: 'Primary category set successfully' });
   };
 
   getPagesByCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

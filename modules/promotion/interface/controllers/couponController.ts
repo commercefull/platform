@@ -1,14 +1,6 @@
-import { jsonResponse } from 'libs/apiResponse';
-import type { HttpRequest, HttpResponse } from 'libs/http';
-import {
-  type CreateCouponInput,
-  type UpdateCouponInput,
-  createCouponUseCase,
-  validateCouponCodeUseCase,
-  calculateCouponDiscountUseCase,
-  manageCouponsUseCase,
-} from '../../application/wired';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import {jsonResponse} from 'libs/apiResponse';
+import type {HttpRequest, HttpResponse} from 'libs/http';
+import {type CreateCouponInput, type UpdateCouponInput, createCouponUseCase, validateCouponCodeUseCase, calculateCouponDiscountUseCase, manageCouponsUseCase} from '../../application/wired';
 
 interface ValidateCouponBody {
   code: string;
@@ -101,17 +93,13 @@ export const createCoupon = async (
     couponData.type = typeMapping[couponData.type] as unknown as CreateCouponInput['type'];
   }
 
-  try {
-    const coupon = await createCouponUseCase.execute(couponData);
+  const coupon = await createCouponUseCase.execute(couponData);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: coupon,
-      message: 'Coupon created successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: coupon,
+    message: 'Coupon created successfully',
+  });
 };
 
 /**
@@ -178,29 +166,25 @@ export const validateCoupon = async (
 ): Promise<void> => {
   const { code, orderTotalCents, customerId, organizationId } = req.body;
 
-  try {
-    const result = await validateCouponCodeUseCase.execute({
-      code,
-      orderTotalCents,
-      customerId,
-      organizationId,
-    });
+  const result = await validateCouponCodeUseCase.execute({
+    code,
+    orderTotalCents,
+    customerId,
+    organizationId,
+  });
 
-    if (!result.valid) {
-      jsonResponse(res, 400, {
-        success: false,
-        data: result,
-      });
-      return;
-    }
-
-    jsonResponse(res, 200, {
-      success: true,
+  if (!result.valid) {
+    jsonResponse(res, 400, {
+      success: false,
       data: result,
     });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    return;
   }
+
+  jsonResponse(res, 200, {
+    success: true,
+    data: result,
+  });
 };
 
 /**
@@ -241,14 +225,10 @@ export const calculateCouponDiscount = async (
 ): Promise<void> => {
   const { code, orderTotalCents, items: _items, organizationId } = req.body;
 
-  try {
-    const result = await calculateCouponDiscountUseCase.execute({ code, orderTotalCents, organizationId });
+  const result = await calculateCouponDiscountUseCase.execute({ code, orderTotalCents, organizationId });
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: result,
+  });
 };

@@ -1,6 +1,6 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { AppError, logCaughtError} from '../../../../libs/errors';
+import { AppError, logCaughtError } from '../../../../libs/errors';
 import { ManageCompanyUseCase, ManageB2BUserUseCase, ManageQuoteUseCase, ManageApprovalWorkflowUseCase } from '../../application/useCases';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
@@ -34,11 +34,7 @@ export class B2BController {
 
   /** Run a handler producing response `data`, translating domain errors to HTTP. */
   private async respond(res: HttpResponse, fn: () => Promise<unknown>, status = 200): Promise<void> {
-    try {
-      jsonResponse(res, status, { success: true, data: await fn() });
-    } catch (error) {
-      this.handleError(res, error);
-    }
+    jsonResponse(res, status, { success: true, data: await fn() });
   }
 
   private handleError(res: HttpResponse, error: unknown): void {
@@ -77,10 +73,7 @@ export class B2BController {
   async updateCompany(req: HttpRequest<{ companyId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
       (
-        await this.companyUseCase.updateProfile(
-          req.params.companyId,
-          req.body as Parameters<typeof this.companyUseCase.updateProfile>[1],
-        )
+        await this.companyUseCase.updateProfile(req.params.companyId, req.body as Parameters<typeof this.companyUseCase.updateProfile>[1])
       ).toJSON(),
     );
   }
@@ -88,10 +81,7 @@ export class B2BController {
   async setPaymentTerms(req: HttpRequest<{ companyId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
       (
-        await this.companyUseCase.setPaymentTerms(
-          req.params.companyId,
-          (req.body as Record<string, unknown>).paymentTerms as PaymentTerms,
-        )
+        await this.companyUseCase.setPaymentTerms(req.params.companyId, (req.body as Record<string, unknown>).paymentTerms as PaymentTerms)
       ).toJSON(),
     );
   }
@@ -99,10 +89,7 @@ export class B2BController {
   async setCreditLimit(req: HttpRequest<{ companyId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
       (
-        await this.companyUseCase.setCreditLimit(
-          req.params.companyId,
-          (req.body as Record<string, unknown>).creditLimitCents as number,
-        )
+        await this.companyUseCase.setCreditLimit(req.params.companyId, (req.body as Record<string, unknown>).creditLimitCents as number)
       ).toJSON(),
     );
   }
@@ -175,9 +162,7 @@ export class B2BController {
 
   async setUserRole(req: HttpRequest<{ userId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
-      (
-        await this.userUseCase.setRole(req.params.userId, (req.body as Record<string, unknown>).role as B2BUserRole)
-      ).toJSON(),
+      (await this.userUseCase.setRole(req.params.userId, (req.body as Record<string, unknown>).role as B2BUserRole)).toJSON(),
     );
   }
 
@@ -194,12 +179,7 @@ export class B2BController {
 
   async updateUserProfile(req: HttpRequest<{ userId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
-      (
-        await this.userUseCase.updateProfile(
-          req.params.userId,
-          req.body as Parameters<typeof this.userUseCase.updateProfile>[1],
-        )
-      ).toJSON(),
+      (await this.userUseCase.updateProfile(req.params.userId, req.body as Parameters<typeof this.userUseCase.updateProfile>[1])).toJSON(),
     );
   }
 
@@ -241,12 +221,7 @@ export class B2BController {
 
   async addQuoteLineItem(req: HttpRequest<{ quoteId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
-      (
-        await this.quoteUseCase.addLineItem(
-          req.params.quoteId,
-          req.body as Parameters<typeof this.quoteUseCase.addLineItem>[1],
-        )
-      ).toJSON(),
+      (await this.quoteUseCase.addLineItem(req.params.quoteId, req.body as Parameters<typeof this.quoteUseCase.addLineItem>[1])).toJSON(),
     );
   }
 
@@ -263,9 +238,7 @@ export class B2BController {
   }
 
   async removeQuoteLineItem(req: HttpRequest<{ quoteId: string; lineItemId: string }>, res: HttpResponse): Promise<void> {
-    await this.respond(res, async () =>
-      (await this.quoteUseCase.removeLineItem(req.params.quoteId, req.params.lineItemId)).toJSON(),
-    );
+    await this.respond(res, async () => (await this.quoteUseCase.removeLineItem(req.params.quoteId, req.params.lineItemId)).toJSON());
   }
 
   async sendQuote(req: HttpRequest<{ quoteId: string }>, res: HttpResponse): Promise<void> {
@@ -282,17 +255,13 @@ export class B2BController {
 
   async rejectQuote(req: HttpRequest<{ quoteId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
-      (
-        await this.quoteUseCase.reject(req.params.quoteId, (req.body as Record<string, unknown>).reason as string)
-      ).toJSON(),
+      (await this.quoteUseCase.reject(req.params.quoteId, (req.body as Record<string, unknown>).reason as string)).toJSON(),
     );
   }
 
   async convertQuote(req: HttpRequest<{ quoteId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
-      (
-        await this.quoteUseCase.convert(req.params.quoteId, (req.body as Record<string, unknown>).orderId as string)
-      ).toJSON(),
+      (await this.quoteUseCase.convert(req.params.quoteId, (req.body as Record<string, unknown>).orderId as string)).toJSON(),
     );
   }
 
@@ -305,10 +274,7 @@ export class B2BController {
   async setQuoteInternalNotes(req: HttpRequest<{ quoteId: string }>, res: HttpResponse): Promise<void> {
     await this.respond(res, async () =>
       (
-        await this.quoteUseCase.setInternalNotes(
-          req.params.quoteId,
-          (req.body as Record<string, unknown>).internalNotes as string,
-        )
+        await this.quoteUseCase.setInternalNotes(req.params.quoteId, (req.body as Record<string, unknown>).internalNotes as string)
       ).toJSON(),
     );
   }
