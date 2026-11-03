@@ -11,7 +11,6 @@ import { OrderItem } from '../domain/entities/OrderItem';
 import { Money } from '../domain/valueObjects/Money';
 import type { OrderFulfillment } from '../domain/repositories/OrderFulfillmentRepository';
 import type { OrderFulfillmentPackage } from '../domain/repositories/OrderFulfillmentPackageRepository';
-import type { OrderReturn } from '../domain/repositories/OrderReturnRepository';
 import type { OrderNote } from '../domain/repositories/OrderNoteRepository';
 import type { OrderPaymentRefund } from '../domain/repositories/OrderPaymentRefundRepository';
 
@@ -103,23 +102,6 @@ export function createOrderFulfillmentPackage(overrides: Partial<OrderFulfillmen
     packageNumber: 'PKG-1',
     ...overrides,
   } as OrderFulfillmentPackage;
-}
-
-export function createOrderReturn(overrides: Partial<OrderReturn> = {}): OrderReturn {
-  return {
-    orderReturnId: 'ret-1',
-    createdAt: new Date('2024-01-01T00:00:00.000Z'),
-    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
-    orderId: 'order-1',
-    returnNumber: 'RET-1',
-    status: 'requested',
-    returnType: 'refund',
-    requestedAt: new Date('2024-01-01T00:00:00.000Z'),
-    returnShippingPaid: false,
-    returnCarrier: 'custom',
-    requiresInspection: false,
-    ...overrides,
-  } as OrderReturn;
 }
 
 export function createOrderNote(overrides: Partial<OrderNote> = {}): OrderNote {

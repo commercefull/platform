@@ -1,4 +1,6 @@
 import { OrderDataRepository, OrderFulfillmentDataRepository } from '../../infrastructure';
+import { ReturnRequestRepositoryImpl } from '../../../returns/infrastructure';
+import { StorefrontReturnWriterAdapter } from '../../infrastructure/acl/StorefrontReturnWriterAdapter';
 import { ListOrdersUseCase } from './ListOrders';
 import { GetOrderUseCase } from './GetOrder';
 import { GetCustomerOrdersUseCase } from './GetCustomerOrders';
@@ -53,7 +55,10 @@ export const manageOrderItemsUseCase = new ManageOrderItemsUseCase(orderRepo);
 export const getOrderHistoryUseCase = new GetOrderHistoryUseCase(orderRepo);
 export const getOrderExplainabilityUseCase = new GetOrderExplainabilityUseCase(orderRepo, orderQueryRepo);
 
-export const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase(orderReturnRepo);
+export const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase(
+  orderReturnRepo,
+  new StorefrontReturnWriterAdapter(new ReturnRequestRepositoryImpl()),
+);
 export const trackFulfillmentPackageUseCase = new TrackFulfillmentPackageUseCase(orderFulfillmentRepo);
 export const getOrderLinesUseCase = new GetOrderLinesUseCase(orderLineExportRepo);
 import { GetStoreSalesSummaryUseCase } from './GetStoreSalesSummary';

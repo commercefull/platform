@@ -84,6 +84,7 @@ export const submitReturnRequest = async (req: HttpRequest, res: HttpResponse) =
 
   const result = await manageStorefrontReturnsUseCase.createSimple(
     orderId,
+    user.customerId,
     (reason as string) || 'other',
     (description as string) || undefined,
   );
