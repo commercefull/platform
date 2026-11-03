@@ -1,26 +1,22 @@
 /**
  * Consolidated Customer Data Repository
  *
- * Merges CustomerRepository, customerRepo, customerAddressRepo,
+ * Merges CustomerRepository, CustomerCredentialRepository, customerAddressRepo,
  * storefrontWishlistRepo into a single aggregate-aligned repository.
  *
- * Aggregate: Customer (core data, addresses, wishlist, legacy repo)
+ * Aggregate: Customer (core data, credentials, addresses, wishlist)
  */
 
 import customerRepository from './CustomerRepository';
-import { CustomerRepo } from './customerRepo';
+import customerCredentialRepo from './CustomerCredentialRepositoryImpl';
 import customerAddressRepo from './customerAddressRepo';
 import storefrontWishlistRepo from './storefrontWishlistRepo';
 
-// Re-export types for backward compatibility
-export type { Customer, CustomerAddress, CustomerGroup, CustomerGroupMembership, CustomerWishlist } from './customerRepo';
 export type { CustomerAddressCreateParams, CustomerAddressUpdateParams } from './customerAddressRepo';
-
-const customerRepoInstance = new CustomerRepo();
 
 class CustomerDataRepository {
   readonly customers = customerRepository;
-  readonly legacy = customerRepoInstance;
+  readonly credentials = customerCredentialRepo;
   readonly addresses = customerAddressRepo;
   readonly wishlist = storefrontWishlistRepo;
 }

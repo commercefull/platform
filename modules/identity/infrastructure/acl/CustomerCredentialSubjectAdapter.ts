@@ -8,18 +8,18 @@
  */
 
 import { CredentialSubjectPort, CredentialSubject, CreateCredentialSubjectData } from '../../application/ports/CredentialSubjectPort';
-import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
+import type { CustomerCredentialRepository } from '../../../customer/domain/repositories/CustomerCredentialRepository';
 import type { CustomerRepository } from '../../../customer/domain/repositories/CustomerRepository';
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../../customer/application/useCases/RegisterCustomer';
 
 export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
   constructor(
-    private readonly customerRepo: CustomerRepoType,
+    private readonly credentials: CustomerCredentialRepository,
     private readonly customers: CustomerRepository,
   ) {}
 
   async authenticate(email: string, password: string): Promise<CredentialSubject | null> {
-    const result = await this.customerRepo.authenticateCustomer({ email, password });
+    const result = await this.credentials.authenticate({ email, password });
     if (!result) return null;
     return {
       id: result.customerId,
@@ -33,7 +33,7 @@ export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
   }
 
   async findById(id: string): Promise<CredentialSubject | null> {
-    const customer = await this.customerRepo.findCustomerById(id);
+    const customer = await this.customers.findById(id);
     if (!customer) return null;
     return {
       id: customer.customerId,
@@ -48,7 +48,7 @@ export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
   }
 
   async findByEmail(email: string): Promise<CredentialSubject | null> {
-    const customer = await this.customerRepo.findCustomerByEmail(email);
+    const customer = await this.customers.findByEmail(email);
     if (!customer) return null;
     return {
       id: customer.customerId,
@@ -88,26 +88,26 @@ export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
   }
 
   async updateLoginTimestamp(id: string): Promise<void> {
-    await this.customerRepo.updateCustomerLoginTimestamp(id);
+    await this.customers.updateLastLogin(id);
   }
 
   async changePassword(id: string, newPassword: string): Promise<void> {
-    await this.customerRepo.changePassword(id, newPassword);
+    await this.credentials.changePassword(id, newPassword);
   }
 
   async createEmailVerificationToken(id: string): Promise<string> {
-    return this.customerRepo.createEmailVerificationToken(id);
+    return this.credentials.createEmailVerificationToken(id);
   }
 
   async verifyEmailVerificationToken(token: string): Promise<string | null> {
-    return this.customerRepo.verifyEmailVerificationToken(token);
+    return this.credentials.verifyEmailVerificationToken(token);
   }
 
   async createPasswordResetToken(id: string): Promise<string> {
-    return this.customerRepo.createPasswordResetToken(id);
+    return this.credentials.createPasswordResetToken(id);
   }
 
   async verifyPasswordResetToken(token: string): Promise<string | null> {
-    return this.customerRepo.verifyPasswordResetToken(token);
+    return this.credentials.verifyPasswordResetToken(token);
   }
 }

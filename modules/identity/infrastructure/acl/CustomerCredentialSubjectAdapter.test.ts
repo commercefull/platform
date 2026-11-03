@@ -1,6 +1,7 @@
 import { CustomerCredentialSubjectAdapter } from './CustomerCredentialSubjectAdapter';
-import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
+import type { CustomerCredentialRepository } from '../../../customer/domain/repositories/CustomerCredentialRepository';
 import type { CustomerRepository } from '../../../customer/domain/repositories/CustomerRepository';
+import type { CustomerRecord } from '../../../customer/domain/entities/CustomerModel';
 
 jest.mock('../../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn(), registerHandler: jest.fn() },
@@ -16,44 +17,38 @@ jest.mock('../../../../libs/db', () => ({
   withTransaction: jest.fn(async (fn: () => Promise<unknown>) => fn()),
 }));
 
-type CustomerRepo = InstanceType<typeof CustomerRepoType>;
-type RepoCustomer = NonNullable<Awaited<ReturnType<CustomerRepo['findCustomerById']>>>;
-
 describe('CustomerCredentialSubjectAdapter', () => {
   let adapter: CustomerCredentialSubjectAdapter;
-  let mockCustomerRepo: jest.Mocked<
+  let mockCredentials: jest.Mocked<
     Pick<
-      CustomerRepo,
-      | 'authenticateCustomer'
-      | 'findCustomerById'
-      | 'findCustomerByEmail'
-      | 'updateCustomerLoginTimestamp'
+      CustomerCredentialRepository,
+      | 'authenticate'
       | 'changePassword'
+      | 'createEmailVerificationToken'
+      | 'verifyEmailVerificationToken'
       | 'createPasswordResetToken'
       | 'verifyPasswordResetToken'
     >
   >;
-  let mockCustomers: jest.Mocked<Pick<CustomerRepository, 'findByEmail' | 'save' | 'updatePassword'>>;
+  let mockCustomers: jest.Mocked<Pick<CustomerRepository, 'findById' | 'findByEmail' | 'save' | 'updatePassword' | 'updateLastLogin'>>;
 
   beforeEach(() => {
-    mockCustomerRepo = {
-      authenticateCustomer: jest.fn(),
-      findCustomerById: jest.fn(),
-      findCustomerByEmail: jest.fn(),
-      updateCustomerLoginTimestamp: jest.fn(),
+    mockCredentials = {
+      authenticate: jest.fn(),
       changePassword: jest.fn(),
+      createEmailVerificationToken: jest.fn(),
+      verifyEmailVerificationToken: jest.fn(),
       createPasswordResetToken: jest.fn(),
       verifyPasswordResetToken: jest.fn(),
     };
     mockCustomers = {
+      findById: jest.fn(),
       findByEmail: jest.fn().mockResolvedValue(null),
       save: jest.fn().mockImplementation(async c => c),
       updatePassword: jest.fn().mockResolvedValue(undefined),
+      updateLastLogin: jest.fn().mockResolvedValue(undefined),
     };
-    adapter = new CustomerCredentialSubjectAdapter(
-      mockCustomerRepo as unknown as CustomerRepo,
-      mockCustomers as unknown as CustomerRepository,
-    );
+    adapter = new CustomerCredentialSubjectAdapter(mockCredentials, mockCustomers as unknown as CustomerRepository);
   });
 
   it('implements CredentialSubjectPort', () => {
@@ -68,12 +63,12 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should authenticate and map to CredentialSubject', async () => {
-    mockCustomerRepo.authenticateCustomer.mockResolvedValue({
+    mockCredentials.authenticate.mockResolvedValue({
       customerId: 'cust-1',
       email: 'test@test.com',
       firstName: 'John',
       lastName: 'Doe',
-    } as unknown as RepoCustomer);
+    } as unknown as CustomerRecord);
 
     const result = await adapter.authenticate('test@test.com', 'password');
 
@@ -85,7 +80,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should return null when authentication fails', async () => {
-    mockCustomerRepo.authenticateCustomer.mockResolvedValue(null);
+    mockCredentials.authenticate.mockResolvedValue(null);
 
     const result = await adapter.authenticate('test@test.com', 'wrong');
 
@@ -93,7 +88,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should find by id and map to CredentialSubject', async () => {
-    mockCustomerRepo.findCustomerById.mockResolvedValue({
+    mockCustomers.findById.mockResolvedValue({
       customerId: 'cust-1',
       email: 'test@test.com',
       firstName: 'John',
@@ -101,7 +96,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       isActive: true,
       isVerified: true,
       lastLoginAt: new Date('2024-01-01'),
-    } as unknown as RepoCustomer);
+    } as unknown as CustomerRecord);
 
     const result = await adapter.findById('cust-1');
 
@@ -112,7 +107,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should return null when id not found', async () => {
-    mockCustomerRepo.findCustomerById.mockResolvedValue(null);
+    mockCustomers.findById.mockResolvedValue(null);
 
     const result = await adapter.findById('nonexistent');
 
@@ -120,11 +115,11 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should find by email and map to CredentialSubject', async () => {
-    mockCustomerRepo.findCustomerByEmail.mockResolvedValue({
+    mockCustomers.findByEmail.mockResolvedValue({
       customerId: 'cust-1',
       email: 'test@test.com',
       isActive: true,
-    } as unknown as RepoCustomer);
+    } as unknown as CustomerRecord);
 
     const result = await adapter.findByEmail('test@test.com');
 
@@ -167,23 +162,23 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should delegate updateLoginTimestamp', async () => {
-    mockCustomerRepo.updateCustomerLoginTimestamp.mockResolvedValue({} as unknown as RepoCustomer);
+    mockCustomers.updateLastLogin.mockResolvedValue(undefined);
 
     await adapter.updateLoginTimestamp('cust-1');
 
-    expect(mockCustomerRepo.updateCustomerLoginTimestamp).toHaveBeenCalledWith('cust-1');
+    expect(mockCustomers.updateLastLogin).toHaveBeenCalledWith('cust-1');
   });
 
   it('should delegate changePassword', async () => {
-    mockCustomerRepo.changePassword.mockResolvedValue(true);
+    mockCredentials.changePassword.mockResolvedValue(true);
 
     await adapter.changePassword('cust-1', 'newpass');
 
-    expect(mockCustomerRepo.changePassword).toHaveBeenCalledWith('cust-1', 'newpass');
+    expect(mockCredentials.changePassword).toHaveBeenCalledWith('cust-1', 'newpass');
   });
 
   it('should delegate createPasswordResetToken', async () => {
-    mockCustomerRepo.createPasswordResetToken.mockResolvedValue('reset-token-123');
+    mockCredentials.createPasswordResetToken.mockResolvedValue('reset-token-123');
 
     const result = await adapter.createPasswordResetToken('cust-1');
 
@@ -191,7 +186,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should delegate verifyPasswordResetToken', async () => {
-    mockCustomerRepo.verifyPasswordResetToken.mockResolvedValue('cust-1');
+    mockCredentials.verifyPasswordResetToken.mockResolvedValue('cust-1');
 
     const result = await adapter.verifyPasswordResetToken('token');
 
@@ -199,7 +194,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should return null for invalid reset token', async () => {
-    mockCustomerRepo.verifyPasswordResetToken.mockResolvedValue(null);
+    mockCredentials.verifyPasswordResetToken.mockResolvedValue(null);
 
     const result = await adapter.verifyPasswordResetToken('invalid');
 
