@@ -222,7 +222,6 @@ function activateRate(rateId) {
   })
   .catch(error => {
     alert('<%= t("distribution:shipping.errorActivatingRate") %>');
-    console.error('Error:', error);
   });
 }
 
@@ -243,7 +242,6 @@ function deactivateRate(rateId) {
   })
   .catch(error => {
     alert('<%= t("distribution:shipping.errorDeactivatingRate") %>');
-    console.error('Error:', error);
   });
 }
 
@@ -266,7 +264,6 @@ function deleteRate(rateId, rateName) {
     })
     .catch(error => {
       alert('<%= t("distribution:shipping.errorDeletingRate") %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');

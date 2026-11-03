@@ -178,7 +178,6 @@ function deleteGateway(gatewayId, gatewayName) {
     })
     .catch(error => {
       alert('<%= t("payment:errorDeletingGateway") %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');

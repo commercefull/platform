@@ -245,7 +245,6 @@ function activateCard(cardId) {
   })
   .catch(error => {
     alert('<%= t("promotion:giftCard.errorActivating") %>');
-    console.error('Error:', error);
   });
 }
 
@@ -267,7 +266,6 @@ function cancelCard(cardId) {
     })
     .catch(error => {
       alert('<%= t("promotion:giftCard.errorCancelling") %>');
-      console.error('Error:', error);
     });
   };
   $('#cancelModal').modal('show');

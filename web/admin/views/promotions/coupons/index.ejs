@@ -206,7 +206,6 @@ function deleteCoupon(couponId, couponName) {
     })
     .catch(error => {
       alert('<%= t("promotion:coupon.errorDeletingCoupon") %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');

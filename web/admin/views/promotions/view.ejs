@@ -229,7 +229,6 @@ function deletePromotion(promotionId, promotionName) {
     })
     .catch(error => {
       alert('<%= t("promotion:promotions.errorDeletingPromotion") %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');

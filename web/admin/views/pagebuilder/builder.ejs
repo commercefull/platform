@@ -315,7 +315,6 @@ async function updateBlockField(blockId, field, value) {
     });
     renderBlocks();
   } catch (err) {
-    console.error('Error updating block:', err);
   }
 }
 
@@ -330,7 +329,6 @@ async function updateBlockSetting(blockId, field, value) {
       body: JSON.stringify({ settings: block.settings }),
     });
   } catch (err) {
-    console.error('Error updating block settings:', err);
   }
 }
 

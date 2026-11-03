@@ -218,7 +218,6 @@ function deleteCampaign(campaignId, campaignName) {
     })
     .catch(error => {
       alert('<%= t('marketing:errorDeleting') %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');
@@ -242,7 +241,6 @@ function sendCampaign(campaignId, campaignName) {
     })
     .catch(error => {
       alert('<%= t('marketing:errorSending') %>');
-      console.error('Error:', error);
     });
   }
 }

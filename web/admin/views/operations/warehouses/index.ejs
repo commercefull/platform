@@ -218,7 +218,6 @@ function activateWarehouse(warehouseId) {
   })
   .catch(error => {
     alert('<%= t('operations:errorActivating') %>');
-    console.error('Error:', error);
   });
 }
 
@@ -239,7 +238,6 @@ function deactivateWarehouse(warehouseId) {
   })
   .catch(error => {
     alert('<%= t('operations:errorDeactivating') %>');
-    console.error('Error:', error);
   });
 }
 
@@ -262,7 +260,6 @@ function deleteWarehouse(warehouseId, warehouseName) {
     })
     .catch(error => {
       alert('<%= t('operations:errorDeletingWarehouse') %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');
