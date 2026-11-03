@@ -30,7 +30,7 @@ modules/<consumer>/
 
 1. **The port speaks the consumer's language.** `checkout` asks for a `DiscountQuote`, not a `Coupon`. If the port signature mentions a provider concept, the ACL has failed.
 
-2. **Only the adapter may import the provider**, and only from the provider's public `modules/<provider>/index.ts` — never a deep path, never `infrastructure/`.
+2. **Only the adapter may import the provider** — via its public `modules/<provider>/index.ts` when the barrel cannot cycle back, or the provider's `domain/repositories/` / `application/ports/` files directly when it can (barrels that export interface code may reach the consumer through routers → `no-circular` violations). Never `infrastructure/`.
 
 3. **The adapter translates, it does not delegate.** A one-line pass-through that returns the provider's own type is not an ACL; it is a re-export with extra steps.
 
