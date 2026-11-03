@@ -4,7 +4,11 @@
  */
 
 export * from './application/useCases';
-export * from './domain/repositories/LoyaltyRepository';
+export * from './domain/repositories/LoyaltyTierRepository';
+export * from './domain/repositories/LoyaltyPointsRepository';
+export * from './domain/repositories/LoyaltyTransactionRepository';
+export * from './domain/repositories/LoyaltyRewardRepository';
+export * from './domain/repositories/StorefrontLoyaltyRepository';
 export * from './domain/errors/LoyaltyErrors';
 
 // Interface exports (routers, GraphQL)

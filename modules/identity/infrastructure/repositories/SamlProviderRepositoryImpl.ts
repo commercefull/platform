@@ -5,15 +5,16 @@
 import { query, queryOne } from '../../../../libs/db';
 import { SamlProvider, SamlProviderProps, SamlBinding, SamlNameIdFormat, SamlAttributeMapping } from '../../domain/entities/SamlProvider';
 import { SamlProviderRepository } from '../../domain/repositories/SsoProviderRepository';
+import type { IdentitySamlProvider as DbIdentitySamlProvider } from '../../../../libs/db/types';
 
 export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   async findById(providerId: string): Promise<SamlProvider | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identitySamlProvider" WHERE "providerId" = $1', [providerId]);
+    const row = await queryOne<DbIdentitySamlProvider>('SELECT * FROM "identitySamlProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
-    const rows = await query<Record<string, unknown>[]>(
+    const rows = await query<DbIdentitySamlProvider[]>(
       'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
@@ -21,7 +22,7 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   }
 
   async findActiveByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
-    const rows = await query<Record<string, unknown>[]>(
+    const rows = await query<DbIdentitySamlProvider[]>(
       'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
@@ -30,9 +31,10 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
 
   async save(provider: SamlProvider): Promise<SamlProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1', [
-      props.providerId,
-    ]);
+    const existing = await queryOne<Pick<DbIdentitySamlProvider, 'providerId'>>(
+      'SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1',
+      [props.providerId],
+    );
 
     if (existing) {
       await query(

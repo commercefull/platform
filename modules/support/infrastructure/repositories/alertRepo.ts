@@ -95,7 +95,7 @@ function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
 // ============================================================================
 
 export async function getStockAlert(stockAlertId: string): Promise<StockAlert | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "inventoryStockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
+  const row = await queryOne<DbInventoryStockAlert>('SELECT * FROM "inventoryStockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
   return row ? mapToStockAlert(row) : null;
 }
 
@@ -125,7 +125,7 @@ export async function getStockAlerts(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbInventoryStockAlert[]>(
     `SELECT * FROM "inventoryStockAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -146,7 +146,7 @@ export async function getActiveStockAlertsForProduct(productId: string, productV
     params.push(productVariantId);
   }
 
-  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "inventoryStockAlert" WHERE ${whereClause}`, params);
+  const rows = await query<DbInventoryStockAlert[]>(`SELECT * FROM "inventoryStockAlert" WHERE ${whereClause}`, params);
   return (rows || []).map(mapToStockAlert);
 }
 
@@ -167,7 +167,7 @@ export async function createStockAlert(alert: {
   const now = new Date().toISOString();
   const expiresAt = alert.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days default
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbInventoryStockAlert>(
     `INSERT INTO "inventoryStockAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "desiredQuantity",
@@ -221,7 +221,7 @@ export async function cancelStockAlert(stockAlertId: string): Promise<void> {
 // ============================================================================
 
 export async function getPriceAlert(priceAlertId: string): Promise<PriceAlert | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportPriceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
+  const row = await queryOne<DbSupportPriceAlert>('SELECT * FROM "supportPriceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
   return row ? mapToPriceAlert(row) : null;
 }
 
@@ -251,7 +251,7 @@ export async function getPriceAlerts(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportPriceAlert[]>(
     `SELECT * FROM "supportPriceAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -264,7 +264,7 @@ export async function getPriceAlerts(
 }
 
 export async function getPriceAlertsToNotify(productId: string, newPriceCents: number): Promise<PriceAlert[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportPriceAlert[]>(
     `SELECT * FROM "supportPriceAlert" 
      WHERE "productId" = $1 AND "status" = 'active'
      AND (
@@ -298,7 +298,7 @@ export async function createPriceAlert(alert: {
   const now = new Date().toISOString();
   const expiresAt = alert.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days default
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSupportPriceAlert>(
     `INSERT INTO "supportPriceAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "alertType",

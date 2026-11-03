@@ -4,12 +4,12 @@ import { redirectResponse } from 'libs/apiResponse';
  * Admin views for managing system configuration
  */
 
-import { randomUUID } from 'crypto';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageSystemConfigurationUseCase } from '../../application/wired';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { adminRespond } from '../../../../libs/adminRespond';
 
+import { generateUUID } from '../../../../libs/uuid';
 export const listSystemConfigurations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const configs = await manageSystemConfigurationUseCase.findAll();
 
@@ -43,7 +43,7 @@ export const createSystemConfigurationForm = async (req: HttpRequest, res: HttpR
 export const createSystemConfiguration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as HttpRequestBody;
   const config = SystemConfiguration.create({
-    configId: randomUUID(),
+    configId: generateUUID(),
     platformName: body.platformName as string,
     platformDomain: body.platformDomain as string,
     supportEmail: body.supportEmail as string,

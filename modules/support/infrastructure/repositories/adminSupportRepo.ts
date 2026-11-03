@@ -5,9 +5,10 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { generateUUID as uuidv4 } from '../../../../libs/uuid';
-import type { SupportTicketProps as SupportTicketProps } from '../../domain/entities/SupportTicket';
+import type { SupportTicketProps as SupportTicketProps, TicketStatus } from '../../domain/entities/SupportTicket';
 import type { SupportMessage } from 'libs/db/types';
+import { updateTicket } from './supportRepo';
+import { addMessage } from './supportTicketOpsQueries';
 
 type SupportTicket = SupportTicketProps;
 
@@ -114,19 +115,9 @@ export async function listTicketMessages(ticketId: string): Promise<SupportMessa
 }
 
 export async function updateTicketStatus(ticketId: string, status: string): Promise<void> {
-  await query(`UPDATE "supportTicket" SET "status" = $1, "updatedAt" = NOW() WHERE "supportTicketId" = $2`, [status, ticketId]);
+  await updateTicket(ticketId, { status: status as TicketStatus });
 }
 
 export async function addTicketMessage(ticketId: string, message: string, senderId: string): Promise<void> {
-  await query(
-    `INSERT INTO "supportMessage" ("supportMessageId", "supportTicketId", "message", "senderId", "senderType", "createdAt")
-     VALUES ($1, $2, $3, $4, $5, NOW())`,
-    [uuidv4(), ticketId, message, senderId, 'admin'],
-  );
-
-  await query(
-    `UPDATE "supportTicket" SET "firstResponseAt" = COALESCE("firstResponseAt", NOW())
-     WHERE "supportTicketId" = $1`,
-    [ticketId],
-  );
+  await addMessage({ supportTicketId: ticketId, senderId, senderType: 'agent', message });
 }

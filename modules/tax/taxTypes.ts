@@ -30,8 +30,8 @@ export type TaxZone = {
   postcodes?: string[];
   cities?: string[];
   isActive: boolean;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type TaxRate = {
@@ -50,12 +50,12 @@ export type TaxRate = {
   minimumAmountCents?: number;
   maximumAmountCents?: number;
   thresholdCents?: number;
-  startDate: number;
-  endDate?: number;
+  startDate: Date;
+  endDate?: Date;
   isActive: boolean;
   metadata?: unknown;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type TaxCategory = {
@@ -67,8 +67,8 @@ export type TaxCategory = {
   sortOrder: number;
   isActive: boolean;
   metadata?: unknown;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type CustomerTaxExemption = {
@@ -82,11 +82,11 @@ export type CustomerTaxExemption = {
   businessName?: string;
   exemptionReason?: string;
   documentUrl?: string;
-  startDate: number;
-  expiryDate?: number;
+  startDate: Date;
+  expiryDate?: Date;
   isVerified: boolean;
   verifiedBy?: string;
-  verifiedAt?: number;
+  verifiedAt?: Date;
   notes?: string;
   metadata?: unknown;
   // Epic B — exemption scope (category-aware, amount-bounded, partial)
@@ -94,8 +94,8 @@ export type CustomerTaxExemption = {
   minOrderAmountCents?: number | null;
   maxOrderAmountCents?: number | null;
   exemptionPercent?: number;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type TaxSettings = {
@@ -116,8 +116,8 @@ export type TaxSettings = {
   taxProvider?: 'internal' | 'avalara' | 'taxjar' | 'external';
   taxProviderSettings?: unknown;
   metadata?: unknown;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type TaxBreakdownItem = {

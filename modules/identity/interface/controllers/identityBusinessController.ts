@@ -15,7 +15,6 @@ import {
 } from '../../application/wired';
 import { IssueTokenPairCommand } from '../../application/useCases/token/IssueTokenPair';
 import { RenewAccessTokenCommand } from '../../application/useCases/token/RenewAccessToken';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
@@ -185,27 +184,23 @@ export const registerOrganization = async (
  * More secure than simple login as refresh tokens can be revoked
  */
 export const issueTokenPair = async (req: HttpRequest<Record<string, string>, unknown, LoginBody>, res: HttpResponse): Promise<void> => {
-  try {
-    const { email, password } = req.body;
-    const result = await issueOrganizationTokenPairUseCase.execute(
-      new IssueTokenPairCommand(email, password, req.headers['user-agent'] || null, req.ip || null),
-    );
+  const { email, password } = req.body;
+  const result = await issueOrganizationTokenPairUseCase.execute(
+    new IssueTokenPairCommand(email, password, req.headers['user-agent'] || null, req.ip || null),
+  );
 
-    jsonResponse(res, 200, {
-      success: true,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      tokenType: 'Bearer',
-      expiresIn: result.expiresIn,
-      organization: {
-        id: result.subject.id,
-        email: result.subject.email,
-        name: result.subject.name,
-      },
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+    tokenType: 'Bearer',
+    expiresIn: result.expiresIn,
+    organization: {
+      id: result.subject.id,
+      email: result.subject.email,
+      name: result.subject.name,
+    },
+  });
 };
 
 /**
@@ -215,19 +210,15 @@ export const renewAccessToken = async (
   req: HttpRequest<Record<string, string>, unknown, RefreshTokenBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const { refreshToken } = req.body;
-    const result = await renewOrganizationAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
+  const { refreshToken } = req.body;
+  const result = await renewOrganizationAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
 
-    jsonResponse(res, 200, {
-      success: true,
-      accessToken: result.accessToken,
-      tokenType: 'Bearer',
-      expiresIn: result.expiresIn,
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    accessToken: result.accessToken,
+    tokenType: 'Bearer',
+    expiresIn: result.expiresIn,
+  });
 };
 
 /**

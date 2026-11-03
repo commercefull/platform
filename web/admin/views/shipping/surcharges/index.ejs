@@ -128,7 +128,7 @@ function deleteSurcharge(id, name) {
       if (data.success) { location.reload(); }
       else { alert('Error: ' + data.message); }
     })
-    .catch(error => { alert('Error deleting surcharge'); console.error(error); });
+    .catch(() => { alert('Error deleting surcharge'); });
   };
   $('#deleteModal').modal('show');
 }

@@ -87,7 +87,7 @@ const taxCommandAdapter = {
       isCompound: (data.isCompound as boolean) || false,
       includeInPrice: false,
       isShippingTaxable: (data.includesShipping as boolean) || false,
-      startDate: Math.floor(Date.now() / 1000),
+      startDate: new Date(),
       isActive: (data.isActive as boolean) ?? true,
     });
     return {
@@ -96,7 +96,7 @@ const taxCommandAdapter = {
       rate: result.rate,
       country: '',
       isActive: result.isActive,
-      createdAt: new Date(result.createdAt * 1000),
+      createdAt: result.createdAt,
     };
   },
 };

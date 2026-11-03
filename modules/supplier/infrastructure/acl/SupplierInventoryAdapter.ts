@@ -7,10 +7,10 @@
  * product has no stock record at the receiving warehouse yet.
  */
 
-import type { InventoryDataRepository } from '../../../inventory/infrastructure';
+import type { InventoryStockRepository } from '../../../inventory';
 
 type StockRepo = Pick<
-  typeof InventoryDataRepository.stock,
+  InventoryStockRepository,
   'findLocationsByProductId' | 'createLocation' | 'adjustQuantity' | 'createTransaction' | 'findTransactionTypeByCode'
 >;
 

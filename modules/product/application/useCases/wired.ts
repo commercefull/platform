@@ -17,6 +17,7 @@ import brandRepo from '../../infrastructure/repositories/brandRepo';
 import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
 import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductPricingAdapter } from '../../infrastructure/acl/ProductPricingAdapter';
+import productBasePriceRepo from '../../../pricing/infrastructure/repositories/productBasePriceRepo';
 
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
@@ -100,7 +101,7 @@ const attributeSetRepo = new ProductAttributeSetRepository();
 
 // Pricing is owned by the pricing module — product consumes it through this
 // consumer-owned port + ACL adapter (integer cents across the boundary).
-export const productPricingPort = new ProductPricingAdapter();
+export const productPricingPort = new ProductPricingAdapter(productBasePriceRepo);
 
 export const listProductsUseCase = new ListProductsUseCase(productRepo, productPricingPort);
 export const createProductUseCase = new CreateProductUseCase(productRepo, attributeSetRepo, dynamicAttributeRepo, productPricingPort);

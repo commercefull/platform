@@ -14,7 +14,6 @@ import { CreateOrderRefundCommand } from '../../application/useCases/CreateOrder
 import { TrackFulfillmentPackageCommand } from '../../application/useCases/TrackFulfillmentPackage';
 import { UpdatePaymentStatusCommand } from '../../application/useCases/UpdatePaymentStatus';
 import { UpdateFulfillmentStatusCommand } from '../../application/useCases/UpdateFulfillmentStatus';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
   getOrderUseCase,
   updatePaymentStatusUseCase,
@@ -300,12 +299,8 @@ export const updatePaymentStatus = async (req: HttpRequest, res: HttpResponse): 
   const body = req.body as { paymentStatus: string };
   const { paymentStatus } = body;
 
-  try {
-    const result = await updatePaymentStatusUseCase.execute(new UpdatePaymentStatusCommand(orderId, paymentStatus as PaymentStatus));
-    respond(req, res, result, 200);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await updatePaymentStatusUseCase.execute(new UpdatePaymentStatusCommand(orderId, paymentStatus as PaymentStatus));
+  respond(req, res, result, 200);
 };
 
 export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -313,14 +308,10 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
   const body = req.body as { fulfillmentStatus: string };
   const { fulfillmentStatus } = body;
 
-  try {
-    const result = await updateFulfillmentStatusUseCase.execute(
-      new UpdateFulfillmentStatusCommand(orderId, fulfillmentStatus as FulfillmentStatus),
-    );
-    respond(req, res, result, 200);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await updateFulfillmentStatusUseCase.execute(
+    new UpdateFulfillmentStatusCommand(orderId, fulfillmentStatus as FulfillmentStatus),
+  );
+  respond(req, res, result, 200);
 };
 
 // ============================================================================

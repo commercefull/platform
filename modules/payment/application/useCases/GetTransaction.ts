@@ -1,4 +1,4 @@
-import { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { TransactionIdOrExternalIdRequiredError } from '../../domain/errors/PaymentErrors';
 
@@ -34,7 +34,9 @@ export interface TransactionDetailResponse {
 }
 
 export class GetTransactionUseCase {
-  constructor(private readonly paymentRepository: PaymentRepository) {}
+  constructor(
+    private readonly paymentRepository: Pick<PaymentTransactionRepository, 'findTransactionById' | 'findTransactionByExternalId'>,
+  ) {}
 
   async execute(command: GetTransactionCommand): Promise<TransactionDetailResponse | null> {
     let transaction: PaymentTransaction | null = null;

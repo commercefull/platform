@@ -217,7 +217,6 @@ function deletePage(pageId, pageTitle) {
     })
     .catch(error => {
       alert('<%= t("content:errorDeletingPage") %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');
@@ -241,7 +240,6 @@ function publishPage(pageId, pageTitle) {
     })
     .catch(error => {
       alert('<%= t("content:errorPublishingPage") %>');
-      console.error('Error:', error);
     });
   }
 }

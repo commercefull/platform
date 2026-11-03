@@ -32,54 +32,42 @@ router.use('/notifications', isCustomerLoggedIn);
 // ============================================================================
 
 router.get('/notifications', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const limit = parseInt(req.query.limit as string) || 20;
-    const unreadOnly = req.query.unreadOnly === 'true';
-
-    const notifications = unreadOnly
-      ? await manageNotificationRecordsUseCase.findUnreadByUser(customerId)
-      : await manageNotificationRecordsUseCase.findByUser(customerId, limit);
-
-    jsonResponse(res, 200, { success: true, data: notifications });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const limit = parseInt(req.query.limit as string) || 20;
+  const unreadOnly = req.query.unreadOnly === 'true';
+
+  const notifications = unreadOnly
+    ? await manageNotificationRecordsUseCase.findUnreadByUser(customerId)
+    : await manageNotificationRecordsUseCase.findByUser(customerId, limit);
+
+  jsonResponse(res, 200, { success: true, data: notifications });
 });
 
 router.get('/notifications/count', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const unreadCount = await manageNotificationRecordsUseCase.countUnread(customerId);
-    jsonResponse(res, 200, { success: true, data: { unreadCount } });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const unreadCount = await manageNotificationRecordsUseCase.countUnread(customerId);
+  jsonResponse(res, 200, { success: true, data: { unreadCount } });
 });
 
 router.get('/notifications/unread-count', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const count = await manageNotificationRecordsUseCase.countUnread(customerId);
-    jsonResponse(res, 200, { success: true, data: { count } });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const count = await manageNotificationRecordsUseCase.countUnread(customerId);
+  jsonResponse(res, 200, { success: true, data: { count } });
 });
 
 // ============================================================================
@@ -104,92 +92,72 @@ router.post('/notifications/devices', asyncHandler(registerDevice));
 router.delete('/notifications/devices/:deviceToken', asyncHandler(deleteDevice));
 
 router.get('/notifications/:id', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const notification = await manageNotificationRecordsUseCase.getById(String(req.params.id));
-    if (!notification) {
-      return jsonResponse(res, 404, { success: false, error: 'Notification not found' });
-    }
-    jsonResponse(res, 200, { success: true, data: notification });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const notification = await manageNotificationRecordsUseCase.getById(String(req.params.id));
+  if (!notification) {
+    return jsonResponse(res, 404, { success: false, error: 'Notification not found' });
+  }
+  jsonResponse(res, 200, { success: true, data: notification });
 });
 
 router.put('/notifications/:notificationId/read', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const result = await markAsReadUseCase.execute({
-      notificationIds: [req.params.notificationId],
-      recipientId: customerId,
-    });
-
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const result = await markAsReadUseCase.execute({
+    notificationIds: [req.params.notificationId],
+    recipientId: customerId,
+  });
+
+  jsonResponse(res, 200, { success: true, data: result });
 });
 
 router.patch('/notifications/:notificationId/read', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const result = await manageNotificationRecordsUseCase.markAsRead(req.params.notificationId);
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const result = await manageNotificationRecordsUseCase.markAsRead(req.params.notificationId);
+  jsonResponse(res, 200, { success: true, data: result });
 });
 
 router.put('/notifications/read', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
+  }
 
-    const notificationIds = req.body.notificationIds;
-    if (notificationIds && Array.isArray(notificationIds)) {
-      const result = await markAsReadUseCase.execute({ notificationIds, recipientId: customerId });
-      jsonResponse(res, 200, { success: true, data: result });
-    } else {
-      // Mark all as read
-      const count = await manageNotificationRecordsUseCase.markAllAsRead(customerId);
-      jsonResponse(res, 200, { success: true, data: { markedCount: count } });
-    }
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  const notificationIds = req.body.notificationIds;
+  if (notificationIds && Array.isArray(notificationIds)) {
+    const result = await markAsReadUseCase.execute({ notificationIds, recipientId: customerId });
+    jsonResponse(res, 200, { success: true, data: result });
+  } else {
+    // Mark all as read
+    const count = await manageNotificationRecordsUseCase.markAllAsRead(customerId);
+    jsonResponse(res, 200, { success: true, data: { markedCount: count } });
   }
 });
 
 router.post('/notifications/read', async (req, res) => {
-  try {
-    const customerId = req.user?.customerId || req.user?.id;
+  const customerId = req.user?.customerId || req.user?.id;
 
-    if (!customerId) {
-      return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
-    }
-
-    const count = await manageNotificationRecordsUseCase.markAllAsRead(customerId);
-    jsonResponse(res, 200, { success: true, data: { markedCount: count } });
-  } catch (error: unknown) {
-    jsonResponse(res, 400, { success: false, error: (error as Error).message });
+  if (!customerId) {
+    return jsonResponse(res, 401, { success: false, error: 'Not authenticated' });
   }
+
+  const count = await manageNotificationRecordsUseCase.markAllAsRead(customerId);
+  jsonResponse(res, 200, { success: true, data: { markedCount: count } });
 });
 
 export const notificationCustomerRouter = router;

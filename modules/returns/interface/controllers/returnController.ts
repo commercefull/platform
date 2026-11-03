@@ -18,20 +18,20 @@ import {
 } from '../../application/useCases/wired';
 
 class ReturnController {
-  async listReturns(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listReturns = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const status = req.query.status as string | undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
     const returns = await listReturnRequestsUseCase.execute(status, limit, offset);
     jsonResponse(res, 200, { success: true, data: returns.map(r => r.toJSON()) });
-  }
+  };
 
-  async getReturn(req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> {
+  getReturn = async (req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> => {
     const returnRequest = await getReturnRequestUseCase.execute(req.params.returnId);
     jsonResponse(res, 200, { success: true, data: returnRequest.toJSON() });
-  }
+  };
 
-  async createReturn(
+  createReturn = async (
     req: HttpRequest<
       Record<string, never>,
       Record<string, never>,
@@ -63,7 +63,7 @@ class ReturnController {
       }
     >,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const body = req.body;
     // Normalize: accept "reason" as shorthand for "returnReason"
     const returnReason = body.returnReason || body.reason || '';
@@ -124,57 +124,63 @@ class ReturnController {
     };
     const result = await createReturnRequestUseCase.execute(payload as Parameters<typeof createReturnRequestUseCase.execute>[0]);
     jsonResponse(res, 201, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async approveReturn(
+  approveReturn = async (
     req: HttpRequest<{ returnId: string }, Record<string, never>, { rmaNumber?: string }>,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const result = await approveReturnRequestUseCase.execute(req.params.returnId, req.body?.rmaNumber);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async denyReturn(req: HttpRequest<{ returnId: string }, Record<string, never>, { reason?: string }>, res: HttpResponse): Promise<void> {
+  denyReturn = async (
+    req: HttpRequest<{ returnId: string }, Record<string, never>, { reason?: string }>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const result = await denyReturnRequestUseCase.execute(req.params.returnId, req.body?.reason);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async markInTransit(
+  markInTransit = async (
     req: HttpRequest<{ returnId: string }, Record<string, never>, { trackingNumber?: string; trackingUrl?: string }>,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const result = await markReturnInTransitUseCase.execute(req.params.returnId, req.body?.trackingNumber, req.body?.trackingUrl);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async markReceived(req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> {
+  markReceived = async (req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> => {
     const result = await markReturnReceivedUseCase.execute(req.params.returnId);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async completeInspection(
+  completeInspection = async (
     req: HttpRequest<
       { returnId: string },
       Record<string, never>,
       { passedItems?: Record<string, unknown>; failedItems?: Record<string, unknown> }
     >,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const result = await completeReturnInspectionUseCase.execute(req.params.returnId, req.body?.passedItems, req.body?.failedItems);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async completeReturn(req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> {
+  completeReturn = async (req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> => {
     const result = await completeReturnRequestUseCase.execute(req.params.returnId);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async cancelReturn(req: HttpRequest<{ returnId: string }, Record<string, never>, { reason?: string }>, res: HttpResponse): Promise<void> {
+  cancelReturn = async (
+    req: HttpRequest<{ returnId: string }, Record<string, never>, { reason?: string }>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const result = await cancelReturnRequestUseCase.execute(req.params.returnId, req.body?.reason);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 
-  async getStoreCreditBalance(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getStoreCreditBalance = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const customerId = (req.query.customerId as string) || '';
     if (!customerId) {
       jsonResponse(res, 200, { success: true, data: { customerId: '', balanceCents: 0, currency: 'USD' } });
@@ -182,9 +188,9 @@ class ReturnController {
     }
     const balanceCents = await getStoreCreditBalanceUseCase.execute(customerId);
     jsonResponse(res, 200, { success: true, data: balanceCents });
-  }
+  };
 
-  async getStoreCreditLedger(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getStoreCreditLedger = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const customerId = (req.query.customerId as string) || '';
     if (!customerId) {
       jsonResponse(res, 200, { success: true, data: [] });
@@ -193,9 +199,9 @@ class ReturnController {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const ledger = await getStoreCreditLedgerUseCase.execute(customerId, limit);
     jsonResponse(res, 200, { success: true, data: ledger.map(e => e.toJSON()) });
-  }
+  };
 
-  async debitStoreCredit(
+  debitStoreCredit = async (
     req: HttpRequest<
       Record<string, never>,
       Record<string, never>,
@@ -208,10 +214,10 @@ class ReturnController {
       }
     >,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const result = await debitStoreCreditUseCase.execute(req.body as Parameters<typeof debitStoreCreditUseCase.execute>[0]);
     jsonResponse(res, 200, { success: true, data: result.toJSON() });
-  }
+  };
 }
 
 export default new ReturnController();

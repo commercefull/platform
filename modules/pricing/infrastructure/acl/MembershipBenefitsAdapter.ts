@@ -17,7 +17,7 @@ import {
   MembershipBenefitsPort,
   MembershipDiscountBenefit,
 } from '../../application/ports/MembershipBenefitsPort';
-import type { MembershipRepo } from '../../../membership/infrastructure/repositories/membershipRepo';
+import type { MembershipBenefitsRepository } from '../../../membership';
 
 function scopeMatches(scope: string[] | undefined, value: string | undefined, normalizeCase = false): boolean {
   if (!scope || scope.length === 0) return true;
@@ -28,7 +28,7 @@ function scopeMatches(scope: string[] | undefined, value: string | undefined, no
 }
 
 export class MembershipBenefitsAdapter implements MembershipBenefitsPort {
-  constructor(private readonly membershipRepo: Pick<MembershipRepo, 'getUserMembershipBenefits'>) {}
+  constructor(private readonly membershipRepo: Pick<MembershipBenefitsRepository, 'getUserMembershipBenefits'>) {}
 
   async getDiscountBenefits(customerId: string, context?: MembershipBenefitContext): Promise<MembershipDiscountBenefit[]> {
     const benefits = await this.membershipRepo.getUserMembershipBenefits(customerId);

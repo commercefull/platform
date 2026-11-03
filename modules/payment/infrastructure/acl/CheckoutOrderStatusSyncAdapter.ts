@@ -10,7 +10,7 @@
  */
 
 import { OrderStatusSyncPort, CheckoutSyncSummary } from '../../application/ports/OrderStatusSyncPort';
-import type CheckoutRepo from '../../../checkout/infrastructure/repositories/CheckoutRepository';
+import type { CheckoutRepository } from '../../../checkout/domain/repositories/CheckoutRepository';
 import type { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
 import { UpdateOrderStatusUseCase, UpdateOrderStatusCommand } from '../../../order/application/useCases/UpdateOrderStatus';
 import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
@@ -18,7 +18,7 @@ import { PaymentStatus } from '../../../order/domain/valueObjects/PaymentStatus'
 
 export class CheckoutOrderStatusSyncAdapter implements OrderStatusSyncPort {
   constructor(
-    private readonly checkoutRepo: Pick<typeof CheckoutRepo, 'findByPaymentIntentId'>,
+    private readonly checkoutRepo: Pick<CheckoutRepository, 'findByPaymentIntentId'>,
     private readonly orderRepo: OrderRepository,
   ) {}
 

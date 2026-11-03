@@ -3,7 +3,8 @@
  */
 
 import { generateUUID } from '../../../../libs/uuid';
-import { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
+import { PaymentGatewayConfigRepository } from '../../domain/repositories/PaymentGatewayConfigRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
@@ -60,7 +61,10 @@ export interface InitiatePaymentResponse {
 // ============================================================================
 
 export class InitiatePaymentUseCase {
-  constructor(private readonly paymentRepository: PaymentRepository) {}
+  constructor(
+    private readonly paymentRepository: Pick<PaymentTransactionRepository, 'findTransactionsByOrderId' | 'saveTransaction'>,
+    private readonly gatewayConfig: Pick<PaymentGatewayConfigRepository, 'getDefaultGateway'>,
+  ) {}
 
   async execute(command: InitiatePaymentCommand): Promise<InitiatePaymentResponse> {
     if (command.amountCents <= 0) {
@@ -84,7 +88,7 @@ export class InitiatePaymentUseCase {
     }
 
     // Get default gateway
-    const gateway = await this.paymentRepository.getDefaultGateway('default');
+    const gateway = await this.gatewayConfig.getDefaultGateway('default');
     if (!gateway) {
       throw new NoPaymentGatewayConfiguredError();
     }

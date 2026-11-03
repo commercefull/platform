@@ -5,7 +5,6 @@ import type { CreateTaxRateRecordCommand } from '../../application/useCases/Crea
 import type { CreateTaxCategoryCommand } from '../../application/useCases/CreateTaxCategory';
 import type { CreateTaxZoneCommand } from '../../application/useCases/CreateTaxZone';
 import type { UpdateTaxZoneCommand } from '../../application/useCases/UpdateTaxZone';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
   manageTaxRecordsUseCase,
   createTaxRateRecordUseCase,
@@ -53,12 +52,8 @@ export const getAllTaxRates = async (req: HttpRequest, res: HttpResponse) => {
 };
 
 export const createTaxRate = async (req: HttpRequest, res: HttpResponse) => {
-  try {
-    const createdTaxRate = await createTaxRateRecordUseCase.execute(req.body as CreateTaxRateRecordCommand);
-    jsonResponse(res, 201, { success: true, data: createdTaxRate });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) });
-  }
+  const createdTaxRate = await createTaxRateRecordUseCase.execute(req.body as CreateTaxRateRecordCommand);
+  jsonResponse(res, 201, { success: true, data: createdTaxRate });
 };
 
 export const updateTaxRate = async (req: HttpRequest, res: HttpResponse) => {
@@ -147,12 +142,8 @@ export const getTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
 };
 
 export const createTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
-  try {
-    const createdCategory = await createTaxCategoryUseCase.execute(req.body as CreateTaxCategoryCommand);
-    jsonResponse(res, 201, { success: true, data: createdCategory });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) });
-  }
+  const createdCategory = await createTaxCategoryUseCase.execute(req.body as CreateTaxCategoryCommand);
+  jsonResponse(res, 201, { success: true, data: createdCategory });
 };
 
 export const updateTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
@@ -242,23 +233,15 @@ export const getTaxZoneById = async (req: HttpRequest, res: HttpResponse) => {
 };
 
 export const createTaxZone = async (req: HttpRequest, res: HttpResponse) => {
-  try {
-    const createdTaxZone = await createTaxZoneUseCase.execute(req.body as CreateTaxZoneCommand);
-    jsonResponse(res, 201, { success: true, data: createdTaxZone });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) });
-  }
+  const createdTaxZone = await createTaxZoneUseCase.execute(req.body as CreateTaxZoneCommand);
+  jsonResponse(res, 201, { success: true, data: createdTaxZone });
 };
 
 export const updateTaxZone = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
 
-  try {
-    const result = await updateTaxZoneUseCase.execute(id, req.body as UpdateTaxZoneCommand);
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) });
-  }
+  const result = await updateTaxZoneUseCase.execute(id, req.body as UpdateTaxZoneCommand);
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const deleteTaxZone = async (req: HttpRequest, res: HttpResponse) => {

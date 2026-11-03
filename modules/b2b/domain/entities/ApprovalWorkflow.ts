@@ -3,6 +3,7 @@ export type ApprovalType = 'purchase_order' | 'quote' | 'credit_request' | 'spen
 
 import { ApprovalStatusError, UnauthorizedApproverError, B2BValidationError } from '../errors/B2BErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export interface ApprovalStep {
   stepId: string;
   approverId: string;
@@ -55,14 +56,14 @@ export class ApprovalWorkflow {
   }): ApprovalWorkflow {
     const now = new Date();
     const steps: ApprovalStep[] = input.approvers.map((a, idx) => ({
-      stepId: crypto.randomUUID(),
+      stepId: generateUUID(),
       approverId: a.approverId,
       approverEmail: a.approverEmail,
       status: 'pending',
       order: idx + 1,
     }));
     return new ApprovalWorkflow({
-      workflowId: crypto.randomUUID(),
+      workflowId: generateUUID(),
       companyId: input.companyId,
       organizationId: input.organizationId,
       type: input.type,

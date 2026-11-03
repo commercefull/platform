@@ -114,4 +114,3 @@ function createVariantValues(data: ProductCreateProps) {
     variantAttributes: data.variantAttributes ? JSON.stringify(data.variantAttributes) : null,
   };
 }
-

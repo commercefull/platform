@@ -1,6 +1,5 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../../libs/errors';
 import {
   uploadMediaUseCase,
   deleteMediaUseCase,
@@ -58,38 +57,34 @@ export class MediaHandlers {
       externalId,
     } = req.body;
 
-    try {
-      const result = await uploadMediaUseCase.execute(
-        new UploadMediaCommand({
-          title: title,
-          fileName: fileName,
-          filePath: filePath || '',
-          fileType: fileType || 'application/octet-stream',
-          fileSize: fileSize || 0,
-          url: url,
-          width: width,
-          height: height,
-          duration: duration,
-          altText: altText,
-          caption: caption,
-          description: description,
-          folderId: folderId || undefined,
-          thumbnailUrl: thumbnailUrl,
-          tags: tags,
-          isExternal: isExternal,
-          externalService: externalService,
-          externalId: externalId,
-          uploadedBy: req.user?.id,
-        }),
-      );
-      jsonResponse(res, 201, {
-        success: true,
-        data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
-        message: 'Media uploaded successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await uploadMediaUseCase.execute(
+      new UploadMediaCommand({
+        title: title,
+        fileName: fileName,
+        filePath: filePath || '',
+        fileType: fileType || 'application/octet-stream',
+        fileSize: fileSize || 0,
+        url: url,
+        width: width,
+        height: height,
+        duration: duration,
+        altText: altText,
+        caption: caption,
+        description: description,
+        folderId: folderId || undefined,
+        thumbnailUrl: thumbnailUrl,
+        tags: tags,
+        isExternal: isExternal,
+        externalService: externalService,
+        externalId: externalId,
+        uploadedBy: req.user?.id,
+      }),
+    );
+    jsonResponse(res, 201, {
+      success: true,
+      data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
+      message: 'Media uploaded successfully',
+    });
   };
 
   getMediaById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -120,12 +115,9 @@ export class MediaHandlers {
 
   deleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    try {
-      await deleteMediaUseCase.execute(id);
-      jsonResponse(res, 200, { success: true, message: 'Media deleted successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+
+    await deleteMediaUseCase.execute(id);
+    jsonResponse(res, 200, { success: true, message: 'Media deleted successfully' });
   };
 
   moveMediaToFolder = async (
@@ -139,12 +131,8 @@ export class MediaHandlers {
       return;
     }
 
-    try {
-      const result = await organizeMediaFolderUseCase.moveMediaToFolder(new MoveMediaToFolderCommand(mediaIds, folderId ?? null));
-      jsonResponse(res, 200, { success: true, data: result, message: `${result.movedCount} media items moved successfully` });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await organizeMediaFolderUseCase.moveMediaToFolder(new MoveMediaToFolderCommand(mediaIds, folderId ?? null));
+    jsonResponse(res, 200, { success: true, data: result, message: `${result.movedCount} media items moved successfully` });
   };
 
   // Media Folder Handlers
@@ -166,16 +154,12 @@ export class MediaHandlers {
   ): Promise<void> => {
     const { name, parentId } = req.body;
 
-    try {
-      const result = await organizeMediaFolderUseCase.createFolder(new CreateFolderCommand(name, parentId, req.user?.id));
-      jsonResponse(res, 201, {
-        success: true,
-        data: { ...result, contentMediaFolderId: result.id },
-        message: 'Folder created successfully',
-      });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await organizeMediaFolderUseCase.createFolder(new CreateFolderCommand(name, parentId, req.user?.id));
+    jsonResponse(res, 201, {
+      success: true,
+      data: { ...result, contentMediaFolderId: result.id },
+      message: 'Folder created successfully',
+    });
   };
 
   updateMediaFolder = async (
@@ -220,12 +204,8 @@ export class MediaHandlers {
   trackMediaUsage = async (req: HttpRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: HttpResponse): Promise<void> => {
     const { mediaId, entityType, entityId, field, sortOrder } = req.body;
 
-    try {
-      const result = await trackMediaUsageUseCase.execute(new TrackMediaUsageCommand(mediaId, entityType, entityId, field, sortOrder));
-      jsonResponse(res, 201, { success: true, data: result, message: 'Media usage tracked successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await trackMediaUsageUseCase.execute(new TrackMediaUsageCommand(mediaId, entityType, entityId, field, sortOrder));
+    jsonResponse(res, 201, { success: true, data: result, message: 'Media usage tracked successfully' });
   };
 
   untrackMediaUsage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

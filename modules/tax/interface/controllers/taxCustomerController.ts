@@ -1,17 +1,12 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { manageTaxRecordsUseCase, calculateLineItemTaxUseCase, calculateBasketTaxUseCase } from '../../application/wired';
 import type { CalculateLineItemTaxCommand } from '../../application/useCases/CalculateLineItemTax';
 import type { CalculateBasketTaxCommand } from '../../application/useCases/CalculateBasketTax';
 
 export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpResponse) => {
-  try {
-    const taxResult = await calculateLineItemTaxUseCase.execute(req.body as CalculateLineItemTaxCommand);
-    jsonResponse(res, 200, taxResult);
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { error: getErrorMessage(error) });
-  }
+  const taxResult = await calculateLineItemTaxUseCase.execute(req.body as CalculateLineItemTaxCommand);
+  jsonResponse(res, 200, taxResult);
 };
 
 /**
@@ -20,15 +15,11 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
 export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse) => {
   const { basketId } = req.params;
 
-  try {
-    const taxResult = await calculateBasketTaxUseCase.execute({
-      ...(req.body as CalculateBasketTaxCommand),
-      basketId,
-    });
-    jsonResponse(res, 200, taxResult);
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { error: getErrorMessage(error) });
-  }
+  const taxResult = await calculateBasketTaxUseCase.execute({
+    ...(req.body as CalculateBasketTaxCommand),
+    basketId,
+  });
+  jsonResponse(res, 200, taxResult);
 };
 
 /**

@@ -24,11 +24,7 @@ import { mergeGuestBasketOnLoginUseCase } from '../../../basket/application/useC
 
 /** Merge the anonymous session basket into the customer's basket after authentication. Best-effort: login must not fail on merge errors. */
 async function mergeGuestBasket(req: HttpRequest, customerId: string): Promise<void> {
-  try {
-    await mergeGuestBasketOnLoginUseCase.execute(new MergeGuestBasketOnLoginCommand(customerId, req.session?.id));
-  } catch (error: unknown) {
-    logger.warn(`Failed to merge guest basket for customer ${customerId}:`, error);
-  }
+  await mergeGuestBasketOnLoginUseCase.execute(new MergeGuestBasketOnLoginCommand(customerId, req.session?.id));
 }
 
 // ============================================================================

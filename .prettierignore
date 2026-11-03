@@ -1,0 +1,4 @@
+# Generated files whose generator output is not prettier-styled
+# (regenerating them would otherwise break format:check)
+libs/db/types.ts
+docs/generated/openapi.json

@@ -1,36 +1,50 @@
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
+import type { PaymentRefundRepository } from '../../domain/repositories/PaymentRefundRepository';
+import type { PaymentGatewayConfigRepository } from '../../domain/repositories/PaymentGatewayConfigRepository';
+import type { StoredPaymentMethodRepository } from '../../domain/repositories/StoredPaymentMethodRepository';
 
 export class ManagePaymentRecordsUseCase {
-  constructor(private readonly paymentRepo: PaymentRepository) {}
+  constructor(
+    private readonly transactions: Pick<
+      PaymentTransactionRepository,
+      'findTransactionsByCustomerId' | 'findTransactionsByOrderId' | 'findTransactionById' | 'deleteTransaction'
+    >,
+    private readonly refunds: Pick<PaymentRefundRepository, 'findRefundsByTransactionId'>,
+    private readonly gatewayConfig: Pick<PaymentGatewayConfigRepository, 'getEnabledPaymentMethods' | 'getDefaultGateway'>,
+    private readonly storedMethods: Pick<
+      StoredPaymentMethodRepository,
+      'findStoredMethodsByCustomer' | 'setDefaultStoredMethod' | 'softDeleteStoredMethod'
+    >,
+  ) {}
 
-  async findTransactionsByCustomerId(...args: Parameters<PaymentRepository['findTransactionsByCustomerId']>) {
-    return this.paymentRepo.findTransactionsByCustomerId(...args);
+  async findTransactionsByCustomerId(...args: Parameters<PaymentTransactionRepository['findTransactionsByCustomerId']>) {
+    return this.transactions.findTransactionsByCustomerId(...args);
   }
   async findTransactionsByOrderId(orderId: string) {
-    return this.paymentRepo.findTransactionsByOrderId(orderId);
+    return this.transactions.findTransactionsByOrderId(orderId);
   }
   async findTransactionById(transactionId: string) {
-    return this.paymentRepo.findTransactionById(transactionId);
+    return this.transactions.findTransactionById(transactionId);
   }
   async findRefundsByTransactionId(transactionId: string) {
-    return this.paymentRepo.findRefundsByTransactionId(transactionId);
+    return this.refunds.findRefundsByTransactionId(transactionId);
   }
-  async getEnabledPaymentMethods(...args: Parameters<PaymentRepository['getEnabledPaymentMethods']>) {
-    return this.paymentRepo.getEnabledPaymentMethods(...args);
+  async getEnabledPaymentMethods(...args: Parameters<PaymentGatewayConfigRepository['getEnabledPaymentMethods']>) {
+    return this.gatewayConfig.getEnabledPaymentMethods(...args);
   }
   async getDefaultGateway(organizationId: string) {
-    return this.paymentRepo.getDefaultGateway(organizationId);
+    return this.gatewayConfig.getDefaultGateway(organizationId);
   }
   async findStoredMethodsByCustomer(customerId: string) {
-    return this.paymentRepo.findStoredMethodsByCustomer(customerId);
+    return this.storedMethods.findStoredMethodsByCustomer(customerId);
   }
   async setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string) {
-    return this.paymentRepo.setDefaultStoredMethod(storedPaymentMethodId, customerId);
+    return this.storedMethods.setDefaultStoredMethod(storedPaymentMethodId, customerId);
   }
   async softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string) {
-    return this.paymentRepo.softDeleteStoredMethod(storedPaymentMethodId, customerId);
+    return this.storedMethods.softDeleteStoredMethod(storedPaymentMethodId, customerId);
   }
   async deleteTransaction(transactionId: string) {
-    return this.paymentRepo.deleteTransaction(transactionId);
+    return this.transactions.deleteTransaction(transactionId);
   }
 }

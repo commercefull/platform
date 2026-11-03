@@ -12,8 +12,8 @@
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { recordAuditLogUseCase } from '../../application/useCases/wired';
-import { logger } from '../../../../libs/logger';
 import type { AuditAction, ActorType, ResourceType } from '../../domain/enums/AuditAction';
+import { logCaughtError } from '../../../../libs/errors';
 
 interface AuditConfig {
   action: AuditAction;
@@ -154,10 +154,7 @@ function recordRequestAudit(req: HttpRequest, res: HttpResponse, config: AuditCo
       },
     })
     .catch((err: unknown) => {
-      logger.error('Audit middleware failed to record entry', {
-        action: config.action,
-        error: (err as Error).message,
-      });
+      logCaughtError('Audit middleware failed to record entry', err, { action: config.action });
     });
 }
 

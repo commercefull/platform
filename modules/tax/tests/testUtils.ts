@@ -81,12 +81,12 @@ export function createCustomerTaxExemption(overrides: Partial<CustomerTaxExempti
     status: 'approved',
     name: 'Resale Certificate',
     exemptionNumber: 'EX-123',
-    startDate: Date.now(),
+    startDate: new Date(),
     isVerified: true,
     exemptionPercent: 100,
     applicableTaxCategoryIds: null,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     ...overrides,
   };
 }

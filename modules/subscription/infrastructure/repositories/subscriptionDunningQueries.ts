@@ -5,7 +5,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { DunningAttempt, DunningStatus } from './subscriptionTypes';
 import { mapToDunningAttempt } from './subscriptionHelpers';
-
+import type { SubscriptionDunningAttempt as DbSubscriptionDunningAttempt } from '../../../../libs/db/types';
 
 export async function createDunningAttempt(attempt: {
   customerSubscriptionId: string;
@@ -17,7 +17,7 @@ export async function createDunningAttempt(attempt: {
 }): Promise<DunningAttempt> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSubscriptionDunningAttempt>(
     `INSERT INTO "subscriptionDunningAttempt" (
       "customerSubscriptionId", "subscriptionOrderId", "attemptNumber",
       "status", "amountCents", "currencyCode", "scheduledAt", "createdAt", "updatedAt"
@@ -39,7 +39,7 @@ export async function createDunningAttempt(attempt: {
 }
 
 export async function getDunningAttempts(customerSubscriptionId: string): Promise<DunningAttempt[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSubscriptionDunningAttempt[]>(
     'SELECT * FROM "subscriptionDunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
     [customerSubscriptionId],
   );
@@ -47,7 +47,7 @@ export async function getDunningAttempts(customerSubscriptionId: string): Promis
 }
 
 export async function getPendingDunningAttempts(beforeDate: Date): Promise<DunningAttempt[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSubscriptionDunningAttempt[]>(
     `SELECT * FROM "subscriptionDunningAttempt" 
      WHERE "status" = 'pending' AND "scheduledAt" <= $1 
      ORDER BY "scheduledAt" ASC`,
@@ -86,4 +86,3 @@ export async function updateDunningAttempt(
   params.push(dunningAttemptId);
   await query(`UPDATE "subscriptionDunningAttempt" SET ${setClause} WHERE "dunningAttemptId" = $${paramIndex}`, params);
 }
-

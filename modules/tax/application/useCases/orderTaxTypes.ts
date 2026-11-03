@@ -180,4 +180,3 @@ export function taxQuoteMessage(flags: {
   if (flags.hasAnyExemption) return 'Tax exemption applied';
   return undefined;
 }
-

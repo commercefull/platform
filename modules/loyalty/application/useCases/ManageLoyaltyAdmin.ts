@@ -1,11 +1,16 @@
-import type { LoyaltyRepository } from '../../domain/repositories/LoyaltyRepository';
+import type { LoyaltyTierRepository } from '../../domain/repositories/LoyaltyTierRepository';
+import type { LoyaltyPointsRepository } from '../../domain/repositories/LoyaltyPointsRepository';
+import type { LoyaltyTransactionRepository } from '../../domain/repositories/LoyaltyTransactionRepository';
+import type { LoyaltyRewardRepository } from '../../domain/repositories/LoyaltyRewardRepository';
 import { LoyaltyRewardNotFoundError, LoyaltyTierNotFoundError, LoyaltyValidationError } from '../../domain/errors/LoyaltyErrors';
+
+type LoyaltyAdminRepository = LoyaltyTierRepository & LoyaltyPointsRepository & LoyaltyTransactionRepository & LoyaltyRewardRepository;
 
 const REDEMPTION_STATUSES = ['pending', 'used', 'expired', 'cancelled'] as const;
 type RedemptionStatus = (typeof REDEMPTION_STATUSES)[number];
 
 export class ManageLoyaltyAdminUseCase {
-  constructor(private readonly loyaltyRepo: LoyaltyRepository) {}
+  constructor(private readonly loyaltyRepo: LoyaltyAdminRepository) {}
 
   async findAllTiers(includeInactive?: boolean) {
     return this.loyaltyRepo.findAllTiers(includeInactive);
@@ -20,13 +25,13 @@ export class ManageLoyaltyAdminUseCase {
     }
     return tier;
   }
-  async createTier(input: Omit<Parameters<LoyaltyRepository['createTier']>[0], 'type'> & { type?: string }) {
+  async createTier(input: Omit<Parameters<LoyaltyAdminRepository['createTier']>[0], 'type'> & { type?: string }) {
     if (!input.name || input.pointsThreshold === undefined || input.multiplier === undefined) {
       throw new LoyaltyValidationError('Name, pointsThreshold, and multiplier are required');
     }
     return this.loyaltyRepo.createTier({ ...input, type: input.type || 'points' });
   }
-  async updateTier(id: string, input: Parameters<LoyaltyRepository['updateTier']>[1]) {
+  async updateTier(id: string, input: Parameters<LoyaltyAdminRepository['updateTier']>[1]) {
     return this.loyaltyRepo.updateTier(id, input);
   }
   async deleteTier(id: string) {
@@ -45,13 +50,13 @@ export class ManageLoyaltyAdminUseCase {
     }
     return reward;
   }
-  async createReward(input: Parameters<LoyaltyRepository['createReward']>[0]) {
+  async createReward(input: Parameters<LoyaltyAdminRepository['createReward']>[0]) {
     if (!input.name || input.pointsCost === undefined) {
       throw new LoyaltyValidationError('Name and pointsCost are required');
     }
     return this.loyaltyRepo.createReward(input);
   }
-  async updateReward(id: string, input: Parameters<LoyaltyRepository['updateReward']>[1]) {
+  async updateReward(id: string, input: Parameters<LoyaltyAdminRepository['updateReward']>[1]) {
     return this.loyaltyRepo.updateReward(id, input);
   }
   async deleteReward(id: string) {

@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { ProductBundle as DbProductBundle, ProductBundleItem as DbProductBundleItem } from '../../../../libs/db/types';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
+import productBasePriceRepo from '../../../pricing/infrastructure/repositories/productBasePriceRepo';
 import { ProductPricingAdapter } from '../acl/ProductPricingAdapter';
 
 // ============================================================================
@@ -48,7 +49,7 @@ export async function getBundleItems(productBundleId: string): Promise<BundleIte
 // Bundle Pricing
 // ============================================================================
 
-const productPricingPort = new ProductPricingAdapter();
+const productPricingPort = new ProductPricingAdapter(productBasePriceRepo);
 
 /** Effective catalog price in integer cents, resolved from the pricing-owned store. */
 async function getProductPriceCents(productId: string, productVariantId?: string): Promise<number> {
@@ -169,11 +170,7 @@ export async function saveBundle(
 }
 
 /** Column values from "name" through "metadata", shared by insert and update. */
-function bundleFieldValues(
-  bundle: Partial<ProductBundle> & { name: string },
-  slug: string,
-  isActive: boolean,
-): unknown[] {
+function bundleFieldValues(bundle: Partial<ProductBundle> & { name: string }, slug: string, isActive: boolean): unknown[] {
   return [
     bundle.name,
     slug,

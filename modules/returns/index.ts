@@ -8,3 +8,13 @@ export * from './application/useCases';
 // Interface exports (routers, GraphQL)
 export { returnBusinessRouter } from './interface/routers/returnRouter';
 export * from './interface/controllers';
+
+// Domain entity exports
+export {
+  ReturnRuleScope,
+  RefundMethod,
+  ReturnRuleProps,
+  ReturnEvaluationContext,
+  ReturnRuleEvaluationResult,
+  ReturnRule,
+} from './domain/entities/ReturnRule';

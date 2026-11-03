@@ -2,17 +2,15 @@
 
 ## [1.7.3](https://github.com/commercefull/platform/compare/v1.7.2...v1.7.3) (2026-11-02)
 
-
 ### Bug Fixes
 
-* **deps:** bump minimatch to 11.0.3 for globparts DoS advisory ([be2f433](https://github.com/commercefull/platform/commit/be2f433bedd320df931183ab2c6d7657058cd6eb))
+- **deps:** bump minimatch to 11.0.3 for globparts DoS advisory ([be2f433](https://github.com/commercefull/platform/commit/be2f433bedd320df931183ab2c6d7657058cd6eb))
 
 ## [1.7.2](https://github.com/commercefull/platform/compare/v1.7.1...v1.7.2) (2026-11-02)
 
-
 ### Bug Fixes
 
-* **pricing:** preserve API field aliases in row mappers ([9be93d7](https://github.com/commercefull/platform/commit/9be93d77ba6a6ea8a71044d4810195d1483e544d))
+- **pricing:** preserve API field aliases in row mappers ([9be93d7](https://github.com/commercefull/platform/commit/9be93d77ba6a6ea8a71044d4810195d1483e544d))
 
 ## [1.7.1](https://github.com/commercefull/platform/compare/v1.7.0...v1.7.1) (2026-11-02)
 

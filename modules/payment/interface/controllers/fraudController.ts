@@ -7,13 +7,8 @@ import { jsonResponse } from 'libs/apiResponse';
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { manageFraudRecordsUseCase } from '../../application/useCases/wired';
 import { FraudRule, RuleType, CheckStatus, BlacklistType, RiskLevel } from '../../application/wired';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
-
-function respondError(res: HttpResponse, error: unknown, fallback: string): void {
-  jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) || fallback });
-}
 
 // ============================================================================
 // Fraud Rules
@@ -26,21 +21,14 @@ export const getFraudRules: AsyncHandler = async (req, res, _next) => {
 };
 
 export const getFraudRule: AsyncHandler = async (req, res, _next) => {
-  try {
-    jsonResponse(res, 200, { success: true, data: await manageFraudRecordsUseCase.getRule(req.params.id) });
-  } catch (error) {
-    respondError(res, error, 'Rule not found');
-  }
+  jsonResponse(res, 200, { success: true, data: await manageFraudRecordsUseCase.getRule(req.params.id) });
 };
 
 export const createFraudRule: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Partial<FraudRule> & { name: string; ruleType: RuleType; conditions: Record<string, unknown> };
-  try {
-    const rule = await manageFraudRecordsUseCase.saveRule(body);
-    jsonResponse(res, 201, { success: true, data: rule });
-  } catch (error) {
-    respondError(res, error, 'Failed to create fraud rule');
-  }
+
+  const rule = await manageFraudRecordsUseCase.saveRule(body);
+  jsonResponse(res, 201, { success: true, data: rule });
 };
 
 export const updateFraudRule: AsyncHandler = async (req, res, _next) => {
@@ -68,11 +56,7 @@ export const getFraudChecks: AsyncHandler = async (req, res, _next) => {
 };
 
 export const getFraudCheck: AsyncHandler = async (req, res, _next) => {
-  try {
-    jsonResponse(res, 200, { success: true, data: await manageFraudRecordsUseCase.getCheck(req.params.id) });
-  } catch (error) {
-    respondError(res, error, 'Fraud check not found');
-  }
+  jsonResponse(res, 200, { success: true, data: await manageFraudRecordsUseCase.getCheck(req.params.id) });
 };
 
 export const getPendingReviews: AsyncHandler = async (req, res, _next) => {
@@ -83,12 +67,9 @@ export const getPendingReviews: AsyncHandler = async (req, res, _next) => {
 export const reviewFraudCheck: AsyncHandler = async (req, res, _next) => {
   const body = req.body as { decision?: string; notes?: string };
   const reviewedBy = req.user?.userId || req.user?.organizationId || '';
-  try {
-    await manageFraudRecordsUseCase.reviewCheck(req.params.id, body.decision, reviewedBy, body.notes);
-    jsonResponse(res, 200, { success: true, message: 'Review submitted' });
-  } catch (error) {
-    respondError(res, error, 'Failed to submit review');
-  }
+
+  await manageFraudRecordsUseCase.reviewCheck(req.params.id, body.decision, reviewedBy, body.notes);
+  jsonResponse(res, 200, { success: true, message: 'Review submitted' });
 };
 
 // ============================================================================
@@ -115,12 +96,9 @@ export const addToBlacklist: AsyncHandler = async (req, res, _next) => {
     relatedCustomerId?: string;
     expiresAt?: Date;
   };
-  try {
-    const entry = await manageFraudRecordsUseCase.addToBlacklist({ ...body, addedBy });
-    jsonResponse(res, 201, { success: true, data: entry });
-  } catch (error) {
-    respondError(res, error, 'Failed to add blacklist entry');
-  }
+
+  const entry = await manageFraudRecordsUseCase.addToBlacklist({ ...body, addedBy });
+  jsonResponse(res, 201, { success: true, data: entry });
 };
 
 export const removeFromBlacklist: AsyncHandler = async (req, res, _next) => {

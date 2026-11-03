@@ -8,12 +8,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { ReportData, ReportType } from '../../domain/entities/ReportEntities';
 import { UnknownReportTypeError } from '../../domain/errors/ReportingErrors';
-import {
-  generateTaxReport,
-  generateOrderDetail,
-  generatePaymentReport,
-  generateFulfillmentReport,
-} from './reportSecondaryReports';
+import { generateTaxReport, generateOrderDetail, generatePaymentReport, generateFulfillmentReport } from './reportSecondaryReports';
 
 export type { ReportParameters } from './reportParams';
 import type { ReportParameters } from './reportParams';

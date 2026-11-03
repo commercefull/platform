@@ -34,3 +34,10 @@ export class CredentialEncryptionError extends AppError {
     this.name = 'CredentialEncryptionError';
   }
 }
+
+export class IntegrationConfigurationError extends AppError {
+  constructor(message: string) {
+    super(message, 500, { code: 'INTEGRATION_CONFIGURATION' });
+    this.name = 'IntegrationConfigurationError';
+  }
+}

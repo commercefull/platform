@@ -83,8 +83,6 @@ export class CreateCatalogVariantUseCase {
   }
 
   private hasPriceInput(command: CreateCatalogVariantCommand): boolean {
-    return (
-      command.priceCents !== undefined || command.salePriceCents !== undefined || command.compareAtPriceCents !== undefined
-    );
+    return command.priceCents !== undefined || command.salePriceCents !== undefined || command.compareAtPriceCents !== undefined;
   }
 }

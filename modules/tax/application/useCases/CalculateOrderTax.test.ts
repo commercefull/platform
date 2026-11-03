@@ -162,8 +162,8 @@ describe('CalculateOrderTaxUseCase', () => {
     it('should not exempt when the certificate has expired', async () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([
         createCustomerTaxExemption({
-          startDate: Date.now() - 86400000 * 365,
-          expiryDate: Date.now() - 86400000,
+          startDate: new Date(Date.now() - 86400000 * 365),
+          expiryDate: new Date(Date.now() - 86400000),
         }),
       ]);
 

@@ -1,5 +1,12 @@
 import { query, queryOne } from '../../../libs/db';
-import type { GdprService } from '../domain/repositories/GdprRepository';
+import type {
+  ActivityExportRow,
+  AddressExportRow,
+  ConsentExportRow,
+  CustomerExportRow,
+  GdprService,
+  OrderExportRow,
+} from '../domain/repositories/GdprRepository';
 import gdprDataRepository from '../infrastructure/repositories/GdprDataRepository';
 
 export { gdprDataRepository };
@@ -10,27 +17,27 @@ export function createGdprService(): GdprService {
     cookieConsents: gdprDataRepository.cookieConsent,
 
     exportCustomerData: async (customerId: string) => {
-      const customer = await queryOne<Record<string, unknown>>(
+      const customer = await queryOne<CustomerExportRow>(
         'SELECT "customerId", "email", "firstName", "lastName", "phone", "createdAt", "updatedAt" FROM "customer" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
         [customerId],
       );
 
-      const orders = await query<Record<string, unknown>[]>(
+      const orders = await query<OrderExportRow[]>(
         'SELECT "orderId", "orderNumber", status, "totalAmountCents", "currencyCode", "createdAt" FROM "order" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
         [customerId],
       );
 
-      const addresses = await query<Record<string, unknown>[]>(
+      const addresses = await query<AddressExportRow[]>(
         'SELECT "addressLine1", "addressLine2", city, state, "postalCode", country, "addressType" FROM "customerAddress" WHERE "customerId" = $1',
         [customerId],
       );
 
-      const consents = await query<Record<string, unknown>[]>(
-        'SELECT "cookieCategory", "consentGiven", "consentDate" FROM "gdprCookieConsent" WHERE "customerId" = $1 ORDER BY "consentDate" DESC',
+      const consents = await query<ConsentExportRow[]>(
+        'SELECT necessary, functional, analytics, marketing, "thirdParty", "consentedAt" FROM "gdprCookieConsent" WHERE "customerId" = $1 ORDER BY "consentedAt" DESC',
         [customerId],
       );
 
-      const activities = await query<Record<string, unknown>[]>(
+      const activities = await query<ActivityExportRow[]>(
         'SELECT "eventType", "createdAt" FROM "analyticsReportEvent" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT 100',
         [customerId],
       );

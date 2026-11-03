@@ -1,10 +1,10 @@
 import '../../tests/testUtils';
 import { ManageStorefrontLoyaltyUseCase } from './ManageStorefrontLoyalty';
-import { createLoyaltyRepository, createLoyaltyReward } from '../../tests/testUtils';
+import { createStorefrontLoyaltyRepositories, createLoyaltyReward, createLoyaltyPoints } from '../../tests/testUtils';
 
 describe('ManageStorefrontLoyaltyUseCase', () => {
-  const storefrontLoyaltyRepository = createLoyaltyRepository();
-  const useCase = new ManageStorefrontLoyaltyUseCase(storefrontLoyaltyRepository);
+  const { storefrontLoyaltyRepository, loyaltyPointsRepository } = createStorefrontLoyaltyRepositories();
+  const useCase = new ManageStorefrontLoyaltyUseCase(storefrontLoyaltyRepository, loyaltyPointsRepository);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,11 +35,16 @@ describe('ManageStorefrontLoyaltyUseCase', () => {
     expect(storefrontLoyaltyRepository.findAvailableRewards).toHaveBeenCalledWith(500);
   });
 
-  it('should deduct points through the repository', async () => {
-    storefrontLoyaltyRepository.deductPoints.mockResolvedValue(undefined);
+  it('should redeem points through the canonical points adjustment', async () => {
+    loyaltyPointsRepository.adjustCustomerPoints.mockResolvedValue(createLoyaltyPoints());
 
-    await useCase.deductPoints('c1', 100);
+    await useCase.redeemPoints('c1', 100, 'Redeemed: Reward');
 
-    expect(storefrontLoyaltyRepository.deductPoints).toHaveBeenCalledWith('c1', 100);
+    expect(loyaltyPointsRepository.adjustCustomerPoints).toHaveBeenCalledWith({
+      customerId: 'c1',
+      pointsChange: -100,
+      action: 'redemption',
+      description: 'Redeemed: Reward',
+    });
   });
 });

@@ -422,5 +422,3 @@ export const createPaymentIntent = async (req: HttpRequest, res: HttpResponse): 
 
   respond(req, res, result as unknown as unknown, 201);
 };
-
-

@@ -8,10 +8,21 @@
  */
 
 import { CredentialSubjectPort, CredentialSubject, CreateCredentialSubjectData } from '../../application/ports/CredentialSubjectPort';
-import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
+import type { OrganizationRepository } from '../../../organization';
 
 export class OrganizationCredentialSubjectAdapter implements CredentialSubjectPort {
-  constructor(private readonly repo: typeof organizationRepo) {}
+  constructor(
+    private readonly repo: Pick<
+      OrganizationRepository,
+      | 'authenticate'
+      | 'findById'
+      | 'findByEmail'
+      | 'createWithPassword'
+      | 'changePassword'
+      | 'createPasswordResetToken'
+      | 'verifyPasswordResetToken'
+    >,
+  ) {}
 
   async authenticate(email: string, password: string): Promise<CredentialSubject | null> {
     const result = await this.repo.authenticate({ email, password });

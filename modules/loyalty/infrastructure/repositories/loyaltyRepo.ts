@@ -21,14 +21,7 @@ import {
   LoyaltyAccountNotFoundError,
   FailedToAdjustPointsError,
 } from '../../domain/errors/LoyaltyErrors';
-import {
-  LoyaltyTier,
-  LoyaltyPoints,
-  LoyaltyTransaction,
-  LoyaltyReward,
-  LoyaltyRedemption,
-  LoyaltyPointsAction,
-} from './loyaltyRepoTypes';
+import { LoyaltyTier, LoyaltyPoints, LoyaltyTransaction, LoyaltyReward, LoyaltyRedemption, LoyaltyPointsAction } from './loyaltyRepoTypes';
 import type {
   CreateLoyaltyTierInput,
   UpdateLoyaltyTierInput,
@@ -36,14 +29,7 @@ import type {
   UpdateLoyaltyRewardInput,
   CreateLoyaltyTransactionInput,
 } from './loyaltyRepoTypes';
-export {
-  LoyaltyTier,
-  LoyaltyPoints,
-  LoyaltyTransaction,
-  LoyaltyReward,
-  LoyaltyRedemption,
-  LoyaltyPointsAction,
-} from './loyaltyRepoTypes';
+export { LoyaltyTier, LoyaltyPoints, LoyaltyTransaction, LoyaltyReward, LoyaltyRedemption, LoyaltyPointsAction } from './loyaltyRepoTypes';
 export type {
   CreateLoyaltyTierInput,
   UpdateLoyaltyTierInput,

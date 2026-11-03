@@ -8,7 +8,8 @@ import * as crypto from 'crypto';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../../modules/payment/application/useCases/InitiatePayment';
 import { PaymentDataRepository } from '../../../modules/payment/infrastructure';
 
-const PaymentRepo = PaymentDataRepository.payments;
+const paymentTransactions = PaymentDataRepository.transactions;
+const paymentGatewayConfig = PaymentDataRepository.gatewayConfig;
 import { eventBus, EventPayload } from '../../../libs/events/eventBus';
 import { PaymentTransaction } from '../../../modules/payment/domain/entities/PaymentTransaction';
 import { generateUUID } from '../../../libs/uuid';
@@ -60,7 +61,7 @@ describe('Payment Integration Tests', () => {
         received.push(p);
       });
 
-      const useCase = new InitiatePaymentUseCase(PaymentRepo);
+      const useCase = new InitiatePaymentUseCase(paymentTransactions, paymentGatewayConfig);
       let result: Record<string, unknown>;
       try {
         result = (await useCase.execute(
@@ -83,7 +84,7 @@ describe('Payment Integration Tests', () => {
     });
 
     it('REQ 2.1.2 — amountCents <= 0 throws correct error', async () => {
-      const useCase = new InitiatePaymentUseCase(PaymentRepo);
+      const useCase = new InitiatePaymentUseCase(paymentTransactions, paymentGatewayConfig);
       await expect(
         useCase.execute(
           new InitiatePaymentCommand({ orderId: 'order-id', amountCents: 0, currency: 'USD', paymentMethodConfigId: 'default' }),
@@ -135,7 +136,7 @@ describe('Payment Integration Tests', () => {
       });
       tx.markAsPaid(extId, {});
       try {
-        await PaymentRepo.saveTransaction(tx);
+        await paymentTransactions.saveTransaction(tx);
       } catch {
         return;
       }
@@ -169,7 +170,7 @@ describe('Payment Integration Tests', () => {
       });
       tx.fail('card_declined', 'Card declined', {});
       try {
-        await PaymentRepo.saveTransaction(tx);
+        await paymentTransactions.saveTransaction(tx);
       } catch {
         return;
       }

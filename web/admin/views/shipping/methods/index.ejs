@@ -165,7 +165,6 @@
         })
         .catch(error => {
           alert('<%= t("distribution:shipping.errorDeletingMethod") %>');
-          console.error('Error:', error);
         });
     };
     $('#deleteModal').modal('show');
@@ -188,7 +187,6 @@
       })
       .catch(error => {
         alert('<%= t("distribution:shipping.errorActivatingMethod") %>');
-        console.error('Error:', error);
       });
   }
 
@@ -209,7 +207,6 @@
       })
       .catch(error => {
         alert('<%= t("distribution:shipping.errorDeactivatingMethod") %>');
-        console.error('Error:', error);
       });
   }
 </script>

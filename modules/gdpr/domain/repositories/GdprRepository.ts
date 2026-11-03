@@ -84,6 +84,61 @@ export interface GdprCookieConsentRepository {
 // GDPR Service Interface (combines both repositories)
 // ============================================================================
 
+// ============================================================================
+// Customer Data Export
+// ============================================================================
+
+export interface CustomerExportRow {
+  customerId: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface OrderExportRow {
+  orderId: string;
+  orderNumber: string;
+  status: string;
+  totalAmountCents: number;
+  currencyCode: string;
+  createdAt: Date;
+}
+
+export interface AddressExportRow {
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string | null;
+  country: string;
+  addressType: 'billing' | 'shipping' | 'both';
+}
+
+export interface ConsentExportRow {
+  necessary: boolean;
+  functional: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  thirdParty: boolean;
+  consentedAt: Date;
+}
+
+export interface ActivityExportRow {
+  eventType: string;
+  createdAt: Date;
+}
+
+export interface CustomerDataExport {
+  customer: CustomerExportRow | { customerId: string };
+  orders: OrderExportRow[];
+  addresses: AddressExportRow[];
+  consents: ConsentExportRow[];
+  activities: ActivityExportRow[];
+}
+
 export interface GdprService {
   // Data Request operations
   dataRequests: GdprDataRequestRepository;
@@ -92,13 +147,7 @@ export interface GdprService {
   cookieConsents: GdprCookieConsentRepository;
 
   // Data export helpers
-  exportCustomerData(customerId: string): Promise<{
-    customer: Record<string, unknown>;
-    orders: Record<string, unknown>[];
-    addresses: Record<string, unknown>[];
-    consents: Record<string, unknown>[];
-    activities: Record<string, unknown>[];
-  }>;
+  exportCustomerData(customerId: string): Promise<CustomerDataExport>;
 
   // Data deletion helpers
   anonymizeCustomerData(customerId: string): Promise<void>;

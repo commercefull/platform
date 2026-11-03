@@ -171,7 +171,18 @@ export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
     expiresAt: v => (v ? new Date(v) : undefined),
     isActive: v => v !== 'false',
   };
-  const fields = { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive };
+  const fields = {
+    name,
+    description,
+    pointsCost,
+    discountAmountCents,
+    discountPercent,
+    discountCode,
+    freeShipping,
+    productIds,
+    expiresAt,
+    isActive,
+  };
   for (const [key, value] of Object.entries(fields)) {
     if (value !== undefined) updates[key] = transforms[key](value);
   }

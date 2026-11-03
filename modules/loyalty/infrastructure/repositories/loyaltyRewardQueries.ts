@@ -6,21 +6,9 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import type {
-  LoyaltyReward as DbLoyaltyReward,
-  LoyaltyRedemption as DbLoyaltyRedemption,
-} from '../../../../libs/db/types';
-import {
-  LoyaltyRewardNotFoundError,
-  RedemptionNotFoundError,
-  FailedToCreateLoyaltyError,
-} from '../../domain/errors/LoyaltyErrors';
-import type {
-  CreateLoyaltyRewardInput,
-  LoyaltyRedemption,
-  LoyaltyReward,
-  UpdateLoyaltyRewardInput,
-} from './loyaltyRepoTypes';
+import type { LoyaltyReward as DbLoyaltyReward, LoyaltyRedemption as DbLoyaltyRedemption } from '../../../../libs/db/types';
+import { LoyaltyRewardNotFoundError, RedemptionNotFoundError, FailedToCreateLoyaltyError } from '../../domain/errors/LoyaltyErrors';
+import type { CreateLoyaltyRewardInput, LoyaltyRedemption, LoyaltyReward, UpdateLoyaltyRewardInput } from './loyaltyRepoTypes';
 
 // ============================================================================
 // Reward Queries

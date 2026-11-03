@@ -1,6 +1,5 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { ManageNotificationPreferenceCommand } from '../../application/useCases/ManageNotificationPreference';
 import { RegisterNotificationDeviceCommand } from '../../application/useCases/RegisterNotificationDevice';
 import {
@@ -10,10 +9,6 @@ import {
   registerNotificationDeviceUseCase,
 } from '../../application/useCases/wired';
 import { NotificationPreference } from '../../application/wired';
-
-function respondUseCaseError(res: HttpResponse, error: unknown, fallback: string): void {
-  errorResponse(res, getErrorMessage(error) || fallback, getErrorStatusCode(error));
-}
 
 function mapPreference(p: NotificationPreference) {
   return {
@@ -55,12 +50,8 @@ export const getPreferenceById = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  try {
-    const preference = await manageNotificationPreferencesUseCase.getOwnedById(String(req.params.id), userId);
-    successResponse(res, mapPreference(preference));
-  } catch (error) {
-    respondUseCaseError(res, error, 'Preference not found');
-  }
+  const preference = await manageNotificationPreferencesUseCase.getOwnedById(String(req.params.id), userId);
+  successResponse(res, mapPreference(preference));
 };
 
 /**
@@ -140,17 +131,13 @@ export const updatePreference = async (req: HttpRequest, res: HttpResponse): Pro
     metadata?: Record<string, unknown> | null;
   };
 
-  try {
-    const updated = await manageNotificationPreferencesUseCase.updateOwned(id, userId, {
-      channelPreferences,
-      isEnabled,
-      schedulePreferences,
-      metadata,
-    });
-    successResponse(res, mapPreference(updated));
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to update preference');
-  }
+  const updated = await manageNotificationPreferencesUseCase.updateOwned(id, userId, {
+    channelPreferences,
+    isEnabled,
+    schedulePreferences,
+    metadata,
+  });
+  successResponse(res, mapPreference(updated));
 };
 
 /**
@@ -167,12 +154,8 @@ export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promi
   const id = String(req.params.id);
   const { schedulePreferences } = req.body as { schedulePreferences?: Record<string, unknown> | null };
 
-  try {
-    const updated = await manageNotificationPreferencesUseCase.updateOwned(id, userId, { schedulePreferences });
-    successResponse(res, mapPreference(updated));
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to update schedule preferences');
-  }
+  const updated = await manageNotificationPreferencesUseCase.updateOwned(id, userId, { schedulePreferences });
+  successResponse(res, mapPreference(updated));
 };
 
 /**
@@ -188,12 +171,8 @@ export const deletePreference = async (req: HttpRequest, res: HttpResponse): Pro
 
   const id = String(req.params.id);
 
-  try {
-    const result = await manageNotificationPreferencesUseCase.deleteOwned(id, userId);
-    successResponse(res, result);
-  } catch (error) {
-    respondUseCaseError(res, error, 'Failed to delete preference');
-  }
+  const result = await manageNotificationPreferencesUseCase.deleteOwned(id, userId);
+  successResponse(res, result);
 };
 
 /**

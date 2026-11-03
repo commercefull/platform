@@ -9,10 +9,10 @@
  */
 
 import { TaxableBasketPort, TaxableBasket } from '../../application/ports/TaxableBasketPort';
-import type basketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
+import type { BasketRepository } from '../../../basket/domain/repositories/BasketRepository';
 
 export class BasketTaxableBasketAdapter implements TaxableBasketPort {
-  constructor(private readonly baskets: Pick<typeof basketRepo, 'findById'>) {}
+  constructor(private readonly baskets: Pick<BasketRepository, 'findById'>) {}
 
   async findById(basketId: string): Promise<TaxableBasket | null> {
     const basket = await this.baskets.findById(basketId);

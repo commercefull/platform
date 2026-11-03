@@ -20,7 +20,6 @@ import {
   deleteProductUseCase,
   getProductStoreAvailabilityUseCase,
 } from '../../application/useCases/wired';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 // ============================================================================
 // Request Body Interfaces
@@ -319,12 +318,8 @@ export const updateProductStatus = async (req: HttpRequest, res: HttpResponse): 
     return;
   }
 
-  try {
-    const product = await updateProductStatusUseCase.updateStatus(productId, status as ProductStatus);
-    respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const product = await updateProductStatusUseCase.updateStatus(productId, status as ProductStatus);
+  respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200);
 };
 
 /**
@@ -341,12 +336,8 @@ export const updateProductVisibility = async (req: HttpRequest, res: HttpRespons
     return;
   }
 
-  try {
-    const product = await updateProductStatusUseCase.updateVisibility(productId, visibility as ProductVisibility);
-    respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const product = await updateProductStatusUseCase.updateVisibility(productId, visibility as ProductVisibility);
+  respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
 };
 
 /**
@@ -357,12 +348,8 @@ export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promis
   const { productId } = req.params;
   const { permanent } = req.query;
 
-  try {
-    await deleteProductUseCase.execute(productId, permanent === 'true');
-    respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  await deleteProductUseCase.execute(productId, permanent === 'true');
+  respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200);
 };
 
 /**
@@ -372,17 +359,13 @@ export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promis
 export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
-  try {
-    const product = await updateProductStatusUseCase.publish(productId);
-    respond(
-      req,
-      res,
-      { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
-      200,
-    );
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const product = await updateProductStatusUseCase.publish(productId);
+  respond(
+    req,
+    res,
+    { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
+    200,
+  );
 };
 
 /**
@@ -392,12 +375,8 @@ export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promi
 export const unpublishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
-  try {
-    const product = await updateProductStatusUseCase.unpublish(productId);
-    respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const product = await updateProductStatusUseCase.unpublish(productId);
+  respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
 };
 
 // Re-exports — handlers live in productBusinessOpsController.ts

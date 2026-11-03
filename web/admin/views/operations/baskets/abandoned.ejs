@@ -297,7 +297,6 @@ document.getElementById('confirmRecoveryBtn').onclick = function() {
   })
   .catch(error => {
     alert('<%= t('operations:errorSendingRecovery') %>');
-    console.error('Error:', error);
   });
 };
 
@@ -320,7 +319,6 @@ function cleanupExpired() {
     })
     .catch(error => {
       alert('<%= t('operations:errorCleaningUp') %>');
-      console.error('Error:', error);
     });
   }
 }

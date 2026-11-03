@@ -76,10 +76,7 @@ export class ValidateCouponUseCase {
    * Returns an invalid response describing the first failed eligibility check,
    * or null when the coupon may be applied.
    */
-  private async checkEligibility(
-    command: ValidateCouponCommand,
-    coupon: PromotionCoupon,
-  ): Promise<ValidateCouponResponse | null> {
+  private async checkEligibility(command: ValidateCouponCommand, coupon: PromotionCoupon): Promise<ValidateCouponResponse | null> {
     if (!coupon.isActive) {
       return { valid: false, message: 'Coupon is not active', errors: ['coupon_inactive'] };
     }
@@ -108,10 +105,7 @@ export class ValidateCouponUseCase {
     return this.checkCustomerUsage(command, coupon);
   }
 
-  private async checkCustomerUsage(
-    command: ValidateCouponCommand,
-    coupon: PromotionCoupon,
-  ): Promise<ValidateCouponResponse | null> {
+  private async checkCustomerUsage(command: ValidateCouponCommand, coupon: PromotionCoupon): Promise<ValidateCouponResponse | null> {
     if (!command.customerId || !coupon.maxUsagePerCustomer) {
       return null;
     }

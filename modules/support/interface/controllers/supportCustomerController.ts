@@ -6,7 +6,6 @@ import { jsonResponse } from 'libs/apiResponse';
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { manageCustomerTicketsUseCase, manageFaqUseCase, manageStockAlertsUseCase } from '../../application/wired';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { toMinorUnits } from '../../../../libs/money';
 import { AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory } from '../../application/wired';
 
@@ -58,37 +57,28 @@ export const getMyTickets: AsyncHandler = async (req, res, _next) => {
 
 export const getMyTicket: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  try {
-    const data = await manageCustomerTicketsUseCase.getTicketDetail(req.params.id, customerId || '');
-    jsonResponse(res, 200, { success: true, data });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+
+  const data = await manageCustomerTicketsUseCase.getTicketDetail(req.params.id, customerId || '');
+  jsonResponse(res, 200, { success: true, data });
 };
 
 export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  try {
-    const message = await manageCustomerTicketsUseCase.addCustomerMessage(
-      req.params.id,
-      customerId || '',
-      req.body as { name?: string; email?: string; message: string },
-    );
-    jsonResponse(res, 201, { success: true, data: message });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+
+  const message = await manageCustomerTicketsUseCase.addCustomerMessage(
+    req.params.id,
+    customerId || '',
+    req.body as { name?: string; email?: string; message: string },
+  );
+  jsonResponse(res, 201, { success: true, data: message });
 };
 
 export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { satisfaction, feedback } = req.body as { satisfaction: number; feedback?: string };
-  try {
-    await manageCustomerTicketsUseCase.submitFeedback(req.params.id, customerId || '', satisfaction, feedback);
-    jsonResponse(res, 200, { success: true, message: 'Feedback submitted' });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+
+  await manageCustomerTicketsUseCase.submitFeedback(req.params.id, customerId || '', satisfaction, feedback);
+  jsonResponse(res, 200, { success: true, message: 'Feedback submitted' });
 };
 
 // ============================================================================

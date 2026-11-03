@@ -1,11 +1,17 @@
 /**
  * Admin GDPR Repository
- * Handles legacy GDPR queries for the admin hub that use the older gdprRequest table
- * with customer email/name columns and consent stats from the customer table
+ * GDPR data request queries for the admin hub plus consent stats from the customer table
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { GdprDataRequest as DbGdprDataRequest } from '../../../../libs/db/types';
+
+type GdprRequestWithCustomerRow = DbGdprDataRequest & {
+  customerName: string | null;
+  customerEmail: string | null;
+};
 import { generateUUID } from '../../../../libs/uuid';
+import { CustomerIdRequiredError } from '../../domain/errors/GdprErrors';
 
 // ============================================================================
 // Types
@@ -34,7 +40,7 @@ async function getGdprStats(): Promise<GdprStats> {
       COUNT(CASE WHEN "status" = 'pending' THEN 1 END) as "pendingRequests",
       COUNT(CASE WHEN "status" = 'completed' AND "updatedAt" >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as "completedRequests",
       AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 86400) as "avgProcessingDays"
-     FROM "gdprRequest"`,
+     FROM "gdprDataRequest"`,
   );
 
   return {
@@ -69,11 +75,10 @@ async function getConsentStats(): Promise<ConsentStats> {
 
 async function findRecentRequests(limit: number = 20): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<GdprRequestWithCustomerRow[]>(
       `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
-       FROM "gdprRequest" gr
+       FROM "gdprDataRequest" gr
        LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
-       WHERE gr."deletedAt" IS NULL
        ORDER BY gr."createdAt" DESC
        LIMIT $1`,
       [limit],
@@ -82,11 +87,11 @@ async function findRecentRequests(limit: number = 20): Promise<unknown[]> {
 }
 
 async function findRequestById(requestId: string): Promise<unknown | null> {
-  return queryOne<unknown>(
+  return queryOne<GdprRequestWithCustomerRow>(
     `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
-     FROM "gdprRequest" gr
+     FROM "gdprDataRequest" gr
      LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
-     WHERE gr."requestId" = $1 AND gr."deletedAt" IS NULL`,
+     WHERE gr."gdprDataRequestId" = $1`,
     [requestId],
   );
 }
@@ -106,31 +111,25 @@ async function createRequest(params: {
   customerName?: string;
   dueDate: Date;
 }): Promise<void> {
+  if (!params.customerId) {
+    throw new CustomerIdRequiredError();
+  }
   await query(
-    `INSERT INTO "gdprRequest" ("requestId", "customerId", "requestType", "status", "description", "customerEmail", "customerName", "dueDate", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
-    [
-      generateUUID(),
-      params.customerId || null,
-      params.requestType,
-      'pending',
-      params.description || null,
-      params.customerEmail,
-      params.customerName || null,
-      params.dueDate,
-    ],
+    `INSERT INTO "gdprDataRequest" ("gdprDataRequestId", "customerId", "requestType", "status", "reason", "deadlineAt", "createdAt", "updatedAt")
+     VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
+    [generateUUID(), params.customerId, params.requestType, 'pending', params.description || null, params.dueDate],
   );
 }
 
 async function updateStatus(requestId: string, status: string): Promise<void> {
-  await query(`UPDATE "gdprRequest" SET "status" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`, [status, requestId]);
+  await query(`UPDATE "gdprDataRequest" SET "status" = $1, "updatedAt" = NOW() WHERE "gdprDataRequestId" = $2`, [status, requestId]);
 }
 
 async function completeRequest(requestId: string, notes?: string): Promise<void> {
-  await query(`UPDATE "gdprRequest" SET "status" = 'completed', "notes" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`, [
-    notes,
-    requestId,
-  ]);
+  await query(
+    `UPDATE "gdprDataRequest" SET "status" = 'completed', "adminNotes" = $1, "updatedAt" = NOW() WHERE "gdprDataRequestId" = $2`,
+    [notes, requestId],
+  );
 }
 
 export default {

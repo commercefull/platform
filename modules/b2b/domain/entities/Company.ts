@@ -2,6 +2,7 @@ export type CompanyStatus = 'pending' | 'approved' | 'suspended' | 'terminated';
 
 import { CompanyStatusError, B2BValidationError } from '../errors/B2BErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export type PaymentTerms = 'net15' | 'net30' | 'net60' | 'immediate' | 'prepaid';
 
 export interface CompanyProps {
@@ -61,7 +62,7 @@ export class Company {
   }): Company {
     const now = new Date();
     return new Company({
-      companyId: crypto.randomUUID(),
+      companyId: generateUUID(),
       organizationId: input.organizationId,
       name: input.name,
       legalName: input.legalName,

@@ -1,14 +1,16 @@
-import { lazyMock, createOrderReturn } from '../../tests/testUtils';
+import { lazyMock } from '../../tests/testUtils';
 import { ManageStorefrontReturnsUseCase } from './ManageStorefrontReturns';
-import type { OrderReturnRepository } from '../../domain/repositories/OrderReturnRepository';
+import type { OrderReturnRepository, StorefrontReturnWriter } from '../../domain/repositories/OrderReturnRepository';
 
 describe('ManageStorefrontReturnsUseCase', () => {
   let useCase: ManageStorefrontReturnsUseCase;
   let returnRepo: jest.Mocked<OrderReturnRepository>;
+  let returnWriter: jest.Mocked<StorefrontReturnWriter>;
 
   beforeEach(() => {
     returnRepo = lazyMock<OrderReturnRepository>();
-    useCase = new ManageStorefrontReturnsUseCase(returnRepo);
+    returnWriter = lazyMock<StorefrontReturnWriter>();
+    useCase = new ManageStorefrontReturnsUseCase(returnRepo, returnWriter);
   });
 
   it('should find returns by customer with order numbers', async () => {
@@ -37,12 +39,12 @@ describe('ManageStorefrontReturnsUseCase', () => {
   });
 
   it('should create a simple return', async () => {
-    returnRepo.createSimple.mockResolvedValue(createOrderReturn({ orderReturnId: 'r2' }));
+    returnWriter.createSimple.mockResolvedValue({ orderReturnId: 'r2' });
 
-    const result = await useCase.createSimple('o1', 'Damaged', 'Item broken');
+    const result = await useCase.createSimple('o1', 'c1', 'Damaged', 'Item broken');
 
-    expect(result?.orderReturnId).toBe('r2');
-    expect(returnRepo.createSimple).toHaveBeenCalledWith('o1', 'Damaged', 'Item broken');
+    expect(result).toEqual({ orderReturnId: 'r2' });
+    expect(returnWriter.createSimple).toHaveBeenCalledWith('o1', 'c1', 'Damaged', 'Item broken');
   });
 
   it('should find a return by ID with order number', async () => {

@@ -3,8 +3,6 @@ import { successResponse, errorResponse, validationErrorResponse } from '../../.
 import type { UpdateZoneInput } from '../../domain/repositories/WarehouseRepository';
 import type { WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
 import { manageWarehouseAdminUseCase, manageZonesUseCase } from '../../application/wired';
-import { useCaseErrorResponse } from './warehouseControllerShared';
-
 
 interface CreateWarehouseBody {
   name: string;
@@ -367,12 +365,8 @@ interface CreateZoneBody {
 export const createZone = async (req: HttpRequest<Record<string, string>, unknown, CreateZoneBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const zone = await manageZonesUseCase.create(id, req.body);
-    successResponse(res, zone, 201);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const zone = await manageZonesUseCase.create(id, req.body);
+  successResponse(res, zone, 201);
 };
 
 export const getZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -394,23 +388,15 @@ export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<
 export const updateZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
-  try {
-    const zone = await manageZonesUseCase.update(zoneId, req.body as UpdateZoneInput);
-    successResponse(res, zone);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const zone = await manageZonesUseCase.update(zoneId, req.body as UpdateZoneInput);
+  successResponse(res, zone);
 };
 
 export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
-  try {
-    await manageZonesUseCase.delete(zoneId);
-    successResponse(res, { message: 'Zone deleted successfully' });
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  await manageZonesUseCase.delete(zoneId);
+  successResponse(res, { message: 'Zone deleted successfully' });
 };
 
 export {

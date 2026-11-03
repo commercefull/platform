@@ -12,7 +12,6 @@ import {
   manageNotificationRecordsUseCase,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
 // Typed body interfaces
 interface CreateNotificationBody {
@@ -69,10 +68,6 @@ interface UserRequest extends HttpRequest {
   };
 }
 
-function respondError(res: HttpResponse, error: unknown, fallback: string): void {
-  jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) || fallback });
-}
-
 // ============================================================================
 // Existing notification CRUD handlers
 // ============================================================================
@@ -91,11 +86,8 @@ export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): 
 
 export const getNotificationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  try {
-    jsonResponse(res, 200, { success: true, data: await manageNotificationRecordsUseCase.getById(id) });
-  } catch (error) {
-    respondError(res, error, 'Notification not found');
-  }
+
+  jsonResponse(res, 200, { success: true, data: await manageNotificationRecordsUseCase.getById(id) });
 };
 
 export const createNotification = async (
@@ -103,23 +95,20 @@ export const createNotification = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
-  try {
-    const notification = await manageNotificationRecordsUseCase.create({
-      userId,
-      userType,
-      type,
-      title,
-      content,
-      channel,
-      priority,
-      category,
-      data,
-      metadata,
-    });
-    jsonResponse(res, 201, { success: true, data: notification });
-  } catch (error) {
-    respondError(res, error, 'Failed to create notification');
-  }
+
+  const notification = await manageNotificationRecordsUseCase.create({
+    userId,
+    userType,
+    type,
+    title,
+    content,
+    channel,
+    priority,
+    category,
+    data,
+    metadata,
+  });
+  jsonResponse(res, 201, { success: true, data: notification });
 };
 
 export const updateNotification = async (
@@ -128,21 +117,15 @@ export const updateNotification = async (
 ): Promise<void> => {
   const { id } = req.params;
   const { title, content, priority, category, data, metadata } = req.body;
-  try {
-    const updated = await manageNotificationRecordsUseCase.update(id, { title, content, priority, category, data, metadata });
-    jsonResponse(res, 200, { success: true, data: updated });
-  } catch (error) {
-    respondError(res, error, 'Failed to update notification');
-  }
+
+  const updated = await manageNotificationRecordsUseCase.update(id, { title, content, priority, category, data, metadata });
+  jsonResponse(res, 200, { success: true, data: updated });
 };
 
 export const markNotificationAsSent = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  try {
-    jsonResponse(res, 200, { success: true, data: await manageNotificationRecordsUseCase.markAsSent(id) });
-  } catch (error) {
-    respondError(res, error, 'Notification not found');
-  }
+
+  jsonResponse(res, 200, { success: true, data: await manageNotificationRecordsUseCase.markAsSent(id) });
 };
 
 export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
@@ -173,12 +156,9 @@ export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse
     jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
-  try {
-    const updatedNotification = await manageNotificationRecordsUseCase.markAsReadOwned(id, userId);
-    jsonResponse(res, 200, { success: true, data: updatedNotification });
-  } catch (error) {
-    respondError(res, error, 'Failed to mark notification as read');
-  }
+
+  const updatedNotification = await manageNotificationRecordsUseCase.markAsReadOwned(id, userId);
+  jsonResponse(res, 200, { success: true, data: updatedNotification });
 };
 
 export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
@@ -198,12 +178,9 @@ export const deleteNotification = async (req: UserRequest, res: HttpResponse): P
     jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
-  try {
-    const result = await manageNotificationRecordsUseCase.deleteOwned(id, userId);
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error) {
-    respondError(res, error, 'Failed to delete notification');
-  }
+
+  const result = await manageNotificationRecordsUseCase.deleteOwned(id, userId);
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promise<void> => {

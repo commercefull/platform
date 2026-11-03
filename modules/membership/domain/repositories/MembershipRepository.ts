@@ -53,3 +53,25 @@ export interface MembershipPlanBenefit {
   rulesOverride?: Record<string, unknown>;
   notes?: string;
 }
+
+export interface MembershipBenefit {
+  id: string;
+  tierIds: string[];
+  name: string;
+  description: string;
+  benefitType: string;
+  discountPercentage?: number;
+  discountAmountCents?: number;
+  /** Optional targeting scopes stored in the benefit value payload. */
+  storeIds?: string[];
+  channelIds?: string[];
+  countryCodes?: string[];
+  currencyCodes?: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MembershipBenefitsRepository {
+  getUserMembershipBenefits(userId: string): Promise<MembershipBenefit[]>;
+}

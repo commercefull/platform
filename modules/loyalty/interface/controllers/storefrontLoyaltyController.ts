@@ -94,12 +94,7 @@ export const redeemReward = async (req: HttpRequest, res: HttpResponse) => {
     return jsonResponse(res, 400, { error: 'Insufficient points' });
   }
 
-  await manageStorefrontLoyaltyUseCase.deductPoints(user.customerId, rewardData.pointsCost as number);
-  await manageStorefrontLoyaltyUseCase.createRedeemTransaction(
-    user.customerId,
-    -(rewardData.pointsCost as number),
-    `Redeemed: ${rewardData.name}`,
-  );
+  await manageStorefrontLoyaltyUseCase.redeemPoints(user.customerId, rewardData.pointsCost as number, `Redeemed: ${rewardData.name}`);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     return jsonResponse(res, 200, { success: true });

@@ -8,7 +8,9 @@ function createPort(): jest.Mocked<Port> {
   const port: jest.Mocked<Port> = {
     createTaxCategory: jest.fn(),
   };
-  port.createTaxCategory.mockImplementation(c => Promise.resolve({ ...c, id: 'tc1', createdAt: 0, updatedAt: 0 } as TaxCategory));
+  port.createTaxCategory.mockImplementation(c =>
+    Promise.resolve({ ...c, id: 'tc1', createdAt: new Date(0), updatedAt: new Date(0) } as TaxCategory),
+  );
   return port;
 }
 

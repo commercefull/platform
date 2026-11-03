@@ -1,9 +1,9 @@
 import '../../tests/testUtils';
 import { ManageLoyaltyAdminUseCase } from './ManageLoyaltyAdmin';
-import { createLoyaltyRepository, createLoyaltyTier, createLoyaltyPoints, createLoyaltyRedemption } from '../../tests/testUtils';
+import { createLoyaltyAdminRepository, createLoyaltyTier, createLoyaltyPoints, createLoyaltyRedemption } from '../../tests/testUtils';
 
 describe('ManageLoyaltyAdminUseCase', () => {
-  const loyaltyRepository = createLoyaltyRepository();
+  const loyaltyRepository = createLoyaltyAdminRepository();
   const useCase = new ManageLoyaltyAdminUseCase(loyaltyRepository);
 
   beforeEach(() => {

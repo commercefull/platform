@@ -6,8 +6,8 @@
  * planning use case consumes.
  */
 
-import StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
-import WarehouseRepo from '../../../warehouse/infrastructure/repositories/warehouseRepo';
+import type { StoreRepository } from '../../../store';
+import type { WarehouseRepository } from '../../../warehouse';
 import type { Store } from '../../../store/domain/entities/Store';
 import { FulfillmentSourcePort, FulfillableStore, FulfillmentWarehouse } from '../../domain/repositories/FulfillmentSourceRepository';
 
@@ -26,13 +26,18 @@ function toFulfillableStore(store: Store): FulfillableStore {
 }
 
 export class FulfillmentSourceAdapter implements FulfillmentSourcePort {
+  constructor(
+    private readonly stores: Pick<StoreRepository, 'findActive'>,
+    private readonly warehouses: Pick<WarehouseRepository, 'findDefault'>,
+  ) {}
+
   async findFulfillableStores(): Promise<FulfillableStore[]> {
-    const stores = await StoreRepo.findActive();
+    const stores = await this.stores.findActive();
     return stores.map(toFulfillableStore);
   }
 
   async findDefaultWarehouse(): Promise<FulfillmentWarehouse | null> {
-    const warehouse = await WarehouseRepo.findDefault();
+    const warehouse = await this.warehouses.findDefault();
     if (!warehouse) return null;
     return {
       distributionWarehouseId: warehouse.distributionWarehouseId,

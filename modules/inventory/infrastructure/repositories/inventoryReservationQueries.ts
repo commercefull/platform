@@ -80,10 +80,9 @@ export class InventoryReservationRepo {
   }
 
   async findReservationById(reservationId: string): Promise<InventoryReservationRow | null> {
-    const row = await queryOne<DbReservationRow>(
-      `SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1`,
-      [reservationId],
-    );
+    const row = await queryOne<DbReservationRow>(`SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1`, [
+      reservationId,
+    ]);
     if (!row) return null;
     return mapReservation(row);
   }

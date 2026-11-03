@@ -1,6 +1,5 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
 import { Currency, CurrencyRegion } from '../../domain/currency';
 import {
@@ -90,17 +89,13 @@ export const getCurrencyByCode = async (req: HttpRequest, res: HttpResponse): Pr
  * Save currency
  */
 export const saveCurrency = async (req: HttpRequest<Record<string, string>, unknown, Currency>, res: HttpResponse): Promise<void> => {
-  try {
-    const result = await saveCurrencyUseCase.execute(req.body);
+  const result = await saveCurrencyUseCase.execute(req.body);
 
-    jsonResponse(res, result.created ? 201 : 200, {
-      success: true,
-      data: result.currency,
-      message: result.created ? 'Currency created successfully' : 'Currency updated successfully',
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, result.created ? 201 : 200, {
+    success: true,
+    data: result.currency,
+    message: result.created ? 'Currency created successfully' : 'Currency updated successfully',
+  });
 };
 
 /**
@@ -109,16 +104,12 @@ export const saveCurrency = async (req: HttpRequest<Record<string, string>, unkn
 export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
 
-  try {
-    await deleteCurrencyUseCase.execute(code);
+  await deleteCurrencyUseCase.execute(code);
 
-    jsonResponse(res, 200, {
-      success: true,
-      message: 'Currency deleted successfully',
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    message: 'Currency deleted successfully',
+  });
 };
 
 /**
@@ -186,17 +177,13 @@ export const createCurrencyRegion = async (
   req: HttpRequest<Record<string, string>, unknown, CurrencyRegion>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const newRegion = await createCurrencyRegionUseCase.execute(req.body);
+  const newRegion = await createCurrencyRegionUseCase.execute(req.body);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: newRegion,
-      message: 'Currency region created successfully',
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: newRegion,
+    message: 'Currency region created successfully',
+  });
 };
 
 /**
@@ -208,17 +195,13 @@ export const updateCurrencyRegion = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedRegion = await updateCurrencyRegionUseCase.execute(id, req.body);
+  const updatedRegion = await updateCurrencyRegionUseCase.execute(id, req.body);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedRegion,
-      message: 'Currency region updated successfully',
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedRegion,
+    message: 'Currency region updated successfully',
+  });
 };
 
 /**
@@ -280,17 +263,13 @@ export const createPriceRule = async (
   req: HttpRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const newRule = await createCurrencyPriceRuleUseCase.execute(req.body as CurrencyPriceRuleCreateProps);
+  const newRule = await createCurrencyPriceRuleUseCase.execute(req.body as CurrencyPriceRuleCreateProps);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: newRule,
-      message: 'Price rule created successfully',
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: newRule,
+    message: 'Price rule created successfully',
+  });
 };
 
 /**
@@ -302,17 +281,13 @@ export const updatePriceRule = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedRule = await updateCurrencyPriceRuleUseCase.execute(id, req.body as CurrencyPriceRuleUpdateProps);
+  const updatedRule = await updateCurrencyPriceRuleUseCase.execute(id, req.body as CurrencyPriceRuleUpdateProps);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedRule,
-      message: 'Price rule updated successfully',
-    });
-  } catch (error: unknown) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedRule,
+    message: 'Price rule updated successfully',
+  });
 };
 
 /**

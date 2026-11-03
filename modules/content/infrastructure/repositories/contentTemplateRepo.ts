@@ -6,15 +6,14 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentTemplate } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
-import {
-  ContentTemplateNotFoundError,
-  ContentValidationError,
-  FailedToCreateContentError,
-} from '../../domain/errors/ContentErrors';
+import { ContentTemplateNotFoundError, ContentValidationError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 import type { ContentTemplate as DbContentTemplate } from '../../../../libs/db/types';
 import { TABLES } from './contentTables';
 
-export type ContentTemplateCreateParams = Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
+export type ContentTemplateCreateParams = Omit<
+  ContentTemplate,
+  'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
+>;
 export type ContentTemplateUpdateParams = Partial<
   Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
 >;

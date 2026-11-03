@@ -7,7 +7,6 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import type { PickupLocationPort } from '../../application/ports/PickupLocationPort';
-import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
 import {
   pickupLocationAdapter,
   adjustStockUseCase,
@@ -272,26 +271,14 @@ export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<
     return;
   }
 
-  try {
-    const result = await adjustStockUseCase.execute({
-      inventoryLocationId,
-      adjustmentType: quantityChange >= 0 ? 'increment' : 'decrement',
-      quantity: Math.abs(quantityChange),
-      reason: reason || 'manual',
-      transactionTypeCode,
-    });
-    respond(res, result.location);
-  } catch (error: unknown) {
-    if (error instanceof InventoryLocationNotFoundError) {
-      respondError(res, 'Inventory location not found', 404);
-      return;
-    }
-    if (error instanceof InventoryValidationError) {
-      respondError(res, error.message, 400);
-      return;
-    }
-    throw error;
-  }
+  const result = await adjustStockUseCase.execute({
+    inventoryLocationId,
+    adjustmentType: quantityChange >= 0 ? 'increment' : 'decrement',
+    quantity: Math.abs(quantityChange),
+    reason: reason || 'manual',
+    transactionTypeCode,
+  });
+  respond(res, result.location);
 };
 
 /**
@@ -301,25 +288,13 @@ export const reserveStock = async (req: HttpRequest, res: HttpResponse): Promise
   const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   const { quantity, orderId, basketId } = req.body as ReserveStockBody;
 
-  try {
-    const updatedLocation = await reserveLocationStockUseCase.execute({
-      inventoryLocationId,
-      quantity,
-      orderId,
-      basketId,
-    });
-    respond(res, updatedLocation);
-  } catch (error: unknown) {
-    if (error instanceof InventoryLocationNotFoundError) {
-      respondError(res, 'Inventory location not found', 404);
-      return;
-    }
-    if (error instanceof InventoryValidationError) {
-      respondError(res, error.message, 400);
-      return;
-    }
-    throw error;
-  }
+  const updatedLocation = await reserveLocationStockUseCase.execute({
+    inventoryLocationId,
+    quantity,
+    orderId,
+    basketId,
+  });
+  respond(res, updatedLocation);
 };
 
 /**
@@ -329,20 +304,8 @@ export const releaseReservation = async (req: HttpRequest, res: HttpResponse): P
   const { inventoryLocationId } = req.params;
   const { quantity } = req.body as ReleaseReservationBody;
 
-  try {
-    const updatedLocation = await releaseLocationReservationUseCase.execute(inventoryLocationId, quantity);
-    respond(res, updatedLocation);
-  } catch (error: unknown) {
-    if (error instanceof InventoryLocationNotFoundError) {
-      respondError(res, 'Inventory location not found', 404);
-      return;
-    }
-    if (error instanceof InventoryValidationError) {
-      respondError(res, error.message, 400);
-      return;
-    }
-    throw error;
-  }
+  const updatedLocation = await releaseLocationReservationUseCase.execute(inventoryLocationId, quantity);
+  respond(res, updatedLocation);
 };
 
 // ============================================================================

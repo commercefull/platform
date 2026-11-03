@@ -35,7 +35,7 @@ describe('FulfillmentSourceAdapter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    adapter = new FulfillmentSourceAdapter();
+    adapter = new FulfillmentSourceAdapter(storeRepo, warehouseRepo);
   });
 
   it('should map active stores to fulfillable stores', async () => {

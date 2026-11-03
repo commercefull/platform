@@ -25,14 +25,14 @@ export type VatValidationLog = DbTaxVatValidationLog;
 // ============================================================================
 
 export async function getVatRegistration(vatRegistrationId: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "taxVatRegistration" WHERE "vatRegistrationId" = $1', [
+  const row = await queryOne<DbTaxVatRegistration>('SELECT * FROM "taxVatRegistration" WHERE "vatRegistrationId" = $1', [
     vatRegistrationId,
   ]);
   return row ? mapToVatRegistration(row) : null;
 }
 
 export async function getVatRegistrationsByMerchant(organizationId: string): Promise<VatRegistration[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbTaxVatRegistration[]>(
     'SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 ORDER BY "countryCode" ASC',
     [organizationId],
   );
@@ -40,7 +40,7 @@ export async function getVatRegistrationsByMerchant(organizationId: string): Pro
 }
 
 export async function getVatRegistrationByCountry(organizationId: string, countryCode: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbTaxVatRegistration>(
     'SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 AND "countryCode" = $2 AND "isActive" = true',
     [organizationId, countryCode],
   );
@@ -48,7 +48,7 @@ export async function getVatRegistrationByCountry(organizationId: string, countr
 }
 
 export async function getActiveOssRegistration(organizationId: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbTaxVatRegistration>(
     `SELECT * FROM "taxVatRegistration" 
      WHERE "organizationId" = $1 AND "registrationType" = 'oss' AND "isActive" = true`,
     [organizationId],
@@ -64,9 +64,7 @@ function isoOpt(value: Date | string | null | undefined): string | undefined {
   return value instanceof Date ? value.toISOString() : (value ?? undefined);
 }
 
-function vatUpdateValues(
-  data: Partial<VatRegistration> & { organizationId: string; countryCode: string; vatNumber: string },
-): unknown[] {
+function vatUpdateValues(data: Partial<VatRegistration> & { organizationId: string; countryCode: string; vatNumber: string }): unknown[] {
   return [
     data.vatNumber,
     data.tradingName,
@@ -108,16 +106,12 @@ export async function saveVatRegistration(
         "annualThresholdCents" = $12, "thresholdCurrency" = $13, "currentYearSalesCents" = $14, "thresholdExceeded" = $15,
         "isActive" = $16, "notes" = $17, "certificateUrl" = $18, "updatedAt" = $19
       WHERE "vatRegistrationId" = $20`,
-      [
-        ...vatUpdateValues(data),
-        now,
-        data.vatRegistrationId,
-      ],
+      [...vatUpdateValues(data), now, data.vatRegistrationId],
     );
     return (await getVatRegistration(data.vatRegistrationId))!;
   } else {
     // Insert new
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxVatRegistration>(
       `INSERT INTO "taxVatRegistration" (
         "organizationId", "countryCode", "vatNumber", "tradingName", "legalName", "registrationType",
         "isVerified", "registrationDate", "effectiveFrom",
@@ -169,7 +163,7 @@ export async function deactivateVatRegistration(vatRegistrationId: string): Prom
 export async function logVatValidation(data: Omit<VatValidationLog, 'vatValidationLogId' | 'createdAt'>): Promise<VatValidationLog> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbTaxVatValidationLog>(
     `INSERT INTO "taxVatValidationLog" (
       "customerId", "organizationId", "orderId", "vatNumber", "countryCode", "vatNumberFormatted",
       "isValid", "validationStatus", "validationSource", "requestId", "response",
@@ -212,7 +206,7 @@ export async function getRecentValidation(
   countryCode: string,
   maxAgeHours: number = 24,
 ): Promise<VatValidationLog | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbTaxVatValidationLog>(
     `SELECT * FROM "taxVatValidationLog" 
      WHERE "vatNumber" = $1 AND "countryCode" = $2 
      AND "validatedAt" > NOW() - INTERVAL '${maxAgeHours} hours'
@@ -224,7 +218,7 @@ export async function getRecentValidation(
 }
 
 export async function getValidationHistory(vatNumber: string, limit: number = 10): Promise<VatValidationLog[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbTaxVatValidationLog[]>(
     `SELECT * FROM "taxVatValidationLog" 
      WHERE "vatNumber" = $1
      ORDER BY "validatedAt" DESC LIMIT $2`,
@@ -233,76 +227,8 @@ export async function getValidationHistory(vatNumber: string, limit: number = 10
   return (rows || []).map(mapToVatValidationLog);
 }
 
-// ============================================================================
-// VAT Number Formatting & Validation
-// ============================================================================
-
-const VAT_PATTERNS: Record<string, RegExp> = {
-  AT: /^ATU\d{8}$/,
-  BE: /^BE0?\d{9,10}$/,
-  BG: /^BG\d{9,10}$/,
-  CY: /^CY\d{8}[A-Z]$/,
-  CZ: /^CZ\d{8,10}$/,
-  DE: /^DE\d{9}$/,
-  DK: /^DK\d{8}$/,
-  EE: /^EE\d{9}$/,
-  EL: /^EL\d{9}$/,
-  ES: /^ES[A-Z0-9]\d{7}[A-Z0-9]$/,
-  FI: /^FI\d{8}$/,
-  FR: /^FR[A-Z0-9]{2}\d{9}$/,
-  HR: /^HR\d{11}$/,
-  HU: /^HU\d{8}$/,
-  IE: /^IE\d[A-Z0-9+*]\d{5}[A-Z]{1,2}$/,
-  IT: /^IT\d{11}$/,
-  LT: /^LT(\d{9}|\d{12})$/,
-  LU: /^LU\d{8}$/,
-  LV: /^LV\d{11}$/,
-  MT: /^MT\d{8}$/,
-  NL: /^NL\d{9}B\d{2}$/,
-  PL: /^PL\d{10}$/,
-  PT: /^PT\d{9}$/,
-  RO: /^RO\d{2,10}$/,
-  SE: /^SE\d{12}$/,
-  SI: /^SI\d{8}$/,
-  SK: /^SK\d{10}$/,
-  GB: /^GB(\d{9}|\d{12}|(GD|HA)\d{3})$/, // UK VAT
-  XI: /^XI(\d{9}|\d{12}|(GD|HA)\d{3})$/, // Northern Ireland
-};
-
-export function formatVatNumber(vatNumber: string, countryCode?: string): string {
-  // Remove spaces and convert to uppercase
-  let formatted = vatNumber.replace(/\s/g, '').toUpperCase();
-
-  // Add country code prefix if not present and country code provided
-  if (countryCode && !formatted.startsWith(countryCode)) {
-    formatted = countryCode + formatted;
-  }
-
-  return formatted;
-}
-
-export function validateVatNumberFormat(vatNumber: string, countryCode: string): boolean {
-  const formatted = formatVatNumber(vatNumber, countryCode);
-  const pattern = VAT_PATTERNS[countryCode];
-
-  if (!pattern) {
-    // Unknown country, allow any format
-    return formatted.length >= 8;
-  }
-
-  return pattern.test(formatted);
-}
-
-export function extractCountryFromVat(vatNumber: string): string | null {
-  const formatted = vatNumber.replace(/\s/g, '').toUpperCase();
-  const countryCode = formatted.substring(0, 2);
-
-  if (VAT_PATTERNS[countryCode]) {
-    return countryCode;
-  }
-
-  return null;
-}
+// VAT helpers live in domain — re-exported for existing importers.
+export { extractCountryFromVat, formatVatNumber, validateVatNumberFormat } from '../../domain/vatFormat';
 
 // ============================================================================
 // Helpers

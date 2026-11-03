@@ -2,7 +2,6 @@ import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageUserMembershipsUseCase, manageMembershipTiersUseCase, manageTierBenefitsUseCase } from '../../application/wired';
 import { LegacyMembershipBenefit as _MembershipBenefit } from '../../application/wired';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 // Request body interfaces
 interface CreateTierBody {
@@ -101,17 +100,13 @@ export const createMembershipTier = async (
   req: HttpRequest<Record<string, string>, unknown, CreateTierBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const tier = await manageMembershipTiersUseCase.create(req.body);
+  const tier = await manageMembershipTiersUseCase.create(req.body);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: tier,
-      message: 'Membership tier created successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: tier,
+    message: 'Membership tier created successfully',
+  });
 };
 
 export const updateMembershipTier = async (
@@ -120,32 +115,24 @@ export const updateMembershipTier = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedTier = await manageMembershipTiersUseCase.update(id, req.body);
+  const updatedTier = await manageMembershipTiersUseCase.update(id, req.body);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedTier,
-      message: 'Membership tier updated successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedTier,
+    message: 'Membership tier updated successfully',
+  });
 };
 
 export const deleteMembershipTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    await manageMembershipTiersUseCase.remove(id);
+  await manageMembershipTiersUseCase.remove(id);
 
-    jsonResponse(res, 200, {
-      success: true,
-      message: 'Membership tier deleted successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    message: 'Membership tier deleted successfully',
+  });
 };
 
 // Membership Benefit Endpoints
@@ -187,17 +174,13 @@ export const createMembershipBenefit = async (
   req: HttpRequest<Record<string, string>, unknown, CreateBenefitBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const benefit = await manageTierBenefitsUseCase.create(req.body);
+  const benefit = await manageTierBenefitsUseCase.create(req.body);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: benefit,
-      message: 'Membership benefit created successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: benefit,
+    message: 'Membership benefit created successfully',
+  });
 };
 
 export const updateMembershipBenefit = async (
@@ -206,32 +189,24 @@ export const updateMembershipBenefit = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedBenefit = await manageTierBenefitsUseCase.update(id, req.body);
+  const updatedBenefit = await manageTierBenefitsUseCase.update(id, req.body);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedBenefit,
-      message: 'Membership benefit updated successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedBenefit,
+    message: 'Membership benefit updated successfully',
+  });
 };
 
 export const deleteMembershipBenefit = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    await manageTierBenefitsUseCase.remove(id);
+  await manageTierBenefitsUseCase.remove(id);
 
-    jsonResponse(res, 200, {
-      success: true,
-      message: 'Membership benefit deleted successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    message: 'Membership benefit deleted successfully',
+  });
 };
 
 // User Membership Endpoints
@@ -294,17 +269,13 @@ export const createUserMembership = async (
   req: HttpRequest<Record<string, string>, unknown, CreateUserMembershipBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  try {
-    const membership = await manageUserMembershipsUseCase.create(req.body);
+  const membership = await manageUserMembershipsUseCase.create(req.body);
 
-    jsonResponse(res, 201, {
-      success: true,
-      data: membership,
-      message: 'User membership created successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 201, {
+    success: true,
+    data: membership,
+    message: 'User membership created successfully',
+  });
 };
 
 export const updateUserMembership = async (
@@ -313,33 +284,25 @@ export const updateUserMembership = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const updatedMembership = await manageUserMembershipsUseCase.update(id, req.body);
+  const updatedMembership = await manageUserMembershipsUseCase.update(id, req.body);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: updatedMembership,
-      message: 'User membership updated successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: updatedMembership,
+    message: 'User membership updated successfully',
+  });
 };
 
 export const cancelUserMembership = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const cancelledMembership = await manageUserMembershipsUseCase.cancel(id);
+  const cancelledMembership = await manageUserMembershipsUseCase.cancel(id);
 
-    jsonResponse(res, 200, {
-      success: true,
-      data: cancelledMembership,
-      message: 'User membership cancelled successfully',
-    });
-  } catch (error) {
-    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-  }
+  jsonResponse(res, 200, {
+    success: true,
+    data: cancelledMembership,
+    message: 'User membership cancelled successfully',
+  });
 };
 
 export const getUserMembershipBenefits = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

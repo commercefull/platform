@@ -88,4 +88,3 @@ function jsonFields(row: DbProduct) {
     seoData: (row.seoData ?? undefined) as Record<string, unknown> | undefined,
   };
 }
-

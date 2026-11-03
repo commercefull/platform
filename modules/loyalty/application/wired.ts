@@ -1,12 +1,12 @@
 import loyaltyDataRepository, { LoyaltyPointsAction } from '../infrastructure/repositories/LoyaltyDataRepository';
-import type { LoyaltyRepository } from '../domain/repositories/LoyaltyRepository';
+import type { CreateLoyaltyRewardInput } from '../domain/repositories/LoyaltyRewardRepository';
 import { ManageLoyaltyAdminUseCase } from './useCases/ManageLoyaltyAdmin';
 import { ManageStorefrontLoyaltyUseCase } from './useCases/ManageStorefrontLoyalty';
 import { AdjustCustomerPointsUseCase, type AdjustCustomerPointsPort } from './useCases/AdjustCustomerPoints';
 
 export { loyaltyDataRepository, LoyaltyPointsAction };
 
-export const manageLoyaltyAdminUseCase = new ManageLoyaltyAdminUseCase(loyaltyDataRepository.points as LoyaltyRepository);
+export const manageLoyaltyAdminUseCase = new ManageLoyaltyAdminUseCase(loyaltyDataRepository.points);
 
 const customerPointsAdapter: AdjustCustomerPointsPort = {
   findCustomerPoints: customerId => loyaltyDataRepository.points.findCustomerPoints(customerId),
@@ -22,15 +22,14 @@ const customerPointsAdapter: AdjustCustomerPointsPort = {
 
 export const adjustCustomerPointsUseCase = new AdjustCustomerPointsUseCase(customerPointsAdapter);
 
-export const manageStorefrontLoyaltyUseCase = new ManageStorefrontLoyaltyUseCase(loyaltyDataRepository.storefront as LoyaltyRepository);
+export const manageStorefrontLoyaltyUseCase = new ManageStorefrontLoyaltyUseCase(
+  loyaltyDataRepository.storefront,
+  loyaltyDataRepository.points,
+);
 
 import { CheckPointsBalanceUseCase, type CheckPointsBalanceRepository } from './useCases/CheckPointsBalance';
-import { GetPointsHistoryUseCase } from './useCases/GetPointsHistory';
-import { CalculateTierStatusUseCase } from './useCases/CalculateTierStatus';
-import { EarnPointsUseCase } from './useCases/EarnPoints';
 import { RedeemPointsUseCase, type RedeemPointsRepository, type RedeemPointsRewardRepository } from './useCases/RedeemPoints';
-import { CreateRewardUseCase } from './useCases/CreateReward';
-import { RedeemRewardUseCase } from './useCases/RedeemReward';
+import { CreateRewardUseCase, type CreateRewardRepository } from './useCases/CreateReward';
 
 const checkPointsBalanceRepository: CheckPointsBalanceRepository = {
   findMemberByCustomerId: async customerId => {
@@ -57,9 +56,6 @@ const checkPointsBalanceRepository: CheckPointsBalanceRepository = {
 };
 
 export const checkPointsBalanceUseCase = new CheckPointsBalanceUseCase(checkPointsBalanceRepository);
-export const getPointsHistoryUseCase = new GetPointsHistoryUseCase(loyaltyDataRepository.points as never);
-export const calculateTierStatusUseCase = new CalculateTierStatusUseCase(loyaltyDataRepository.points as never);
-export const earnPointsUseCase = new EarnPointsUseCase(loyaltyDataRepository.points as never, loyaltyDataRepository.points as never);
 
 // Maps use-case member semantics (memberId = loyaltyPointsId, availablePoints =
 // currentPoints) onto the loyaltyRepo surface — loyaltyRepo itself has no
@@ -98,5 +94,19 @@ const redeemPointsRewardRepository: RedeemPointsRewardRepository = {
 };
 
 export const redeemPointsUseCase = new RedeemPointsUseCase(redeemPointsRepository, redeemPointsRewardRepository);
-export const createRewardUseCase = new CreateRewardUseCase(loyaltyDataRepository.points as never);
-export const redeemRewardUseCase = new RedeemRewardUseCase(loyaltyDataRepository.points as never);
+
+const createRewardRepository: CreateRewardRepository = {
+  createReward: async data => {
+    const reward = await loyaltyDataRepository.points.createReward(data as unknown as CreateLoyaltyRewardInput);
+    return {
+      rewardId: reward.rewardId,
+      name: reward.name,
+      pointsCost: reward.pointsCost,
+      type: reward.type ?? 'discount',
+      isActive: reward.isActive === true,
+      createdAt: reward.createdAt ?? new Date(),
+    };
+  },
+};
+
+export const createRewardUseCase = new CreateRewardUseCase(createRewardRepository);

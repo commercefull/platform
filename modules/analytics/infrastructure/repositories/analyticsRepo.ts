@@ -15,13 +15,13 @@ import {
   AnalyticsSalesDaily as AnalyticsSalesDailyRow,
   AnalyticsSearchQuery as AnalyticsSearchQueryRow,
 } from '../../../../libs/db/types';
-import type { ProductPerformance, CustomerCohort } from '../../domain/types';
+import type { CustomerCohort } from '../../domain/types';
 import type {
   AnalyticsCustomerCohort as DbAnalyticsCustomerCohort,
   AnalyticsSearchQuery as DbAnalyticsSearchQuery,
 } from '../../../../libs/db/types';
 
-export type { ProductPerformance, CustomerCohort };
+export type { CustomerCohort };
 
 // ============================================================================
 // Types

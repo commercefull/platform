@@ -7,20 +7,20 @@ class AttributeGroupController {
    * GET /attribute-groups
    * List all attribute groups
    */
-  async listAttributeGroups(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listAttributeGroups = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const groups = await manageAttributeGroupsUseCase.findAll();
 
     jsonResponse(res, 200, {
       success: true,
       data: groups || [],
     });
-  }
+  };
 
   /**
    * GET /attribute-groups/:id
    * Get a single attribute group by ID
    */
-  async getAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getAttributeGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const group = await manageAttributeGroupsUseCase.findOne(id);
 
@@ -36,13 +36,13 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-  }
+  };
 
   /**
    * GET /attribute-groups/code/:code
    * Get a single attribute group by code
    */
-  async getAttributeGroupByCode(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getAttributeGroupByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { code } = req.params;
     const group = await manageAttributeGroupsUseCase.findByCode(code);
 
@@ -58,13 +58,13 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-  }
+  };
 
   /**
    * POST /attribute-groups
    * Create a new attribute group
    */
-  async createAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createAttributeGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { name, code, description, sortOrder } = req.body as { name?: string; code?: string; description?: string; sortOrder?: number };
 
     // Validate required fields
@@ -97,13 +97,13 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-  }
+  };
 
   /**
    * PUT /attribute-groups/:id
    * Update an attribute group
    */
-  async updateAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
+  updateAttributeGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { name, description, sortOrder } = req.body as { name?: string; description?: string; sortOrder?: number };
 
@@ -127,13 +127,13 @@ class AttributeGroupController {
       success: true,
       data: group,
     });
-  }
+  };
 
   /**
    * DELETE /attribute-groups/:id
    * Delete an attribute group
    */
-  async deleteAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
+  deleteAttributeGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Check if group exists
@@ -152,7 +152,7 @@ class AttributeGroupController {
       success: true,
       message: 'Attribute group deleted successfully',
     });
-  }
+  };
 }
 
 export default new AttributeGroupController();

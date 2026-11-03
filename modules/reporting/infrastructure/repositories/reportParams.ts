@@ -19,4 +19,3 @@ export interface ReportParameters {
   carrierId?: string;
   limit?: number;
 }
-

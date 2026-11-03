@@ -1,30 +1,30 @@
 import { query, queryOne } from '../../../../libs/db';
 import { TrackingConfig, TrackingConfigProps, GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
 import { TrackingConfigRepository } from '../../domain/repositories/TrackingConfigRepository';
+import type { TrackingConfig as DbTrackingConfig } from '../../../../libs/db/types';
 
 export class TrackingConfigRepositoryImpl implements TrackingConfigRepository {
   async findById(configId: string): Promise<TrackingConfig | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "trackingConfig" WHERE "configId" = $1', [configId]);
+    const row = await queryOne<DbTrackingConfig>('SELECT * FROM "trackingConfig" WHERE "configId" = $1', [configId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByStoreId(storeId: string): Promise<TrackingConfig | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "trackingConfig" WHERE "storeId" = $1', [storeId]);
+    const row = await queryOne<DbTrackingConfig>('SELECT * FROM "trackingConfig" WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<TrackingConfig[]> {
-    const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "trackingConfig" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
-      [organizationId],
-    );
+    const rows = await query<DbTrackingConfig[]>('SELECT * FROM "trackingConfig" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC', [
+      organizationId,
+    ]);
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
   async save(config: TrackingConfig): Promise<TrackingConfig> {
     const props = this.getProps(config);
 
-    const existing = await queryOne<Record<string, unknown>>('SELECT "configId" FROM "trackingConfig" WHERE "configId" = $1', [
+    const existing = await queryOne<Pick<DbTrackingConfig, 'configId'>>('SELECT "configId" FROM "trackingConfig" WHERE "configId" = $1', [
       props.configId,
     ]);
 

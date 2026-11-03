@@ -437,7 +437,6 @@ export interface ProductVariantPort {
   findAll(filters: ProductVariantFilters, pagination?: PaginationOptions): Promise<PaginatedResult<ProductVariantRow>>;
 }
 
-
 // Re-exports — attribute ports live in ProductAttributePorts.ts
 export type {
   AttributeType,

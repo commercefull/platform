@@ -8112,7 +8112,7 @@
     "/scim/v2/Users": {
       "get": {
         "summary": "SCIM 2.0 /Users endpoints",
-        "operationId": "asyncHandler(scimController.listUsers.bind(scimController))_identity",
+        "operationId": "asyncHandler(scimController.listUsers)_identity",
         "tags": [
           "identity"
         ],
@@ -8132,8 +8132,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(scimController.createUser.bind(scimController))",
-        "operationId": "asyncHandler(scimController.createUser.bind(scimController))_identity",
+        "summary": "asyncHandler(scimController.createUser)",
+        "operationId": "asyncHandler(scimController.createUser)_identity",
         "tags": [
           "identity"
         ],
@@ -8165,8 +8165,8 @@
     },
     "/scim/v2/Users/{id}": {
       "get": {
-        "summary": "asyncHandler(scimController.getUser.bind(scimController))",
-        "operationId": "asyncHandler(scimController.getUser.bind(scimController))_identity",
+        "summary": "asyncHandler(scimController.getUser)",
+        "operationId": "asyncHandler(scimController.getUser)_identity",
         "tags": [
           "identity"
         ],
@@ -8186,8 +8186,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(scimController.replaceUser.bind(scimController)",
-        "operationId": "asyncHandler(scimController.replaceUser.bind(scimController)_identity",
+        "summary": "asyncHandler(scimController.replaceUser)",
+        "operationId": "asyncHandler(scimController.replaceUser)_identity",
         "tags": [
           "identity"
         ],
@@ -8217,8 +8217,8 @@
         }
       },
       "patch": {
-        "summary": "asyncHandler(scimController.patchUser.bind(scimController))",
-        "operationId": "asyncHandler(scimController.patchUser.bind(scimController))_identity",
+        "summary": "asyncHandler(scimController.patchUser)",
+        "operationId": "asyncHandler(scimController.patchUser)_identity",
         "tags": [
           "identity"
         ],
@@ -8248,8 +8248,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(scimController.deleteUser.bind(scimController))",
-        "operationId": "asyncHandler(scimController.deleteUser.bind(scimController))_identity",
+        "summary": "asyncHandler(scimController.deleteUser)",
+        "operationId": "asyncHandler(scimController.deleteUser)_identity",
         "tags": [
           "identity"
         ],
@@ -8272,7 +8272,7 @@
     "/sso/saml/login/{providerId}": {
       "post": {
         "summary": "SAML SSO",
-        "operationId": "asyncHandler(ssoController.initiateSamlLogin.bind(ssoControl_identity",
+        "operationId": "asyncHandler(ssoController.initiateSamlLogin)_identity",
         "tags": [
           "identity"
         ],
@@ -8304,8 +8304,8 @@
     },
     "/sso/saml/callback/{providerId}": {
       "post": {
-        "summary": "asyncHandler(ssoController.samlCallback.bind(ssoController))",
-        "operationId": "asyncHandler(ssoController.samlCallback.bind(ssoController))_identity",
+        "summary": "asyncHandler(ssoController.samlCallback)",
+        "operationId": "asyncHandler(ssoController.samlCallback)_identity",
         "tags": [
           "identity"
         ],
@@ -8338,7 +8338,7 @@
     "/sso/oidc/login/{providerId}": {
       "post": {
         "summary": "OIDC SSO",
-        "operationId": "asyncHandler(ssoController.initiateOidcLogin.bind(ssoControl_identity",
+        "operationId": "asyncHandler(ssoController.initiateOidcLogin)_identity",
         "tags": [
           "identity"
         ],
@@ -8370,8 +8370,8 @@
     },
     "/sso/oidc/callback/{providerId}": {
       "post": {
-        "summary": "asyncHandler(ssoController.oidcCallback.bind(ssoController))",
-        "operationId": "asyncHandler(ssoController.oidcCallback.bind(ssoController))_identity",
+        "summary": "asyncHandler(ssoController.oidcCallback)",
+        "operationId": "asyncHandler(ssoController.oidcCallback)_identity",
         "tags": [
           "identity"
         ],
@@ -8404,7 +8404,7 @@
     "/sso/providers": {
       "get": {
         "summary": "List all SSO providers",
-        "operationId": "asyncHandler(ssoController.listProviders.bind(ssoController)_identity",
+        "operationId": "asyncHandler(ssoController.listProviders)_identity",
         "tags": [
           "identity"
         ],
@@ -8427,7 +8427,7 @@
     "/sso/saml/providers": {
       "post": {
         "summary": "SAML provider CRUD",
-        "operationId": "asyncHandler(ssoController.createSamlProvider.bind(ssoContro_identity",
+        "operationId": "asyncHandler(ssoController.createSamlProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8459,8 +8459,8 @@
     },
     "/sso/saml/providers/{providerId}": {
       "get": {
-        "summary": "asyncHandler(ssoController.getSamlProvider.bind(ssoControlle",
-        "operationId": "asyncHandler(ssoController.getSamlProvider.bind(ssoControlle_identity",
+        "summary": "asyncHandler(ssoController.getSamlProvider)",
+        "operationId": "asyncHandler(ssoController.getSamlProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8480,8 +8480,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(ssoController.updateSamlProvider.bind(ssoContro",
-        "operationId": "asyncHandler(ssoController.updateSamlProvider.bind(ssoContro_identity",
+        "summary": "asyncHandler(ssoController.updateSamlProvider)",
+        "operationId": "asyncHandler(ssoController.updateSamlProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8511,8 +8511,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(ssoController.deleteSamlProvider.bind(ssoContro",
-        "operationId": "asyncHandler(ssoController.deleteSamlProvider.bind(ssoContro_identity",
+        "summary": "asyncHandler(ssoController.deleteSamlProvider)",
+        "operationId": "asyncHandler(ssoController.deleteSamlProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8534,8 +8534,8 @@
     },
     "/sso/saml/providers/{providerId}/activate": {
       "post": {
-        "summary": "asyncHandler(ssoController.activateSamlProvider.bind(ssoCont",
-        "operationId": "asyncHandler(ssoController.activateSamlProvider.bind(ssoCont_identity",
+        "summary": "asyncHandler(ssoController.activateSamlProvider)",
+        "operationId": "asyncHandler(ssoController.activateSamlProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8567,8 +8567,8 @@
     },
     "/sso/saml/providers/{providerId}/deactivate": {
       "post": {
-        "summary": "asyncHandler(ssoController.deactivateSamlProvider.bind(ssoCo",
-        "operationId": "asyncHandler(ssoController.deactivateSamlProvider.bind(ssoCo_identity",
+        "summary": "asyncHandler(ssoController.deactivateSamlProvider)",
+        "operationId": "asyncHandler(ssoController.deactivateSamlProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8601,7 +8601,7 @@
     "/sso/oidc/providers": {
       "post": {
         "summary": "OIDC provider CRUD",
-        "operationId": "asyncHandler(ssoController.createOidcProvider.bind(ssoContro_identity",
+        "operationId": "asyncHandler(ssoController.createOidcProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8633,8 +8633,8 @@
     },
     "/sso/oidc/providers/{providerId}": {
       "get": {
-        "summary": "asyncHandler(ssoController.getOidcProvider.bind(ssoControlle",
-        "operationId": "asyncHandler(ssoController.getOidcProvider.bind(ssoControlle_identity",
+        "summary": "asyncHandler(ssoController.getOidcProvider)",
+        "operationId": "asyncHandler(ssoController.getOidcProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8654,8 +8654,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(ssoController.updateOidcProvider.bind(ssoContro",
-        "operationId": "asyncHandler(ssoController.updateOidcProvider.bind(ssoContro_identity",
+        "summary": "asyncHandler(ssoController.updateOidcProvider)",
+        "operationId": "asyncHandler(ssoController.updateOidcProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8685,8 +8685,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(ssoController.deleteOidcProvider.bind(ssoContro",
-        "operationId": "asyncHandler(ssoController.deleteOidcProvider.bind(ssoContro_identity",
+        "summary": "asyncHandler(ssoController.deleteOidcProvider)",
+        "operationId": "asyncHandler(ssoController.deleteOidcProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8708,8 +8708,8 @@
     },
     "/sso/oidc/providers/{providerId}/activate": {
       "post": {
-        "summary": "asyncHandler(ssoController.activateOidcProvider.bind(ssoCont",
-        "operationId": "asyncHandler(ssoController.activateOidcProvider.bind(ssoCont_identity",
+        "summary": "asyncHandler(ssoController.activateOidcProvider)",
+        "operationId": "asyncHandler(ssoController.activateOidcProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8741,8 +8741,8 @@
     },
     "/sso/oidc/providers/{providerId}/deactivate": {
       "post": {
-        "summary": "asyncHandler(ssoController.deactivateOidcProvider.bind(ssoCo",
-        "operationId": "asyncHandler(ssoController.deactivateOidcProvider.bind(ssoCo_identity",
+        "summary": "asyncHandler(ssoController.deactivateOidcProvider)",
+        "operationId": "asyncHandler(ssoController.deactivateOidcProvider)_identity",
         "tags": [
           "identity"
         ],
@@ -8875,7 +8875,7 @@
     "/integration": {
       "post": {
         "summary": "Integration CRUD",
-        "operationId": "asyncHandler(integrationController.createIntegration.bind(in_integration",
+        "operationId": "asyncHandler(integrationController.createIntegration)_integration",
         "tags": [
           "integration"
         ],
@@ -8895,8 +8895,8 @@
         }
       },
       "get": {
-        "summary": "asyncHandler(integrationController.listIntegrations.bind(int",
-        "operationId": "asyncHandler(integrationController.listIntegrations.bind(int_integration",
+        "summary": "asyncHandler(integrationController.listIntegrations)",
+        "operationId": "asyncHandler(integrationController.listIntegrations)_integration",
         "tags": [
           "integration"
         ],
@@ -8918,8 +8918,8 @@
     },
     "/integration/{integrationId}": {
       "get": {
-        "summary": "asyncHandler(integrationController.getIntegration.bind(integ",
-        "operationId": "asyncHandler(integrationController.getIntegration.bind(integ_integration",
+        "summary": "asyncHandler(integrationController.getIntegration)",
+        "operationId": "asyncHandler(integrationController.getIntegration)_integration",
         "tags": [
           "integration"
         ],
@@ -8939,8 +8939,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(integrationController.updateIntegration.bind(in",
-        "operationId": "asyncHandler(integrationController.updateIntegration.bind(in_integration",
+        "summary": "asyncHandler(integrationController.updateIntegration)",
+        "operationId": "asyncHandler(integrationController.updateIntegration)_integration",
         "tags": [
           "integration"
         ],
@@ -8960,8 +8960,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(integrationController.deleteIntegration.bind(in",
-        "operationId": "asyncHandler(integrationController.deleteIntegration.bind(in_integration",
+        "summary": "asyncHandler(integrationController.deleteIntegration)",
+        "operationId": "asyncHandler(integrationController.deleteIntegration)_integration",
         "tags": [
           "integration"
         ],
@@ -8983,8 +8983,8 @@
     },
     "/integration/{integrationId}/activate": {
       "post": {
-        "summary": "asyncHandler(integrationController.activateIntegration.bind(",
-        "operationId": "asyncHandler(integrationController.activateIntegration.bind(_integration",
+        "summary": "asyncHandler(integrationController.activateIntegration)",
+        "operationId": "asyncHandler(integrationController.activateIntegration)_integration",
         "tags": [
           "integration"
         ],
@@ -9006,8 +9006,8 @@
     },
     "/integration/{integrationId}/deactivate": {
       "post": {
-        "summary": "asyncHandler(integrationController.deactivateIntegration.bin",
-        "operationId": "asyncHandler(integrationController.deactivateIntegration.bin_integration",
+        "summary": "asyncHandler(integrationController.deactivateIntegration)",
+        "operationId": "asyncHandler(integrationController.deactivateIntegration)_integration",
         "tags": [
           "integration"
         ],
@@ -9030,7 +9030,7 @@
     "/integration/{integrationId}/credentials": {
       "post": {
         "summary": "Credentials",
-        "operationId": "asyncHandler(integrationController.addCredential.bind(integr_integration",
+        "operationId": "asyncHandler(integrationController.addCredential)_integration",
         "tags": [
           "integration"
         ],
@@ -9050,8 +9050,8 @@
         }
       },
       "get": {
-        "summary": "asyncHandler(integrationController.listCredentials.bind(inte",
-        "operationId": "asyncHandler(integrationController.listCredentials.bind(inte_integration",
+        "summary": "asyncHandler(integrationController.listCredentials)",
+        "operationId": "asyncHandler(integrationController.listCredentials)_integration",
         "tags": [
           "integration"
         ],
@@ -9073,8 +9073,8 @@
     },
     "/integration/{integrationId}/credentials/{credentialId}": {
       "put": {
-        "summary": "asyncHandler(integrationController.updateCredential.bind(int",
-        "operationId": "asyncHandler(integrationController.updateCredential.bind(int_integration",
+        "summary": "asyncHandler(integrationController.updateCredential)",
+        "operationId": "asyncHandler(integrationController.updateCredential)_integration",
         "tags": [
           "integration"
         ],
@@ -9094,8 +9094,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(integrationController.deleteCredential.bind(int",
-        "operationId": "asyncHandler(integrationController.deleteCredential.bind(int_integration",
+        "summary": "asyncHandler(integrationController.deleteCredential)",
+        "operationId": "asyncHandler(integrationController.deleteCredential)_integration",
         "tags": [
           "integration"
         ],
@@ -9118,7 +9118,7 @@
     "/integration/{integrationId}/subscriptions": {
       "post": {
         "summary": "Event subscriptions",
-        "operationId": "asyncHandler(integrationController.createSubscription.bind(i_integration",
+        "operationId": "asyncHandler(integrationController.createSubscription)_integration",
         "tags": [
           "integration"
         ],
@@ -9138,8 +9138,8 @@
         }
       },
       "get": {
-        "summary": "asyncHandler(integrationController.listSubscriptions.bind(in",
-        "operationId": "asyncHandler(integrationController.listSubscriptions.bind(in_integration",
+        "summary": "asyncHandler(integrationController.listSubscriptions)",
+        "operationId": "asyncHandler(integrationController.listSubscriptions)_integration",
         "tags": [
           "integration"
         ],
@@ -9161,8 +9161,8 @@
     },
     "/integration/{integrationId}/subscriptions/{subscriptionId}": {
       "put": {
-        "summary": "asyncHandler(integrationController.updateSubscription.bind(i",
-        "operationId": "asyncHandler(integrationController.updateSubscription.bind(i_integration",
+        "summary": "asyncHandler(integrationController.updateSubscription)",
+        "operationId": "asyncHandler(integrationController.updateSubscription)_integration",
         "tags": [
           "integration"
         ],
@@ -9182,8 +9182,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(integrationController.deleteSubscription.bind(i",
-        "operationId": "asyncHandler(integrationController.deleteSubscription.bind(i_integration",
+        "summary": "asyncHandler(integrationController.deleteSubscription)",
+        "operationId": "asyncHandler(integrationController.deleteSubscription)_integration",
         "tags": [
           "integration"
         ],
@@ -9206,7 +9206,7 @@
     "/integration/{integrationId}/logs": {
       "get": {
         "summary": "Logs",
-        "operationId": "asyncHandler(integrationController.listLogs.bind(integration_integration",
+        "operationId": "asyncHandler(integrationController.listLogs)_integration",
         "tags": [
           "integration"
         ],
@@ -9226,8 +9226,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(integrationController.deleteLogs.bind(integrati",
-        "operationId": "asyncHandler(integrationController.deleteLogs.bind(integrati_integration",
+        "summary": "asyncHandler(integrationController.deleteLogs)",
+        "operationId": "asyncHandler(integrationController.deleteLogs)_integration",
         "tags": [
           "integration"
         ],
@@ -12649,7 +12649,7 @@
     "/jobs": {
       "post": {
         "summary": "Import job CRUD",
-        "operationId": "asyncHandler(migrationController.createJob.bind(migrationCon_migration",
+        "operationId": "asyncHandler(migrationController.createJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12669,8 +12669,8 @@
         }
       },
       "get": {
-        "summary": "asyncHandler(migrationController.listJobs.bind(migrationCont",
-        "operationId": "asyncHandler(migrationController.listJobs.bind(migrationCont_migration",
+        "summary": "asyncHandler(migrationController.listJobs)",
+        "operationId": "asyncHandler(migrationController.listJobs)_migration",
         "tags": [
           "migration"
         ],
@@ -12692,8 +12692,8 @@
     },
     "/jobs/{importJobId}": {
       "get": {
-        "summary": "asyncHandler(migrationController.getJob.bind(migrationContro",
-        "operationId": "asyncHandler(migrationController.getJob.bind(migrationContro_migration",
+        "summary": "asyncHandler(migrationController.getJob)",
+        "operationId": "asyncHandler(migrationController.getJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12713,8 +12713,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(migrationController.deleteJob.bind(migrationCon",
-        "operationId": "asyncHandler(migrationController.deleteJob.bind(migrationCon_migration",
+        "summary": "asyncHandler(migrationController.deleteJob)",
+        "operationId": "asyncHandler(migrationController.deleteJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12736,8 +12736,8 @@
     },
     "/jobs/{importJobId}/start": {
       "post": {
-        "summary": "asyncHandler(migrationController.startJob.bind(migrationCont",
-        "operationId": "asyncHandler(migrationController.startJob.bind(migrationCont_migration",
+        "summary": "asyncHandler(migrationController.startJob)",
+        "operationId": "asyncHandler(migrationController.startJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12759,8 +12759,8 @@
     },
     "/jobs/{importJobId}/complete": {
       "post": {
-        "summary": "asyncHandler(migrationController.completeJob.bind(migrationC",
-        "operationId": "asyncHandler(migrationController.completeJob.bind(migrationC_migration",
+        "summary": "asyncHandler(migrationController.completeJob)",
+        "operationId": "asyncHandler(migrationController.completeJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12782,8 +12782,8 @@
     },
     "/jobs/{importJobId}/fail": {
       "post": {
-        "summary": "asyncHandler(migrationController.failJob.bind(migrationContr",
-        "operationId": "asyncHandler(migrationController.failJob.bind(migrationContr_migration",
+        "summary": "asyncHandler(migrationController.failJob)",
+        "operationId": "asyncHandler(migrationController.failJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12805,8 +12805,8 @@
     },
     "/jobs/{importJobId}/pause": {
       "post": {
-        "summary": "asyncHandler(migrationController.pauseJob.bind(migrationCont",
-        "operationId": "asyncHandler(migrationController.pauseJob.bind(migrationCont_migration",
+        "summary": "asyncHandler(migrationController.pauseJob)",
+        "operationId": "asyncHandler(migrationController.pauseJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12828,8 +12828,8 @@
     },
     "/jobs/{importJobId}/cancel": {
       "post": {
-        "summary": "asyncHandler(migrationController.cancelJob.bind(migrationCon",
-        "operationId": "asyncHandler(migrationController.cancelJob.bind(migrationCon_migration",
+        "summary": "asyncHandler(migrationController.cancelJob)",
+        "operationId": "asyncHandler(migrationController.cancelJob)_migration",
         "tags": [
           "migration"
         ],
@@ -12852,7 +12852,7 @@
     "/jobs/{importJobId}/mappings": {
       "get": {
         "summary": "Import mappings",
-        "operationId": "asyncHandler(migrationController.getMappings.bind(migrationC_migration",
+        "operationId": "asyncHandler(migrationController.getMappings)_migration",
         "tags": [
           "migration"
         ],
@@ -12872,8 +12872,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(migrationController.createMapping.bind(migratio",
-        "operationId": "asyncHandler(migrationController.createMapping.bind(migratio_migration",
+        "summary": "asyncHandler(migrationController.createMapping)",
+        "operationId": "asyncHandler(migrationController.createMapping)_migration",
         "tags": [
           "migration"
         ],
@@ -12895,8 +12895,8 @@
     },
     "/jobs/{importJobId}/mappings/lookup": {
       "get": {
-        "summary": "asyncHandler(migrationController.lookupMapping.bind(migratio",
-        "operationId": "asyncHandler(migrationController.lookupMapping.bind(migratio_migration",
+        "summary": "asyncHandler(migrationController.lookupMapping)",
+        "operationId": "asyncHandler(migrationController.lookupMapping)_migration",
         "tags": [
           "migration"
         ],
@@ -12919,7 +12919,7 @@
     "/jobs/{importJobId}/errors": {
       "get": {
         "summary": "Import errors",
-        "operationId": "asyncHandler(migrationController.getErrors.bind(migrationCon_migration",
+        "operationId": "asyncHandler(migrationController.getErrors)_migration",
         "tags": [
           "migration"
         ],
@@ -12941,8 +12941,8 @@
     },
     "/errors/{importErrorId}/resolve": {
       "post": {
-        "summary": "asyncHandler(migrationController.resolveError.bind(migration",
-        "operationId": "asyncHandler(migrationController.resolveError.bind(migration_migration",
+        "summary": "asyncHandler(migrationController.resolveError)",
+        "operationId": "asyncHandler(migrationController.resolveError)_migration",
         "tags": [
           "migration"
         ],
@@ -12964,8 +12964,8 @@
     },
     "/notifications": {
       "get": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -13064,8 +13064,8 @@
     },
     "/notifications/count": {
       "get": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -13274,8 +13274,8 @@
     },
     "/notifications/{id}": {
       "get": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -13733,8 +13733,8 @@
     },
     "/notifications/unread-count": {
       "get": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -14051,8 +14051,8 @@
     },
     "/notifications/{notificationId}/read": {
       "put": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -14082,8 +14082,8 @@
         }
       },
       "patch": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -14115,8 +14115,8 @@
     },
     "/notifications/read": {
       "put": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -14146,8 +14146,8 @@
         }
       },
       "post": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "summary": "async (req, res) => {\n  const customerId = req.user?.custome",
+        "operationId": "async (req, res) => {\n  const customerId = req.user?.custome_notification",
         "tags": [
           "notification"
         ],
@@ -17738,7 +17738,7 @@
     "/products/search": {
       "get": {
         "summary": "Search products with advanced filters and facets\nGET /customer/products/search",
-        "operationId": "asyncHandler(productSearchController.search.bind(productSear_product",
+        "operationId": "asyncHandler(productSearchController.search)_product",
         "tags": [
           "product"
         ],
@@ -17759,7 +17759,7 @@
       },
       "post": {
         "summary": "Search products (POST for complex queries)\nPOST /customer/products/search",
-        "operationId": "asyncHandler(productSearchController.searchPost.bind(product_product",
+        "operationId": "asyncHandler(productSearchController.searchPost)_product",
         "tags": [
           "product"
         ],
@@ -17792,7 +17792,7 @@
     "/products/search/suggestions": {
       "get": {
         "summary": "Get search suggestions for autocomplete\nGET /customer/products/search/suggestions",
-        "operationId": "asyncHandler(productSearchController.getSuggestions.bind(pro_product",
+        "operationId": "asyncHandler(productSearchController.getSuggestions)_product",
         "tags": [
           "product"
         ],
@@ -17815,7 +17815,7 @@
     "/products/by-attribute/{code}/{value}": {
       "get": {
         "summary": "Find products by attribute\nGET /customer/products/by-attribute/:code/:value",
-        "operationId": "asyncHandler(productSearchController.findByAttribute.bind(pr_product",
+        "operationId": "asyncHandler(productSearchController.findByAttribute)_product",
         "tags": [
           "product"
         ],
@@ -17838,7 +17838,7 @@
     "/products/{productId}/similar": {
       "get": {
         "summary": "Find similar products\nGET /customer/products/:productId/similar",
-        "operationId": "asyncHandler(productSearchController.findSimilar.bind(produc_product",
+        "operationId": "asyncHandler(productSearchController.findSimilar)_product",
         "tags": [
           "product"
         ],
@@ -17860,8 +17860,8 @@
     },
     "/product-types": {
       "get": {
-        "summary": "asyncHandler(productTypeController.listProductTypes.bind(pro",
-        "operationId": "asyncHandler(productTypeController.listProductTypes.bind(pro_product",
+        "summary": "asyncHandler(productTypeController.listProductTypes)",
+        "operationId": "asyncHandler(productTypeController.listProductTypes)_product",
         "tags": [
           "product"
         ],
@@ -17881,8 +17881,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(productTypeController.createProductType.bind(pr",
-        "operationId": "asyncHandler(productTypeController.createProductType.bind(pr_product",
+        "summary": "asyncHandler(productTypeController.createProductType)",
+        "operationId": "asyncHandler(productTypeController.createProductType)_product",
         "tags": [
           "product"
         ],
@@ -17914,8 +17914,8 @@
     },
     "/product-types/{id}": {
       "get": {
-        "summary": "asyncHandler(productTypeController.getProductType.bind(produ",
-        "operationId": "asyncHandler(productTypeController.getProductType.bind(produ_product",
+        "summary": "asyncHandler(productTypeController.getProductType)",
+        "operationId": "asyncHandler(productTypeController.getProductType)_product",
         "tags": [
           "product"
         ],
@@ -17935,8 +17935,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(productTypeController.updateProductType.bind(pr",
-        "operationId": "asyncHandler(productTypeController.updateProductType.bind(pr_product",
+        "summary": "asyncHandler(productTypeController.updateProductType)",
+        "operationId": "asyncHandler(productTypeController.updateProductType)_product",
         "tags": [
           "product"
         ],
@@ -17966,8 +17966,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(productTypeController.deleteProductType.bind(pr",
-        "operationId": "asyncHandler(productTypeController.deleteProductType.bind(pr_product",
+        "summary": "asyncHandler(productTypeController.deleteProductType)",
+        "operationId": "asyncHandler(productTypeController.deleteProductType)_product",
         "tags": [
           "product"
         ],
@@ -17989,8 +17989,8 @@
     },
     "/product-types/slug/{slug}": {
       "get": {
-        "summary": "asyncHandler(productTypeController.getProductTypeBySlug.bind",
-        "operationId": "asyncHandler(productTypeController.getProductTypeBySlug.bind_product",
+        "summary": "asyncHandler(productTypeController.getProductTypeBySlug)",
+        "operationId": "asyncHandler(productTypeController.getProductTypeBySlug)_product",
         "tags": [
           "product"
         ],
@@ -18012,8 +18012,8 @@
     },
     "/product-types/{id}/attributes": {
       "get": {
-        "summary": "asyncHandler(productTypeController.getProductTypeAttributes.",
-        "operationId": "asyncHandler(productTypeController.getProductTypeAttributes._product",
+        "summary": "asyncHandler(productTypeController.getProductTypeAttributes)",
+        "operationId": "asyncHandler(productTypeController.getProductTypeAttributes)_product",
         "tags": [
           "product"
         ],
@@ -18035,8 +18035,8 @@
     },
     "/attributes": {
       "get": {
-        "summary": "asyncHandler(attributeController.listAttributes.bind(attribu",
-        "operationId": "asyncHandler(attributeController.listAttributes.bind(attribu_product",
+        "summary": "asyncHandler(attributeController.listAttributes)",
+        "operationId": "asyncHandler(attributeController.listAttributes)_product",
         "tags": [
           "product"
         ],
@@ -18056,8 +18056,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(attributeController.createAttribute.bind(attrib",
-        "operationId": "asyncHandler(attributeController.createAttribute.bind(attrib_product",
+        "summary": "asyncHandler(attributeController.createAttribute)",
+        "operationId": "asyncHandler(attributeController.createAttribute)_product",
         "tags": [
           "product"
         ],
@@ -18089,8 +18089,8 @@
     },
     "/attributes/{id}": {
       "get": {
-        "summary": "asyncHandler(attributeController.getAttribute.bind(attribute",
-        "operationId": "asyncHandler(attributeController.getAttribute.bind(attribute_product",
+        "summary": "asyncHandler(attributeController.getAttribute)",
+        "operationId": "asyncHandler(attributeController.getAttribute)_product",
         "tags": [
           "product"
         ],
@@ -18110,8 +18110,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(attributeController.updateAttribute.bind(attrib",
-        "operationId": "asyncHandler(attributeController.updateAttribute.bind(attrib_product",
+        "summary": "asyncHandler(attributeController.updateAttribute)",
+        "operationId": "asyncHandler(attributeController.updateAttribute)_product",
         "tags": [
           "product"
         ],
@@ -18141,8 +18141,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(attributeController.deleteAttribute.bind(attrib",
-        "operationId": "asyncHandler(attributeController.deleteAttribute.bind(attrib_product",
+        "summary": "asyncHandler(attributeController.deleteAttribute)",
+        "operationId": "asyncHandler(attributeController.deleteAttribute)_product",
         "tags": [
           "product"
         ],
@@ -18164,8 +18164,8 @@
     },
     "/attributes/code/{code}": {
       "get": {
-        "summary": "asyncHandler(attributeController.getAttributeByCode.bind(att",
-        "operationId": "asyncHandler(attributeController.getAttributeByCode.bind(att_product",
+        "summary": "asyncHandler(attributeController.getAttributeByCode)",
+        "operationId": "asyncHandler(attributeController.getAttributeByCode)_product",
         "tags": [
           "product"
         ],
@@ -18188,7 +18188,7 @@
     "/attributes/{id}/values": {
       "get": {
         "summary": "Attribute Values",
-        "operationId": "asyncHandler(attributeController.getAttributeValues.bind(att_product",
+        "operationId": "asyncHandler(attributeController.getAttributeValues)_product",
         "tags": [
           "product"
         ],
@@ -18208,8 +18208,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(attributeController.addAttributeValue.bind(attr",
-        "operationId": "asyncHandler(attributeController.addAttributeValue.bind(attr_product",
+        "summary": "asyncHandler(attributeController.addAttributeValue)",
+        "operationId": "asyncHandler(attributeController.addAttributeValue)_product",
         "tags": [
           "product"
         ],
@@ -18241,8 +18241,8 @@
     },
     "/attributes/{id}/values/{valueId}": {
       "delete": {
-        "summary": "asyncHandler(attributeController.removeAttributeValue.bind(a",
-        "operationId": "asyncHandler(attributeController.removeAttributeValue.bind(a_product",
+        "summary": "asyncHandler(attributeController.removeAttributeValue)",
+        "operationId": "asyncHandler(attributeController.removeAttributeValue)_product",
         "tags": [
           "product"
         ],
@@ -18265,7 +18265,7 @@
     "/products/{productId}/attributes": {
       "get": {
         "summary": "Product Attributes",
-        "operationId": "asyncHandler(attributeController.getProductAttributes.bind(a_product",
+        "operationId": "asyncHandler(attributeController.getProductAttributes)_product",
         "tags": [
           "product"
         ],
@@ -18285,8 +18285,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(attributeController.setProductAttribute.bind(at",
-        "operationId": "asyncHandler(attributeController.setProductAttribute.bind(at_product",
+        "summary": "asyncHandler(attributeController.setProductAttribute)",
+        "operationId": "asyncHandler(attributeController.setProductAttribute)_product",
         "tags": [
           "product"
         ],
@@ -18316,8 +18316,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(attributeController.setProductAttributes.bind(a",
-        "operationId": "asyncHandler(attributeController.setProductAttributes.bind(a_product",
+        "summary": "asyncHandler(attributeController.setProductAttributes)",
+        "operationId": "asyncHandler(attributeController.setProductAttributes)_product",
         "tags": [
           "product"
         ],
@@ -18349,8 +18349,8 @@
     },
     "/products/{productId}/attributes/{attributeId}": {
       "delete": {
-        "summary": "asyncHandler(attributeController.removeProductAttribute.bind",
-        "operationId": "asyncHandler(attributeController.removeProductAttribute.bind_product",
+        "summary": "asyncHandler(attributeController.removeProductAttribute)",
+        "operationId": "asyncHandler(attributeController.removeProductAttribute)_product",
         "tags": [
           "product"
         ],
@@ -19683,8 +19683,8 @@
     },
     "/attribute-sets": {
       "get": {
-        "summary": "asyncHandler(attributeSetController.listAttributeSets.bind(a",
-        "operationId": "asyncHandler(attributeSetController.listAttributeSets.bind(a_product",
+        "summary": "asyncHandler(attributeSetController.listAttributeSets)",
+        "operationId": "asyncHandler(attributeSetController.listAttributeSets)_product",
         "tags": [
           "product"
         ],
@@ -19704,8 +19704,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(attributeSetController.createAttributeSet.bind(",
-        "operationId": "asyncHandler(attributeSetController.createAttributeSet.bind(_product",
+        "summary": "asyncHandler(attributeSetController.createAttributeSet)",
+        "operationId": "asyncHandler(attributeSetController.createAttributeSet)_product",
         "tags": [
           "product"
         ],
@@ -19737,8 +19737,8 @@
     },
     "/attribute-sets/{id}": {
       "get": {
-        "summary": "asyncHandler(attributeSetController.getAttributeSet.bind(att",
-        "operationId": "asyncHandler(attributeSetController.getAttributeSet.bind(att_product",
+        "summary": "asyncHandler(attributeSetController.getAttributeSet)",
+        "operationId": "asyncHandler(attributeSetController.getAttributeSet)_product",
         "tags": [
           "product"
         ],
@@ -19758,8 +19758,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(attributeSetController.updateAttributeSet.bind(",
-        "operationId": "asyncHandler(attributeSetController.updateAttributeSet.bind(_product",
+        "summary": "asyncHandler(attributeSetController.updateAttributeSet)",
+        "operationId": "asyncHandler(attributeSetController.updateAttributeSet)_product",
         "tags": [
           "product"
         ],
@@ -19789,8 +19789,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(attributeSetController.deleteAttributeSet.bind(",
-        "operationId": "asyncHandler(attributeSetController.deleteAttributeSet.bind(_product",
+        "summary": "asyncHandler(attributeSetController.deleteAttributeSet)",
+        "operationId": "asyncHandler(attributeSetController.deleteAttributeSet)_product",
         "tags": [
           "product"
         ],
@@ -19812,8 +19812,8 @@
     },
     "/attribute-sets/{id}/attributes": {
       "post": {
-        "summary": "asyncHandler(attributeSetController.addAttributeToSet.bind(a",
-        "operationId": "asyncHandler(attributeSetController.addAttributeToSet.bind(a_product",
+        "summary": "asyncHandler(attributeSetController.addAttributeToSet)",
+        "operationId": "asyncHandler(attributeSetController.addAttributeToSet)_product",
         "tags": [
           "product"
         ],
@@ -19845,8 +19845,8 @@
     },
     "/attribute-sets/{id}/attributes/{attributeId}": {
       "delete": {
-        "summary": "asyncHandler(attributeSetController.removeAttributeFromSet.b",
-        "operationId": "asyncHandler(attributeSetController.removeAttributeFromSet.b_product",
+        "summary": "asyncHandler(attributeSetController.removeAttributeFromSet)",
+        "operationId": "asyncHandler(attributeSetController.removeAttributeFromSet)_product",
         "tags": [
           "product"
         ],
@@ -19868,8 +19868,8 @@
     },
     "/attribute-sets/{id}/attributes/reorder": {
       "post": {
-        "summary": "asyncHandler(attributeSetController.reorderAttributes.bind(a",
-        "operationId": "asyncHandler(attributeSetController.reorderAttributes.bind(a_product",
+        "summary": "asyncHandler(attributeSetController.reorderAttributes)",
+        "operationId": "asyncHandler(attributeSetController.reorderAttributes)_product",
         "tags": [
           "product"
         ],
@@ -19901,8 +19901,8 @@
     },
     "/attribute-groups": {
       "get": {
-        "summary": "asyncHandler(attributeGroupController.listAttributeGroups.bi",
-        "operationId": "asyncHandler(attributeGroupController.listAttributeGroups.bi_product",
+        "summary": "asyncHandler(attributeGroupController.listAttributeGroups)",
+        "operationId": "asyncHandler(attributeGroupController.listAttributeGroups)_product",
         "tags": [
           "product"
         ],
@@ -19922,8 +19922,8 @@
         }
       },
       "post": {
-        "summary": "asyncHandler(attributeGroupController.createAttributeGroup.b",
-        "operationId": "asyncHandler(attributeGroupController.createAttributeGroup.b_product",
+        "summary": "asyncHandler(attributeGroupController.createAttributeGroup)",
+        "operationId": "asyncHandler(attributeGroupController.createAttributeGroup)_product",
         "tags": [
           "product"
         ],
@@ -19955,8 +19955,8 @@
     },
     "/attribute-groups/{id}": {
       "get": {
-        "summary": "asyncHandler(attributeGroupController.getAttributeGroup.bind",
-        "operationId": "asyncHandler(attributeGroupController.getAttributeGroup.bind_product",
+        "summary": "asyncHandler(attributeGroupController.getAttributeGroup)",
+        "operationId": "asyncHandler(attributeGroupController.getAttributeGroup)_product",
         "tags": [
           "product"
         ],
@@ -19976,8 +19976,8 @@
         }
       },
       "put": {
-        "summary": "asyncHandler(attributeGroupController.updateAttributeGroup.b",
-        "operationId": "asyncHandler(attributeGroupController.updateAttributeGroup.b_product",
+        "summary": "asyncHandler(attributeGroupController.updateAttributeGroup)",
+        "operationId": "asyncHandler(attributeGroupController.updateAttributeGroup)_product",
         "tags": [
           "product"
         ],
@@ -20007,8 +20007,8 @@
         }
       },
       "delete": {
-        "summary": "asyncHandler(attributeGroupController.deleteAttributeGroup.b",
-        "operationId": "asyncHandler(attributeGroupController.deleteAttributeGroup.b_product",
+        "summary": "asyncHandler(attributeGroupController.deleteAttributeGroup)",
+        "operationId": "asyncHandler(attributeGroupController.deleteAttributeGroup)_product",
         "tags": [
           "product"
         ],
@@ -20053,8 +20053,8 @@
     },
     "/attributes/group/{groupId}": {
       "get": {
-        "summary": "asyncHandler(attributeController.listAttributesByGroup.bind(",
-        "operationId": "asyncHandler(attributeController.listAttributesByGroup.bind(_product",
+        "summary": "asyncHandler(attributeController.listAttributesByGroup)",
+        "operationId": "asyncHandler(attributeController.listAttributesByGroup)_product",
         "tags": [
           "product"
         ],
@@ -20076,8 +20076,8 @@
     },
     "/attribute-options/attribute/{attributeId}/value/{value}": {
       "get": {
-        "summary": "asyncHandler(attributeOptionController.getOptionByValue.bind",
-        "operationId": "asyncHandler(attributeOptionController.getOptionByValue.bind_product",
+        "summary": "asyncHandler(attributeOptionController.getOptionByValue)",
+        "operationId": "asyncHandler(attributeOptionController.getOptionByValue)_product",
         "tags": [
           "product"
         ],
@@ -20122,8 +20122,8 @@
     },
     "/attribute-options/{id}": {
       "get": {
-        "summary": "asyncHandler(attributeOptionController.getAttributeOption.bi",
-        "operationId": "asyncHandler(attributeOptionController.getAttributeOption.bi_product",
+        "summary": "asyncHandler(attributeOptionController.getAttributeOption)",
+        "operationId": "asyncHandler(attributeOptionController.getAttributeOption)_product",
         "tags": [
           "product"
         ],
@@ -24509,7 +24509,7 @@
     "/stores": {
       "post": {
         "summary": "Create store",
-        "operationId": "asyncHandler(storeController.createStore.bind(storeControlle_store",
+        "operationId": "asyncHandler(storeController.createStore)_store",
         "tags": [
           "store"
         ],
@@ -24563,7 +24563,7 @@
     "/stores/active": {
       "get": {
         "summary": "Get active stores (must be before :storeId to avoid collision)",
-        "operationId": "asyncHandler(storeController.getActiveStores.bind(storeContr_store",
+        "operationId": "asyncHandler(storeController.getActiveStores)_store",
         "tags": [
           "store"
         ],
@@ -24586,7 +24586,7 @@
     "/stores/slug/{slug}": {
       "get": {
         "summary": "Get store by slug",
-        "operationId": "asyncHandler(storeController.getStoreBySlug.bind(storeContro_store",
+        "operationId": "asyncHandler(storeController.getStoreBySlug)_store",
         "tags": [
           "store"
         ],
@@ -24630,7 +24630,7 @@
       },
       "put": {
         "summary": "Update store",
-        "operationId": "asyncHandler(storeController.updateStore.bind(storeControlle_store",
+        "operationId": "asyncHandler(storeController.updateStore)_store",
         "tags": [
           "store"
         ],
@@ -24661,7 +24661,7 @@
       },
       "delete": {
         "summary": "Delete store",
-        "operationId": "asyncHandler(storeController.deleteStore.bind(storeControlle_store",
+        "operationId": "asyncHandler(storeController.deleteStore)_store",
         "tags": [
           "store"
         ],
@@ -24684,7 +24684,7 @@
     "/stores/business/{organizationId}": {
       "get": {
         "summary": "Get stores by business",
-        "operationId": "asyncHandler(storeController.getStoresByBusiness.bind(storeC_store",
+        "operationId": "asyncHandler(storeController.getStoresByBusiness)_store",
         "tags": [
           "store"
         ],
@@ -24707,7 +24707,7 @@
     "/stores/{storeId}/pickup": {
       "put": {
         "summary": "Configure store pickup (BOPIS)",
-        "operationId": "asyncHandler(storeController.configurePickup.bind(storeContr_store",
+        "operationId": "asyncHandler(storeController.configurePickup)_store",
         "tags": [
           "store"
         ],
@@ -24740,7 +24740,7 @@
     "/stores/{storeId}/local-delivery": {
       "put": {
         "summary": "Set local delivery zone",
-        "operationId": "asyncHandler(storeController.setLocalDelivery.bind(storeCont_store",
+        "operationId": "asyncHandler(storeController.setLocalDelivery)_store",
         "tags": [
           "store"
         ],
@@ -24773,7 +24773,7 @@
     "/stores/hierarchy": {
       "post": {
         "summary": "Create store hierarchy",
-        "operationId": "asyncHandler(storeController.createStoreHierarchy.bind(store_store",
+        "operationId": "asyncHandler(storeController.createStoreHierarchy)_store",
         "tags": [
           "store"
         ],
@@ -25024,7 +25024,7 @@
     "/markets/context": {
       "get": {
         "summary": "Resolve the market context for this hostname (+ optional currency/locale overrides)",
-        "operationId": "async (req: HttpRequest, res: HttpResponse) => {\n  try {\n   _store",
+        "operationId": "async (req: HttpRequest, res: HttpResponse) => {\n  const con_store",
         "tags": [
           "store"
         ],
@@ -25047,7 +25047,7 @@
     "/markets/{marketId}/context": {
       "get": {
         "summary": "Explicit market selection for the storefront market switcher",
-        "operationId": "async (req: HttpRequest, res: HttpResponse) => {\n  try {\n   _store",
+        "operationId": "async (req: HttpRequest, res: HttpResponse) => {\n  const con_store",
         "tags": [
           "store"
         ],

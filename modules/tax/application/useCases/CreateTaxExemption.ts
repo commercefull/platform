@@ -22,8 +22,8 @@ export interface CreateTaxExemptionInput {
   exemptionReason?: string;
   documentUrl?: string;
   taxZoneId?: string;
-  startDate?: number;
-  expiryDate?: number;
+  startDate?: Date;
+  expiryDate?: Date;
   notes?: string;
   // Epic B scope fields
   applicableTaxCategoryIds?: string[] | null;
@@ -46,7 +46,7 @@ export class CreateTaxExemptionUseCase {
       exemptionReason: input.exemptionReason,
       documentUrl: input.documentUrl,
       taxZoneId: input.taxZoneId,
-      startDate: input.startDate ?? Date.now(),
+      startDate: input.startDate ?? new Date(),
       expiryDate: input.expiryDate,
       isVerified: false,
       notes: input.notes,

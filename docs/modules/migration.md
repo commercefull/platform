@@ -353,21 +353,21 @@ All routes are mounted under `/business/migration` and require organization auth
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                             | Controller                                                     | Description     |
-| ------ | ------------------------------------ | -------------------------------------------------------------- | --------------- |
-| POST   | `/errors/:importErrorId/resolve`     | `asyncHandler(migrationController.resolveError.bind(migration` | —               |
-| POST   | `/jobs`                              | `asyncHandler(migrationController.createJob.bind(migrationCon` | Import job CRUD |
-| GET    | `/jobs`                              | `asyncHandler(migrationController.listJobs.bind(migrationCont` | —               |
-| GET    | `/jobs/:importJobId`                 | `asyncHandler(migrationController.getJob.bind(migrationContro` | —               |
-| DELETE | `/jobs/:importJobId`                 | `asyncHandler(migrationController.deleteJob.bind(migrationCon` | —               |
-| POST   | `/jobs/:importJobId/cancel`          | `asyncHandler(migrationController.cancelJob.bind(migrationCon` | —               |
-| POST   | `/jobs/:importJobId/complete`        | `asyncHandler(migrationController.completeJob.bind(migrationC` | —               |
-| GET    | `/jobs/:importJobId/errors`          | `asyncHandler(migrationController.getErrors.bind(migrationCon` | Import errors   |
-| POST   | `/jobs/:importJobId/fail`            | `asyncHandler(migrationController.failJob.bind(migrationContr` | —               |
-| GET    | `/jobs/:importJobId/mappings`        | `asyncHandler(migrationController.getMappings.bind(migrationC` | Import mappings |
-| POST   | `/jobs/:importJobId/mappings`        | `asyncHandler(migrationController.createMapping.bind(migratio` | —               |
-| GET    | `/jobs/:importJobId/mappings/lookup` | `asyncHandler(migrationController.lookupMapping.bind(migratio` | —               |
-| POST   | `/jobs/:importJobId/pause`           | `asyncHandler(migrationController.pauseJob.bind(migrationCont` | —               |
-| POST   | `/jobs/:importJobId/start`           | `asyncHandler(migrationController.startJob.bind(migrationCont` | —               |
+| Method | Endpoint                             | Controller                                        | Description     |
+| ------ | ------------------------------------ | ------------------------------------------------- | --------------- |
+| POST   | `/errors/:importErrorId/resolve`     | `asyncHandler(migrationController.resolveError)`  | —               |
+| POST   | `/jobs`                              | `asyncHandler(migrationController.createJob)`     | Import job CRUD |
+| GET    | `/jobs`                              | `asyncHandler(migrationController.listJobs)`      | —               |
+| GET    | `/jobs/:importJobId`                 | `asyncHandler(migrationController.getJob)`        | —               |
+| DELETE | `/jobs/:importJobId`                 | `asyncHandler(migrationController.deleteJob)`     | —               |
+| POST   | `/jobs/:importJobId/cancel`          | `asyncHandler(migrationController.cancelJob)`     | —               |
+| POST   | `/jobs/:importJobId/complete`        | `asyncHandler(migrationController.completeJob)`   | —               |
+| GET    | `/jobs/:importJobId/errors`          | `asyncHandler(migrationController.getErrors)`     | Import errors   |
+| POST   | `/jobs/:importJobId/fail`            | `asyncHandler(migrationController.failJob)`       | —               |
+| GET    | `/jobs/:importJobId/mappings`        | `asyncHandler(migrationController.getMappings)`   | Import mappings |
+| POST   | `/jobs/:importJobId/mappings`        | `asyncHandler(migrationController.createMapping)` | —               |
+| GET    | `/jobs/:importJobId/mappings/lookup` | `asyncHandler(migrationController.lookupMapping)` | —               |
+| POST   | `/jobs/:importJobId/pause`           | `asyncHandler(migrationController.pauseJob)`      | —               |
+| POST   | `/jobs/:importJobId/start`           | `asyncHandler(migrationController.startJob)`      | —               |
 
 <!-- GENERATED:ENDPOINTS:END -->

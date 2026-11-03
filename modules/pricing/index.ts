@@ -12,6 +12,7 @@ export * from './domain/services/PricingRuleEvaluator';
 export * from './domain/repositories/CurrencyCatalog';
 export * from './domain/repositories/PricingRuleQueryRepository';
 export * from './domain/repositories/PricingDataQueryRepository';
+export * from './domain/repositories/ProductBasePriceRepository';
 
 // Interface exports (routers, GraphQL)
 export { pricingMerchantRouter } from './interface/routers/pricingBusinessRouter';

@@ -6,6 +6,8 @@
 
 import { query, queryOne } from '../../../../libs/db';
 
+type PurchaseHistoryRow = { date: string; orders: string; revenue: string | null };
+
 // ============================================================================
 // Predictive Analytics
 // ============================================================================
@@ -22,7 +24,7 @@ export async function findRecentCustomerIds(limit: number = 10): Promise<string[
 
 export async function findCustomerPurchaseHistory(customerId: string, limit: number = 30): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<PurchaseHistoryRow[]>(
       `SELECT
         DATE("createdAt") as date,
         COUNT(*) as orders,

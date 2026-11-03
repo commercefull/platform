@@ -9,10 +9,10 @@ import { jsonResponse, sendResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
 import { safeEqual } from '../../../../libs/httpSecurity';
 import { ScimValidationError, ScimResourceNotFoundError, ScimConflictError, ScimAuthenticationError } from '../../domain/errors/SsoErrors';
 import type { ManageScimProvisioningUseCase, ScimPatchOperation } from '../../application/useCases/ManageScimProvisioning';
+import { logCaughtError } from '../../../../libs/errors';
 
 const SCIM_BEARER_TOKEN = process.env.SCIM_BEARER_TOKEN || '';
 
@@ -63,7 +63,7 @@ export class ScimController {
   /**
    * GET /scim/v2/Users — list provisioned users
    */
-  async listUsers(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listUsers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const organizationId = (req.query.organizationId as string) || '';
@@ -96,16 +96,16 @@ export class ScimController {
       } else if (error instanceof ScimValidationError) {
         scimError(400, error.message, res);
       } else {
-        logger.error('SCIM listUsers error', { error: (error as Error).message });
+        logCaughtError('SCIM listUsers error', error);
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * GET /scim/v2/Users/:id — get a single provisioned user
    */
-  async getUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -129,16 +129,16 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM getUser error', { error: (error as Error).message });
+        logCaughtError('SCIM getUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * POST /scim/v2/Users — provision a new user
    */
-  async createUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const body = req.body as Record<string, unknown>;
@@ -181,16 +181,16 @@ export class ScimController {
       } else if (error instanceof ScimConflictError) {
         scimError(409, error.message, res);
       } else {
-        logger.error('SCIM createUser error', { error: (error as Error).message });
+        logCaughtError('SCIM createUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * PUT /scim/v2/Users/:id — replace a user
    */
-  async replaceUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  replaceUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -222,16 +222,16 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM replaceUser error', { error: (error as Error).message });
+        logCaughtError('SCIM replaceUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * PATCH /scim/v2/Users/:id — update user attributes
    */
-  async patchUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  patchUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -247,16 +247,16 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM patchUser error', { error: (error as Error).message });
+        logCaughtError('SCIM patchUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * DELETE /scim/v2/Users/:id — deprovision a user
    */
-  async deleteUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  deleteUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -270,20 +270,20 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM deleteUser error', { error: (error as Error).message });
+        logCaughtError('SCIM deleteUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
-  private toScimUser(params: {
+  private toScimUser = (params: {
     scimUserId: string;
     user: { id: string; email: string; name?: string; firstName?: string; lastName?: string; isActive: boolean };
     active: boolean | null;
     createdAt: Date | null;
     updatedAt: Date | null;
     externalId?: string | null;
-  }): ScimUser {
+  }): ScimUser => {
     const { scimUserId, user, active, createdAt, updatedAt, externalId } = params;
     return {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
@@ -303,5 +303,5 @@ export class ScimController {
         lastModified: updatedAt?.toISOString() ?? new Date().toISOString(),
       },
     };
-  }
+  };
 }

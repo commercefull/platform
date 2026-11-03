@@ -479,6 +479,5 @@ export class ProductRepo implements IProductRepository {
   private mapToVariant(row: DbProductVariant): ProductVariant {
     return mapToVariant(row);
   }
-
 }
 export default new ProductRepo();

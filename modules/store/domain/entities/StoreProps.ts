@@ -115,4 +115,3 @@ export interface StoreProps {
   createdAt: Date;
   updatedAt: Date;
 }
-

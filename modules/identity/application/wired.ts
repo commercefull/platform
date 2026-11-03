@@ -25,7 +25,10 @@ const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 const samlRepo = new SamlProviderRepositoryImpl();
 const oidcRepo = new OidcProviderRepositoryImpl();
 export const orgCredentialPort = new OrganizationCredentialSubjectAdapter(organizationRepo);
-export const customerCredentialPort = new CustomerCredentialSubjectAdapter(customerDataRepository.legacy, customerDataRepository.customers);
+export const customerCredentialPort = new CustomerCredentialSubjectAdapter(
+  customerDataRepository.credentials,
+  customerDataRepository.customers,
+);
 const orgPort = orgCredentialPort;
 
 export const manageSamlUseCase = new ManageSamlProviderUseCase(samlRepo);

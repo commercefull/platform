@@ -5,6 +5,9 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/CustomerRepository';
+export * from './domain/repositories/CustomerCredentialRepository';
+export * from './domain/repositories/CustomerAddressRepository';
+export * from './domain/repositories/StorefrontWishlistRepository';
 export * from './domain/events/CustomerEvents';
 export * from './domain/errors/CustomerErrors';
 
@@ -14,3 +17,6 @@ export { customerBusinessRouter } from './interface/routers/businessRouter';
 export { customerTypeDefs } from './interface/graphql/typeDefs';
 export { customerResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { CustomerStatus, AddressType, CustomerAddress, CustomerProps, Customer } from './domain/entities/Customer';

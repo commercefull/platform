@@ -180,3 +180,7 @@ export interface CreatePickPackInput {
   assignedTo?: string;
   notes?: string;
 }
+
+export interface WarehouseRepository {
+  findDefault(): Promise<WarehouseRecord | null>;
+}

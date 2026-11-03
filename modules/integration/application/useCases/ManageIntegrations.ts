@@ -1,10 +1,10 @@
-import { randomUUID } from 'crypto';
 import type { IntegrationRepository, IntegrationCredentialRepository } from '../../domain/repositories/IntegrationRepository';
 import { Integration, type IntegrationProvider } from '../../domain/entities/Integration';
 import { IntegrationCredential, type CredentialType } from '../../domain/entities/IntegrationCredential';
 import { IntegrationNotFoundError, CredentialNotFoundError, IntegrationValidationError } from '../../domain/errors/IntegrationErrors';
 import { encryptCredential, decryptCredential } from '../../domain/services/CredentialCrypto';
 
+import { generateUUID } from '../../../../libs/uuid';
 export class ManageIntegrationsUseCase {
   constructor(
     private integrationRepo: IntegrationRepository,
@@ -22,7 +22,7 @@ export class ManageIntegrationsUseCase {
     if (!params.name) throw new IntegrationValidationError('Integration name is required');
     if (!params.provider) throw new IntegrationValidationError('Integration provider is required');
     const integration = Integration.create({
-      integrationId: randomUUID(),
+      integrationId: generateUUID(),
       organizationId: params.organizationId,
       name: params.name,
       provider: params.provider,
@@ -85,7 +85,7 @@ export class ManageIntegrationsUseCase {
   }): Promise<IntegrationCredential> {
     const encrypted = encryptCredential(params.credentials);
     const credential = IntegrationCredential.create({
-      credentialId: randomUUID(),
+      credentialId: generateUUID(),
       integrationId: params.integrationId,
       type: params.type,
       label: params.label,

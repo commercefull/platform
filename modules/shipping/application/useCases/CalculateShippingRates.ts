@@ -242,9 +242,7 @@ export class CalculateShippingRatesUseCase {
     };
   }
 
-  private estimatedDays(
-    method: Awaited<ReturnType<Pick<ShippingMethodPort, 'findAll'>['findAll']>>[number],
-  ): number | null {
+  private estimatedDays(method: Awaited<ReturnType<Pick<ShippingMethodPort, 'findAll'>['findAll']>>[number]): number | null {
     if (!method.estimatedDeliveryDays) return method.handlingDays;
     if (typeof method.estimatedDeliveryDays === 'object') {
       return (method.estimatedDeliveryDays as { min?: number }).min ?? null;

@@ -184,15 +184,10 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
   // A customer may attribute an order to a store/channel, but only to one
   // that exists, is active, and — when both are given — is assigned.
   if (resolvedStoreId || resolvedChannelId) {
-    try {
-      await manageSalesChannelsUseCase.assertStoreChannelAccess({
-        storeId: resolvedStoreId,
-        channelId: resolvedChannelId,
-      });
-    } catch (err: unknown) {
-      respondError(req, res, (err as Error).message, 400);
-      return;
-    }
+    await manageSalesChannelsUseCase.assertStoreChannelAccess({
+      storeId: resolvedStoreId,
+      channelId: resolvedChannelId,
+    });
   }
 
   const command = buildCreateOrderCommand(req, body, {

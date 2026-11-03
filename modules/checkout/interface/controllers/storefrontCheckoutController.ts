@@ -88,9 +88,7 @@ function parseCheckoutAddresses(
 ): { shippingAddress: Record<string, unknown>; billingAddress: Record<string, unknown> } | null {
   try {
     const shippingAddress = JSON.parse(body.shippingAddress as string) as Record<string, unknown>;
-    const billingAddress = body.billingAddress
-      ? (JSON.parse(body.billingAddress as string) as Record<string, unknown>)
-      : shippingAddress;
+    const billingAddress = body.billingAddress ? (JSON.parse(body.billingAddress as string) as Record<string, unknown>) : shippingAddress;
     return { shippingAddress, billingAddress };
   } catch {
     return null;

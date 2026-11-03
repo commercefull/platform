@@ -1,3 +1,5 @@
+import { generateUUID } from '../../../../libs/uuid';
+
 export type ImportErrorSeverity = 'error' | 'warning' | 'info';
 
 export interface ImportErrorProps {
@@ -30,7 +32,7 @@ export class ImportError {
     rawData?: Record<string, unknown>;
   }): ImportError {
     return new ImportError({
-      importErrorId: crypto.randomUUID(),
+      importErrorId: generateUUID(),
       importJobId: props.importJobId,
       entityType: props.entityType,
       sourceId: props.sourceId,

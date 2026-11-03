@@ -5,7 +5,8 @@ import {
   TransactionCannotBeRefundedError,
   RefundAmountExceedsRefundableError,
 } from '../../domain/errors/PaymentErrors';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
+import type { PaymentRefundRepository } from '../../domain/repositories/PaymentRefundRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import type { PaymentRefund } from '../../domain/entities/PaymentRefund';
 
@@ -16,7 +17,9 @@ beforeEach(() => {
 
 describe('ProcessPaymentRefundUseCase', () => {
   let useCase: ProcessPaymentRefundUseCase;
-  let mockRepo: jest.Mocked<Pick<PaymentRepository, 'findTransactionById' | 'saveRefund' | 'saveTransaction'>>;
+  let mockRepo: jest.Mocked<
+    Pick<PaymentTransactionRepository, 'findTransactionById' | 'saveTransaction'> & Pick<PaymentRefundRepository, 'saveRefund'>
+  >;
   let txn: PaymentTransaction;
   let recordRefundSpy: jest.SpyInstance;
 
@@ -41,7 +44,7 @@ describe('ProcessPaymentRefundUseCase', () => {
       saveRefund: jest.fn().mockResolvedValue(undefined as unknown as PaymentRefund),
       saveTransaction: jest.fn().mockResolvedValue(undefined as unknown as PaymentTransaction),
     };
-    useCase = new ProcessPaymentRefundUseCase(mockRepo as unknown as PaymentRepository);
+    useCase = new ProcessPaymentRefundUseCase(mockRepo, mockRepo);
   });
 
   it('should process refund (happy path)', async () => {

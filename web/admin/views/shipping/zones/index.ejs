@@ -169,7 +169,6 @@ function activateZone(zoneId) {
   })
   .catch(error => {
     alert('<%= t("distribution:shipping.errorActivatingZone") %>');
-    console.error('Error:', error);
   });
 }
 
@@ -190,7 +189,6 @@ function deactivateZone(zoneId) {
   })
   .catch(error => {
     alert('<%= t("distribution:shipping.errorDeactivatingZone") %>');
-    console.error('Error:', error);
   });
 }
 
@@ -213,7 +211,6 @@ function deleteZone(zoneId, zoneName) {
     })
     .catch(error => {
       alert('<%= t("distribution:shipping.errorDeletingZone") %>');
-      console.error('Error:', error);
     });
   };
   $('#deleteModal').modal('show');

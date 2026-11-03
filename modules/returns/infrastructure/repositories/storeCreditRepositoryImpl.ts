@@ -4,6 +4,7 @@ import type { StoreCreditRepository } from '../../domain/repositories/ReturnRepo
 import { StoreCreditLedgerEntry } from '../../domain/entities/StoreCredit';
 import type { StoreCreditEntryType, CustomerStoreCreditBalance } from '../../domain/entities/StoreCredit';
 import { ReturnValidationError } from '../../domain/errors/ReturnErrors';
+import type { StoreCreditLedger as DbStoreCreditLedger } from '../../../../libs/db/types';
 
 export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   async getBalance(customerId: string): Promise<CustomerStoreCreditBalance> {
@@ -94,7 +95,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   }
 
   async getLedger(customerId: string, limit = 50): Promise<StoreCreditLedgerEntry[]> {
-    const rows = await query<Record<string, unknown>[]>(
+    const rows = await query<DbStoreCreditLedger[]>(
       `SELECT * FROM "storeCreditLedger" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
       [customerId, limit],
     );
@@ -106,7 +107,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
         referenceType: row.referenceType as string | undefined,
         referenceId: row.referenceId as string | undefined,
         amountCents: Number(row.amountCents),
-        balanceAfterCents: parseFloat(row.balanceAfterCents as string),
+        balanceAfterCents: Number(row.balanceAfterCents),
         currency: row.currencyCode as string,
         reason: row.reason as string | undefined,
         notes: row.notes as string | undefined,
@@ -119,10 +120,10 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   }
 
   async findByReference(referenceType: string, referenceId: string): Promise<StoreCreditLedgerEntry | null> {
-    const row = await queryOne<Record<string, unknown>>(
-      `SELECT * FROM "storeCreditLedger" WHERE "referenceType" = $1 AND "referenceId" = $2`,
-      [referenceType, referenceId],
-    );
+    const row = await queryOne<DbStoreCreditLedger>(`SELECT * FROM "storeCreditLedger" WHERE "referenceType" = $1 AND "referenceId" = $2`, [
+      referenceType,
+      referenceId,
+    ]);
     if (!row) return null;
     return StoreCreditLedgerEntry.reconstitute({
       storeCreditLedgerId: row.storeCreditLedgerId as string,
@@ -131,7 +132,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       referenceType: row.referenceType as string | undefined,
       referenceId: row.referenceId as string | undefined,
       amountCents: Number(row.amountCents),
-      balanceAfterCents: parseFloat(row.balanceAfterCents as string),
+      balanceAfterCents: Number(row.balanceAfterCents),
       currency: row.currencyCode as string,
       reason: row.reason as string | undefined,
       notes: row.notes as string | undefined,

@@ -163,10 +163,7 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
 };
 
 /** Filters scoped to the current store. */
-function buildListingFilters(
-  query: HttpRequest['query'],
-  storeCtx: ReturnType<typeof getStoreContext>,
-): Record<string, unknown> {
+function buildListingFilters(query: HttpRequest['query'], storeCtx: ReturnType<typeof getStoreContext>): Record<string, unknown> {
   const { category, search, brand, priceMin, priceMax, onSale } = query;
   const filters: Record<string, unknown> = {};
   if (storeCtx.storeId) filters.storeId = storeCtx.storeId;

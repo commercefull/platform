@@ -7,6 +7,7 @@ export * from './application/useCases';
 export * from './domain/entities/TaxDecision';
 export * from './domain/ports/TaxEnginePort';
 export * from './domain/repositories/TaxRepository';
+export * from './domain/vatFormat';
 export * from './domain/errors/TaxErrors';
 
 // Interface exports (routers, GraphQL)
@@ -15,3 +16,6 @@ export { taxBusinessRouter } from './interface/routers/taxBusinessRouter';
 export { taxTypeDefs } from './interface/graphql/typeDefs';
 export { taxResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { TaxExemptionProps, TaxExemption } from './domain/entities/TaxExemption';

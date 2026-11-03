@@ -5,18 +5,24 @@
 import { query, queryOne } from '../../../../libs/db';
 import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError } from '../../domain/errors/SubscriptionErrors';
 import type { CustomerSubscription, SubscriptionPlan, SubscriptionPause, SubscriptionStatus } from './subscriptionTypes';
-import { mapToCustomerSubscription, mapToSubscriptionPause, generateSubscriptionNumber, calculateNextBillingDate } from './subscriptionHelpers';
+import {
+  mapToCustomerSubscription,
+  mapToSubscriptionPause,
+  generateSubscriptionNumber,
+  calculateNextBillingDate,
+} from './subscriptionHelpers';
 import { getSubscriptionPlan } from './subscriptionPlanQueries';
+import type { CustomerSubscription as DbCustomerSubscription, SubscriptionPause as DbSubscriptionPause } from '../../../../libs/db/types';
 
 export async function getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
+  const row = await queryOne<DbCustomerSubscription>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
     customerSubscriptionId,
   ]);
   return row ? mapToCustomerSubscription(row) : null;
 }
 
 export async function getCustomerSubscriptionByNumber(subscriptionNumber: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
+  const row = await queryOne<DbCustomerSubscription>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
     subscriptionNumber,
   ]);
   return row ? mapToCustomerSubscription(row) : null;
@@ -47,7 +53,7 @@ export async function getCustomerSubscriptions(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbCustomerSubscription[]>(
     `SELECT * FROM "customerSubscription" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -60,7 +66,7 @@ export async function getCustomerSubscriptions(
 }
 
 export async function getSubscriptionsDueBilling(beforeDate: Date): Promise<CustomerSubscription[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbCustomerSubscription[]>(
     `SELECT * FROM "customerSubscription" 
      WHERE "status" IN ('active', 'trialing') 
      AND "nextBillingAt" <= $1 
@@ -137,7 +143,7 @@ async function insertCustomerSubscription(
   const pricing = subscriptionPricing(plan, quantity);
   const { trialDays, trialStartAt, trialEndAt, currentPeriodStart, currentPeriodEnd, nextBillingAt } = schedule;
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbCustomerSubscription>(
     `INSERT INTO "customerSubscription" (
       "subscriptionNumber", "customerId", "subscriptionPlanId", "subscriptionProductId",
       "productVariantId", "status", "quantity", "unitPriceCents", "discountAmountCents",
@@ -262,7 +268,7 @@ export async function pauseSubscription(
   );
 
   // Create pause record
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSubscriptionPause>(
     `INSERT INTO "subscriptionPause" (
       "customerSubscriptionId", "status", "pausedAt", "scheduledResumeAt",
       "reason", "pausedBy", "createdAt", "updatedAt"
@@ -316,4 +322,3 @@ export async function advanceBillingCycle(customerSubscriptionId: string): Promi
     [newPeriodStart.toISOString(), newPeriodEnd.toISOString(), now.toISOString(), customerSubscriptionId],
   );
 }
-

@@ -14,3 +14,7 @@ export { gdprBusinessRouter } from './interface/routers/gdprBusinessRouter';
 export { gdprTypeDefs } from './interface/graphql/typeDefs';
 export { gdprResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+// Domain entity exports
+export { GdprCookieConsentProps, CookiePreferences, GdprCookieConsent } from './domain/entities/GdprCookieConsent';
+export { GdprRequestType, GdprRequestStatus, GdprDataRequestProps, GdprDataRequest } from './domain/entities/GdprDataRequest';

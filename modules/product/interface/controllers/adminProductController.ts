@@ -181,8 +181,7 @@ interface CreateProductFormBody {
   metadata?: Record<string, unknown>;
 }
 
-const toCents = (amount: string | undefined): number | undefined =>
-  amount ? Math.round(parseFloat(amount) * 100) : undefined;
+const toCents = (amount: string | undefined): number | undefined => (amount ? Math.round(parseFloat(amount) * 100) : undefined);
 
 const truthy = (value: string | boolean | undefined): boolean => value === 'true' || value === true;
 

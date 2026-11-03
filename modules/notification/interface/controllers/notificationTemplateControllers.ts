@@ -5,12 +5,8 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import {
-  manageNotificationTemplatesUseCase,
-  manageNotificationPreferencesUseCase,
-} from '../../application/useCases/wired';
+import { manageNotificationTemplatesUseCase, manageNotificationPreferencesUseCase } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { NotificationTemplate, NotificationPreference } from '../../application/wired';
 
 // ============================================================================
@@ -83,11 +79,7 @@ export const getAllTemplates = async (req: HttpRequest, res: HttpResponse): Prom
 };
 
 export const getTemplateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    successResponse(res, mapTemplate(await manageNotificationTemplatesUseCase.getById(String(req.params.id))));
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  successResponse(res, mapTemplate(await manageNotificationTemplatesUseCase.getById(String(req.params.id))));
 };
 
 export const getTemplatesByType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -102,29 +94,25 @@ export const createTemplate = async (
 ): Promise<void> => {
   const { code, name, type, supportedChannels, defaultChannel } = req.body;
 
-  try {
-    const created = await manageNotificationTemplatesUseCase.create({
-      code,
-      name,
-      description: req.body.description ?? undefined,
-      type: type as never,
-      supportedChannels: supportedChannels as never,
-      defaultChannel: defaultChannel as never,
-      subject: req.body.subject ?? undefined,
-      htmlTemplate: req.body.htmlTemplate ?? undefined,
-      textTemplate: req.body.textTemplate ?? undefined,
-      pushTemplate: req.body.pushTemplate ?? undefined,
-      smsTemplate: req.body.smsTemplate ?? undefined,
-      parameters: req.body.parameters ?? undefined,
-      isActive: req.body.isActive ?? true,
-      categoryCode: req.body.categoryCode ?? undefined,
-      previewData: req.body.previewData ?? undefined,
-      createdBy: undefined,
-    });
-    successResponse(res, mapTemplate(created), 201);
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const created = await manageNotificationTemplatesUseCase.create({
+    code,
+    name,
+    description: req.body.description ?? undefined,
+    type: type as never,
+    supportedChannels: supportedChannels as never,
+    defaultChannel: defaultChannel as never,
+    subject: req.body.subject ?? undefined,
+    htmlTemplate: req.body.htmlTemplate ?? undefined,
+    textTemplate: req.body.textTemplate ?? undefined,
+    pushTemplate: req.body.pushTemplate ?? undefined,
+    smsTemplate: req.body.smsTemplate ?? undefined,
+    parameters: req.body.parameters ?? undefined,
+    isActive: req.body.isActive ?? true,
+    categoryCode: req.body.categoryCode ?? undefined,
+    previewData: req.body.previewData ?? undefined,
+    createdBy: undefined,
+  });
+  successResponse(res, mapTemplate(created), 201);
 };
 
 export const updateTemplate = async (
@@ -133,43 +121,35 @@ export const updateTemplate = async (
 ): Promise<void> => {
   const id = String(req.params.id);
 
-  try {
-    const updated = await manageNotificationTemplatesUseCase.updateExisting(id, {
-      name: req.body.name,
-      description: req.body.description ?? undefined,
-      type: req.body.type as never,
-      supportedChannels: req.body.supportedChannels as never,
-      defaultChannel: req.body.defaultChannel as never,
-      subject: req.body.subject ?? undefined,
-      htmlTemplate: req.body.htmlTemplate ?? undefined,
-      textTemplate: req.body.textTemplate ?? undefined,
-      pushTemplate: req.body.pushTemplate ?? undefined,
-      smsTemplate: req.body.smsTemplate ?? undefined,
-      parameters: req.body.parameters ?? undefined,
-      isActive: req.body.isActive,
-      categoryCode: req.body.categoryCode ?? undefined,
-      previewData: req.body.previewData ?? undefined,
-      createdBy: undefined,
-    });
-    successResponse(res, mapTemplate(updated));
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const updated = await manageNotificationTemplatesUseCase.updateExisting(id, {
+    name: req.body.name,
+    description: req.body.description ?? undefined,
+    type: req.body.type as never,
+    supportedChannels: req.body.supportedChannels as never,
+    defaultChannel: req.body.defaultChannel as never,
+    subject: req.body.subject ?? undefined,
+    htmlTemplate: req.body.htmlTemplate ?? undefined,
+    textTemplate: req.body.textTemplate ?? undefined,
+    pushTemplate: req.body.pushTemplate ?? undefined,
+    smsTemplate: req.body.smsTemplate ?? undefined,
+    parameters: req.body.parameters ?? undefined,
+    isActive: req.body.isActive,
+    categoryCode: req.body.categoryCode ?? undefined,
+    previewData: req.body.previewData ?? undefined,
+    createdBy: undefined,
+  });
+  successResponse(res, mapTemplate(updated));
 };
 
 export const deleteTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const id = String(req.params.id);
 
-  try {
-    const deleted = await manageNotificationTemplatesUseCase.deleteExisting(id);
-    if (!deleted) {
-      errorResponse(res, 'Failed to delete template', 500);
-      return;
-    }
-    successResponse(res, { id });
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
+  const deleted = await manageNotificationTemplatesUseCase.deleteExisting(id);
+  if (!deleted) {
+    errorResponse(res, 'Failed to delete template', 500);
+    return;
   }
+  successResponse(res, { id });
 };
 
 export const previewTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -227,15 +207,11 @@ export const updatePreferenceAdmin = async (
   const id = String(req.params.id);
   const { channelPreferences, isEnabled, schedulePreferences, metadata } = req.body;
 
-  try {
-    const updated = await manageNotificationPreferencesUseCase.update(id, {
-      channelPreferences,
-      isEnabled,
-      schedulePreferences,
-      metadata,
-    });
-    successResponse(res, mapPreferenceAdmin(updated));
-  } catch (error) {
-    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const updated = await manageNotificationPreferencesUseCase.update(id, {
+    channelPreferences,
+    isEnabled,
+    schedulePreferences,
+    metadata,
+  });
+  successResponse(res, mapPreferenceAdmin(updated));
 };

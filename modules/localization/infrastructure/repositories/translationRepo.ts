@@ -4,39 +4,54 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { TranslatableEntityType } from '../../domain/entities/Translation';
+import type {
+  ContentPageTranslation as DbContentPageTranslation,
+  NotificationTemplateTranslation as DbNotificationTemplateTranslation,
+} from '../../../../libs/db/types';
+
+/** Entity types backed by a real translation table in the current schema. */
+export type ImplementedTranslatableEntity = 'product' | 'category' | 'contentPage' | 'notificationTemplate';
+import type {
+  ProductTranslation as DbProductTranslation,
+  LocalizationCategoryTranslation as DbLocalizationCategoryTranslation,
+  Locale as DbLocale,
+} from '../../../../libs/db/types';
+
+type ProductTranslationRow = DbProductTranslation & { localeCode: string; localeName?: string };
+type CategoryTranslationRow = DbLocalizationCategoryTranslation & { localeCode: string; localeName?: string };
+type ProductTranslationIdRow = { productTranslationId: string };
+type CategoryTranslationIdRow = { categoryTranslationId: string };
+type EntityTranslationRow = (
+  DbProductTranslation | DbLocalizationCategoryTranslation | DbContentPageTranslation | DbNotificationTemplateTranslation
+) & {
+  localeCode: string;
+  localeName?: string;
+};
+type LocaleSummaryRow = Pick<DbLocale, 'localeId' | 'code' | 'name'>;
+type TranslationStatsRow = { total: string; approved: string; autoTranslated: string; pending: string };
 
 // Table mapping for different entity types
-const TABLE_MAP: Record<TranslatableEntityType, string> = {
+const TABLE_MAP: Record<ImplementedTranslatableEntity, string> = {
   product: 'productTranslation',
-  category: 'categoryTranslation',
-  collection: 'collectionTranslation',
+  category: 'localizationCategoryTranslation',
   contentPage: 'contentPageTranslation',
   notificationTemplate: 'notificationTemplateTranslation',
-  attribute: 'attributeTranslation',
-  attributeOption: 'attributeOptionTranslation',
 };
 
 // Primary key mapping
-const PK_MAP: Record<TranslatableEntityType, string> = {
+const PK_MAP: Record<ImplementedTranslatableEntity, string> = {
   product: 'productTranslationId',
   category: 'categoryTranslationId',
-  collection: 'collectionTranslationId',
   contentPage: 'contentPageTranslationId',
   notificationTemplate: 'notificationTemplateTranslationId',
-  attribute: 'attributeTranslationId',
-  attributeOption: 'attributeOptionTranslationId',
 };
 
 // Entity ID column mapping
-const ENTITY_ID_MAP: Record<TranslatableEntityType, string> = {
+const ENTITY_ID_MAP: Record<ImplementedTranslatableEntity, string> = {
   product: 'productId',
   category: 'productCategoryId',
-  collection: 'assortmentCollectionId',
   contentPage: 'contentPageId',
   notificationTemplate: 'notificationTemplateId',
-  attribute: 'productAttributeId',
-  attributeOption: 'productAttributeOptionId',
 };
 
 // ============================================================================
@@ -48,7 +63,7 @@ const ENTITY_ID_MAP: Record<TranslatableEntityType, string> = {
 // ============================================================================
 
 export async function getProductTranslation(productId: string, localeId: string): Promise<Record<string, unknown> | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<ProductTranslationRow>(
     `SELECT pt.*, l.code as "localeCode" 
      FROM "productTranslation" pt
      JOIN locale l ON l."localeId" = pt."localeId"
@@ -59,7 +74,7 @@ export async function getProductTranslation(productId: string, localeId: string)
 }
 
 export async function getProductTranslations(productId: string): Promise<Record<string, unknown>[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<ProductTranslationRow[]>(
     `SELECT pt.*, l.code as "localeCode", l.name as "localeName"
      FROM "productTranslation" pt
      JOIN locale l ON l."localeId" = pt."localeId"
@@ -92,7 +107,7 @@ export async function saveProductTranslation(data: {
 }): Promise<Record<string, unknown>> {
   const now = new Date().toISOString();
 
-  const existing = await queryOne<Record<string, unknown>>(
+  const existing = await queryOne<ProductTranslationIdRow>(
     'SELECT "productTranslationId" FROM "productTranslation" WHERE "productId" = $1 AND "localeId" = $2',
     [data.productId, data.localeId],
   );
@@ -130,7 +145,7 @@ export async function saveProductTranslation(data: {
     );
     return { ...data, productTranslationId: existing.productTranslationId };
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbProductTranslation>(
       `INSERT INTO "productTranslation" (
         "productId", "localeId", name, slug, "shortDescription", description,
         "metaTitle", "metaDescription", "metaKeywords",
@@ -185,7 +200,7 @@ export async function approveProductTranslation(productId: string, localeId: str
 // ============================================================================
 
 export async function getCategoryTranslation(categoryId: string, localeId: string): Promise<Record<string, unknown> | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<CategoryTranslationRow>(
     `SELECT ct.*, l.code as "localeCode"
      FROM "localizationCategoryTranslation" ct
      JOIN locale l ON l."localeId" = ct."localeId"
@@ -196,7 +211,7 @@ export async function getCategoryTranslation(categoryId: string, localeId: strin
 }
 
 export async function getCategoryTranslations(categoryId: string): Promise<Record<string, unknown>[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<CategoryTranslationRow[]>(
     `SELECT ct.*, l.code as "localeCode", l.name as "localeName"
      FROM "localizationCategoryTranslation" ct
      JOIN locale l ON l."localeId" = ct."localeId"
@@ -221,7 +236,7 @@ export async function saveCategoryTranslation(data: {
 }): Promise<Record<string, unknown>> {
   const now = new Date().toISOString();
 
-  const existing = await queryOne<Record<string, unknown>>(
+  const existing = await queryOne<CategoryTranslationIdRow>(
     'SELECT "categoryTranslationId" FROM "localizationCategoryTranslation" WHERE "productCategoryId" = $1 AND "localeId" = $2',
     [data.productCategoryId, data.localeId],
   );
@@ -248,7 +263,7 @@ export async function saveCategoryTranslation(data: {
     );
     return { ...data, categoryTranslationId: existing.categoryTranslationId };
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbLocalizationCategoryTranslation>(
       `INSERT INTO "localizationCategoryTranslation" (
         "productCategoryId", "localeId", name, slug, description,
         "metaTitle", "metaDescription", "metaKeywords",
@@ -279,11 +294,14 @@ export async function saveCategoryTranslation(data: {
 /**
  * Get all translations for an entity
  */
-export async function getEntityTranslations(entityType: TranslatableEntityType, entityId: string): Promise<Record<string, unknown>[]> {
+export async function getEntityTranslations(
+  entityType: ImplementedTranslatableEntity,
+  entityId: string,
+): Promise<Record<string, unknown>[]> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<EntityTranslationRow[]>(
     `SELECT t.*, l.code as "localeCode", l.name as "localeName"
      FROM "${table}" t
      JOIN locale l ON l."localeId" = t."localeId"
@@ -298,14 +316,14 @@ export async function getEntityTranslations(entityType: TranslatableEntityType, 
  * Get translation for a specific locale
  */
 export async function getEntityTranslation(
-  entityType: TranslatableEntityType,
+  entityType: ImplementedTranslatableEntity,
   entityId: string,
   localeId: string,
 ): Promise<Record<string, unknown> | null> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
 
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<EntityTranslationRow>(
     `SELECT t.*, l.code as "localeCode"
      FROM "${table}" t
      JOIN locale l ON l."localeId" = t."localeId"
@@ -318,11 +336,14 @@ export async function getEntityTranslation(
 /**
  * Get missing translations for an entity
  */
-export async function getMissingTranslations(entityType: TranslatableEntityType, entityId: string): Promise<Record<string, unknown>[]> {
+export async function getMissingTranslations(
+  entityType: ImplementedTranslatableEntity,
+  entityId: string,
+): Promise<Record<string, unknown>[]> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<LocaleSummaryRow[]>(
     `SELECT l."localeId", l.code, l.name
      FROM locale l
      WHERE l."isActive" = true
@@ -356,7 +377,7 @@ export async function getTranslationStatistics(): Promise<
   }[] = [];
 
   for (const [entityType, table] of Object.entries(TABLE_MAP)) {
-    const stats = await queryOne<Record<string, string>>(`
+    const stats = await queryOne<TranslationStatsRow>(`
       SELECT 
         COUNT(*) as total,
         COUNT(*) FILTER (WHERE "isApproved" = true) as approved,
@@ -381,7 +402,7 @@ export async function getTranslationStatistics(): Promise<
  * Bulk approve translations
  */
 export async function bulkApproveTranslations(
-  entityType: TranslatableEntityType,
+  entityType: ImplementedTranslatableEntity,
   translationIds: string[],
   reviewerId: string,
 ): Promise<number> {

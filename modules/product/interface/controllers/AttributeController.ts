@@ -24,7 +24,7 @@ class AttributeController {
    * GET /attributes
    * List all attributes
    */
-  async listAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listAttributes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { groupId, searchable, filterable, forVariants } = req.query;
 
     let attributes;
@@ -40,13 +40,13 @@ class AttributeController {
       success: true,
       data: attributes,
     });
-  }
+  };
 
   /**
    * GET /attributes/group/:groupId
    * List attributes by group
    */
-  async listAttributesByGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listAttributesByGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { groupId } = req.params;
     const attributes = await manageAttributesUseCase.list({ groupId });
 
@@ -54,7 +54,7 @@ class AttributeController {
       success: true,
       data: attributes,
     });
-  }
+  };
 
   /**
    * GET /attributes/:id
@@ -92,7 +92,7 @@ class AttributeController {
    * GET /attributes/code/:code
    * Get a single attribute by code
    */
-  async getAttributeByCode(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getAttributeByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { code } = req.params;
     const attribute = await manageAttributesUseCase.findByCode(code);
 
@@ -108,13 +108,13 @@ class AttributeController {
       success: true,
       data: attribute,
     });
-  }
+  };
 
   /**
    * POST /attributes
    * Create a new attribute
    */
-  async createAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     // Map attributeGroupId → groupId for backward compatibility
     const body = req.body as CreateAttributeCommand & { attributeGroupId?: string };
     if (body.attributeGroupId !== undefined && !body.groupId) {
@@ -128,13 +128,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 201, result);
-  }
+  };
 
   /**
    * PUT /attributes/:id
    * Update an attribute
    */
-  async updateAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  updateAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { sortOrder, ...rest } = req.body as Record<string, unknown>;
     const result = await updateAttributeUseCase.execute({
@@ -150,13 +150,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * DELETE /attributes/:id
    * Delete an attribute
    */
-  async deleteAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  deleteAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Check if attribute exists
@@ -184,7 +184,7 @@ class AttributeController {
       success: true,
       message: 'Attribute deleted successfully',
     });
-  }
+  };
 
   // ==================== ATTRIBUTE VALUES ====================
 
@@ -192,7 +192,7 @@ class AttributeController {
    * GET /attributes/:id/values
    * Get all values for an attribute
    */
-  async getAttributeValues(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getAttributeValues = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const result = await getAttributeValuesUseCase.execute({ attributeId: id });
 
@@ -202,13 +202,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * POST /attributes/:id/values
    * Add a value to an attribute
    */
-  async addAttributeValue(req: HttpRequest, res: HttpResponse): Promise<void> {
+  addAttributeValue = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const body = req.body as { value?: string; displayValue?: string; position?: number; isDefault?: boolean };
     const result = await addAttributeValueUseCase.execute({
@@ -225,13 +225,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 201, result);
-  }
+  };
 
   /**
    * DELETE /attributes/:id/values/:valueId
    * Remove a value from an attribute
    */
-  async removeAttributeValue(req: HttpRequest, res: HttpResponse): Promise<void> {
+  removeAttributeValue = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { valueId } = req.params;
     const result = await removeAttributeValueUseCase.execute({
       attributeValueId: valueId,
@@ -246,7 +246,7 @@ class AttributeController {
       success: true,
       message: 'Attribute value removed successfully',
     });
-  }
+  };
 
   // ==================== PRODUCT ATTRIBUTES ====================
 
@@ -254,7 +254,7 @@ class AttributeController {
    * GET /products/:productId/attributes
    * Get all attributes for a product
    */
-  async getProductAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getProductAttributes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { productId } = req.params;
     const result = await getAssignedProductAttributesUseCase.execute({ productId });
 
@@ -264,13 +264,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * POST /products/:productId/attributes
    * Set an attribute value for a product
    */
-  async setProductAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  setProductAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { productId } = req.params;
     const body = req.body as { attributeId?: string; attributeCode?: string; value?: string };
     const result = await setProductAttributeUseCase.execute({
@@ -286,13 +286,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * PUT /products/:productId/attributes
    * Set multiple attribute values for a product
    */
-  async setProductAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
+  setProductAttributes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { productId } = req.params;
     const { attributes, clearExisting } = req.body as {
       attributes?: Array<{ attributeId?: string; attributeCode?: string; value: string }>;
@@ -311,13 +311,13 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * DELETE /products/:productId/attributes/:attributeId
    * Remove an attribute from a product
    */
-  async removeProductAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  removeProductAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { productId, attributeId } = req.params;
     const result = await removeProductAttributeUseCase.execute({
       productId,
@@ -333,7 +333,7 @@ class AttributeController {
       success: true,
       message: 'Product attribute removed successfully',
     });
-  }
+  };
 }
 
 export default new AttributeController();

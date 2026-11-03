@@ -1,13 +1,13 @@
 import { lazyMock, createPaymentSettings } from '../../tests/testUtils';
 import { ManagePaymentSettingsUseCase } from './ManagePaymentSettings';
-import type { PaymentRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentRepository';
+import type { PaymentSettingsRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentSettingsRepository';
 
 describe('ManagePaymentSettingsUseCase', () => {
   let useCase: ManagePaymentSettingsUseCase;
-  let repo: jest.Mocked<PaymentRepository>;
+  let repo: jest.Mocked<PaymentSettingsRepository>;
 
   beforeEach(() => {
-    repo = lazyMock<PaymentRepository>();
+    repo = lazyMock<PaymentSettingsRepository>();
     useCase = new ManagePaymentSettingsUseCase(repo);
   });
 

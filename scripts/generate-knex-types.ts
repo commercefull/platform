@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
 import { knex, Knex } from 'knex';
 import { updateTypes } from 'knex-types';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const knexConfig = require('../knexfile');
+const requireCjs = createRequire(__filename);
+const knexConfig = requireCjs('../knexfile');
 
 const OUTPUT_PATH = path.resolve(__dirname, '../libs/db/types.ts');
 const TEMP_PATH = OUTPUT_PATH + '.tmp';

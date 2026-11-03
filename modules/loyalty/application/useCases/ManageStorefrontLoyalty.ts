@@ -1,7 +1,11 @@
-import type { LoyaltyRepository } from '../../domain/repositories/LoyaltyRepository';
+import type { StorefrontLoyaltyRepository } from '../../domain/repositories/StorefrontLoyaltyRepository';
+import type { LoyaltyPointsRepository } from '../../domain/repositories/LoyaltyPointsRepository';
 
 export class ManageStorefrontLoyaltyUseCase {
-  constructor(private readonly storefrontLoyaltyRepo: LoyaltyRepository) {}
+  constructor(
+    private readonly storefrontLoyaltyRepo: StorefrontLoyaltyRepository,
+    private readonly loyaltyPoints: Pick<LoyaltyPointsRepository, 'adjustCustomerPoints'>,
+  ) {}
 
   async findMemberWithTier(customerId: string) {
     return this.storefrontLoyaltyRepo.findMemberWithTier(customerId);
@@ -21,10 +25,12 @@ export class ManageStorefrontLoyaltyUseCase {
   async findMemberByCustomerId(customerId: string) {
     return this.storefrontLoyaltyRepo.findMemberByCustomerId(customerId);
   }
-  async deductPoints(customerId: string, points: number) {
-    return this.storefrontLoyaltyRepo.deductPoints(customerId, points);
-  }
-  async createRedeemTransaction(customerId: string, points: number, description: string) {
-    return this.storefrontLoyaltyRepo.createRedeemTransaction(customerId, points, description);
+  async redeemPoints(customerId: string, points: number, description: string) {
+    return this.loyaltyPoints.adjustCustomerPoints({
+      customerId,
+      pointsChange: -Math.abs(points),
+      action: 'redemption',
+      description,
+    });
   }
 }

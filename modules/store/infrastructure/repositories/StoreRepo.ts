@@ -4,30 +4,31 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { Store as DbStore } from '../../../../libs/db/types';
 import { StoreRepository as IStoreRepository, StoreFilters } from '../../domain/repositories/StoreRepository';
 import { Store, type StoreProps } from '../../domain/entities/Store';
 import { StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
 class StoreRepo implements IStoreRepository {
   async findById(storeId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
+    const row = await queryOne<DbStore>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE slug = $1', [slug]);
+    const row = await queryOne<DbStore>('SELECT * FROM store WHERE slug = $1', [slug]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findByUrl(storeUrl: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
+    const row = await queryOne<DbStore>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findAll(filters?: StoreFilters): Promise<Store[]> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const rows = await query<Record<string, unknown>[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
+    const rows = await query<DbStore[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
 
     return (rows || []).map(row => this.mapToStore(row));
   }
@@ -35,7 +36,7 @@ class StoreRepo implements IStoreRepository {
   async save(store: Store): Promise<Store> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, unknown>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
+    const existing = await queryOne<Pick<DbStore, 'storeId'>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
 
     if (existing) {
       await this.updateStoreRow(store, now);
@@ -243,7 +244,7 @@ class StoreRepo implements IStoreRepository {
   }
 
   async findHeadquarters(organizationId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStore>(
       'SELECT * FROM store WHERE "organizationId" = $1 AND "isHeadquarters" = true ORDER BY "createdAt" ASC LIMIT 1',
       [organizationId],
     );
@@ -302,7 +303,7 @@ class StoreRepo implements IStoreRepository {
   }
 
   async updatePickupSettings(storeId: string, pickupSettings: Record<string, unknown>): Promise<Store> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStore>(
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('pickup', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(pickupSettings), new Date().toISOString(), storeId],
     );
@@ -311,7 +312,7 @@ class StoreRepo implements IStoreRepository {
   }
 
   async updateLocalDeliverySettings(storeId: string, deliverySettings: Record<string, unknown>): Promise<Store> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStore>(
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('localDelivery', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(deliverySettings), new Date().toISOString(), storeId],
     );

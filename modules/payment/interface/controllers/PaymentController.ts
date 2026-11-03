@@ -24,7 +24,6 @@ import type {
 } from '../../domain/repositories/PaymentGatewayRepository';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { isUuid } from '../../../../libs/uuid';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   jsonResponse(res, statusCode, { success: true, data });
@@ -246,30 +245,26 @@ export const createGateway = async (req: HttpRequest, res: HttpResponse): Promis
     return;
   }
 
-  try {
-    const result = await managePaymentGatewaysUseCase.create({
-      organizationId,
-      name,
-      provider,
-      isActive: isActive ?? true,
-      isDefault: isDefault ?? false,
-      isTestMode: isTestMode ?? false,
-      apiKey,
-      apiSecret,
-      publicKey,
-      webhookSecret,
-      apiEndpoint,
-      supportedPaymentMethods: supportedPaymentMethods || 'creditCard',
-      supportedCurrencies: null,
-      processingFees: null,
-      checkoutSettings: null,
-      metadata: null,
-    } as PaymentGatewayCreateParams);
+  const result = await managePaymentGatewaysUseCase.create({
+    organizationId,
+    name,
+    provider,
+    isActive: isActive ?? true,
+    isDefault: isDefault ?? false,
+    isTestMode: isTestMode ?? false,
+    apiKey,
+    apiSecret,
+    publicKey,
+    webhookSecret,
+    apiEndpoint,
+    supportedPaymentMethods: supportedPaymentMethods || 'creditCard',
+    supportedCurrencies: null,
+    processingFees: null,
+    checkoutSettings: null,
+    metadata: null,
+  } as PaymentGatewayCreateParams);
 
-    respond(req, res, result, 201);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  respond(req, res, result, 201);
 };
 
 export const updateGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -297,12 +292,8 @@ export const updateGateway = async (req: HttpRequest, res: HttpResponse): Promis
     }
   }
 
-  try {
-    const result = await managePaymentGatewaysUseCase.update(gatewayId, params as PaymentGatewayUpdateParams);
-    respond(req, res, result);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await managePaymentGatewaysUseCase.update(gatewayId, params as PaymentGatewayUpdateParams);
+  respond(req, res, result);
 };
 
 export const deleteGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -386,29 +377,25 @@ export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     return;
   }
 
-  try {
-    const result = await managePaymentGatewaysUseCase.createMethodConfig({
-      organizationId,
-      paymentMethod,
-      isEnabled: isEnabled ?? true,
-      displayName,
-      description,
-      processingFeeCents: processingFeeCents !== undefined ? Number(processingFeeCents) : undefined,
-      minimumAmountCents: minimumAmountCents !== undefined ? Number(minimumAmountCents) : undefined,
-      maximumAmountCents: maximumAmountCents !== undefined ? Number(maximumAmountCents) : undefined,
-      displayOrder: displayOrder ?? 0,
-      icon,
-      supportedCurrencies: supportedCurrencies || ['USD'],
-      countries,
-      gatewayId,
-      configuration,
-      metadata: null,
-    } as PaymentMethodConfigCreateParams);
+  const result = await managePaymentGatewaysUseCase.createMethodConfig({
+    organizationId,
+    paymentMethod,
+    isEnabled: isEnabled ?? true,
+    displayName,
+    description,
+    processingFeeCents: processingFeeCents !== undefined ? Number(processingFeeCents) : undefined,
+    minimumAmountCents: minimumAmountCents !== undefined ? Number(minimumAmountCents) : undefined,
+    maximumAmountCents: maximumAmountCents !== undefined ? Number(maximumAmountCents) : undefined,
+    displayOrder: displayOrder ?? 0,
+    icon,
+    supportedCurrencies: supportedCurrencies || ['USD'],
+    countries,
+    gatewayId,
+    configuration,
+    metadata: null,
+  } as PaymentMethodConfigCreateParams);
 
-    respond(req, res, result, 201);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  respond(req, res, result, 201);
 };
 
 export const updateMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -438,12 +425,8 @@ export const updateMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     }
   }
 
-  try {
-    const result = await managePaymentGatewaysUseCase.updateMethodConfig(methodConfigId, params as PaymentMethodConfigUpdateParams);
-    respond(req, res, result);
-  } catch (error) {
-    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
-  }
+  const result = await managePaymentGatewaysUseCase.updateMethodConfig(methodConfigId, params as PaymentMethodConfigUpdateParams);
+  respond(req, res, result);
 };
 
 export const deleteMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

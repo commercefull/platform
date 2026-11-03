@@ -31,7 +31,9 @@ export type ContentBlockCreateParams = Omit<
   | 'settings'
   | 'area'
 >;
-export type ContentBlockUpdateParams = Partial<Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
+export type ContentBlockUpdateParams = Partial<
+  Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
+>;
 
 export class ContentBlockRepo {
   private async findPageById(id: string): Promise<ContentPage | null> {

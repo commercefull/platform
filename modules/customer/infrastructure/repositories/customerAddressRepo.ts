@@ -6,7 +6,7 @@ import type { CustomerAddress as DbCustomerAddress } from '../../../../libs/db/t
 import { FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
-export type CustomerAddress = DbCustomerAddress;
+type CustomerAddress = DbCustomerAddress;
 
 // Derived types for create/update operations
 export type CustomerAddressCreateParams = Omit<CustomerAddress, 'customerAddressId' | 'createdAt' | 'updatedAt'> & {
@@ -16,7 +16,7 @@ export type CustomerAddressCreateParams = Omit<CustomerAddress, 'customerAddress
 };
 export type CustomerAddressUpdateParams = Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>;
 
-export class CustomerAddressRepo {
+class CustomerAddressRepo {
   async findById(id: string): Promise<CustomerAddress | null> {
     return await queryOne<DbCustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1`, [id]);
   }

@@ -28,7 +28,7 @@ export type FaqArticle = DbSupportFaqArticle;
 // ============================================================================
 
 export async function getCategory(faqCategoryId: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
+  const row = await queryOne<DbSupportFaqCategory>('SELECT * FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
   return row ? mapToCategory(row) : null;
 }
 
@@ -37,7 +37,7 @@ export async function getCategory(faqCategoryId: string): Promise<FaqCategory | 
 // ============================================================================
 
 export async function getArticle(faqArticleId: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
+  const row = await queryOne<DbSupportFaqArticle>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
   return row ? mapToArticle(row) : null;
 }
 
@@ -108,7 +108,7 @@ function mapToArticle(row: Record<string, unknown>): FaqArticle {
   };
 }
 export async function getCategoryBySlug(slug: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "slug" = $1', [slug]);
+  const row = await queryOne<DbSupportFaqCategory>('SELECT * FROM "supportFaqCategory" WHERE "slug" = $1', [slug]);
   return row ? mapToCategory(row) : null;
 }
 
@@ -118,17 +118,15 @@ export async function getCategories(activeOnly: boolean = true): Promise<FaqCate
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportFaqCategory[]>(
     `SELECT * FROM "supportFaqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`,
   );
   return (rows || []).map(mapToCategory);
 }
 
 export async function getFeaturedCategories(): Promise<FaqCategory[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportFaqCategory" WHERE "isActive" = true AND "isFeatured" = true 
-     ORDER BY "sortOrder" ASC`,
-  );
+  const rows = await query<DbSupportFaqCategory[]>(`SELECT * FROM "supportFaqCategory" WHERE "isActive" = true AND "isFeatured" = true 
+     ORDER BY "sortOrder" ASC`);
   return (rows || []).map(mapToCategory);
 }
 
@@ -166,7 +164,7 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
     );
     return (await getCategory(category.faqCategoryId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbSupportFaqCategory>(
       `INSERT INTO "supportFaqCategory" (
         "parentCategoryId", "name", "slug", "description", "icon", "color",
         "imageUrl", "sortOrder", "isActive", "isFeatured", "metadata",
@@ -200,7 +198,7 @@ export async function deleteCategory(faqCategoryId: string): Promise<void> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "slug" = $1', [slug]);
+  const row = await queryOne<DbSupportFaqArticle>('SELECT * FROM "supportFaqArticle" WHERE "slug" = $1', [slug]);
   return row ? mapToArticle(row) : null;
 }
 
@@ -230,7 +228,7 @@ export async function getArticles(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportFaqArticle[]>(
     `SELECT * FROM "supportFaqArticle" WHERE ${whereClause} 
      ORDER BY "isPinned" DESC, "sortOrder" ASC, "views" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
@@ -244,7 +242,7 @@ export async function getArticles(
 }
 
 export async function searchArticles(searchQuery: string, limit: number = 10): Promise<FaqArticle[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportFaqArticle[]>(
     `SELECT * FROM "supportFaqArticle" 
      WHERE "isPublished" = true 
      AND ("title" ILIKE $1 OR "content" ILIKE $1 OR $2 = ANY("keywords"))
@@ -256,7 +254,7 @@ export async function searchArticles(searchQuery: string, limit: number = 10): P
 }
 
 export async function getPopularArticles(limit: number = 10): Promise<FaqArticle[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportFaqArticle[]>(
     `SELECT * FROM "supportFaqArticle" WHERE "isPublished" = true 
      ORDER BY "views" DESC LIMIT $1`,
     [limit],
@@ -270,7 +268,7 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
 
   // Get explicitly related articles first
   if (article.relatedArticleIds?.length) {
-    const rows = await query<Record<string, unknown>[]>(
+    const rows = await query<DbSupportFaqArticle[]>(
       `SELECT * FROM "supportFaqArticle" 
        WHERE "faqArticleId" = ANY($1) AND "isPublished" = true
        LIMIT $2`,
@@ -282,7 +280,7 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
   }
 
   // Fall back to same category
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportFaqArticle[]>(
     `SELECT * FROM "supportFaqArticle" 
      WHERE "faqCategoryId" = $1 AND "faqArticleId" != $2 AND "isPublished" = true
      ORDER BY "views" DESC LIMIT $3`,
@@ -350,7 +348,7 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
 
     return (await getArticle(article.faqArticleId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbSupportFaqArticle>(
       `INSERT INTO "supportFaqArticle" (
         "faqCategoryId", "title", "slug", "content", "contentHtml", "excerpt",
         "keywords", "relatedArticleIds", "sortOrder", "isPublished", "isFeatured",

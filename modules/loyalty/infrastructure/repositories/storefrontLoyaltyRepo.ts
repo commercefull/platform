@@ -1,7 +1,20 @@
 import { query, queryOne } from '../../../../libs/db';
+import type {
+  LoyaltyPoints as DbLoyaltyPoints,
+  LoyaltyTransaction as DbLoyaltyTransaction,
+  LoyaltyReward as DbLoyaltyReward,
+} from '../../../../libs/db/types';
+
+type MemberWithTierRow = DbLoyaltyPoints & {
+  pointsBalance: number;
+  tierName: string | null;
+  minimumPoints: number | null;
+  multiplier: string | null;
+};
+type PointsBalanceRow = DbLoyaltyPoints & { pointsBalance: number };
 
 async function findMemberWithTier(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(
+  return await queryOne<MemberWithTierRow>(
     `SELECT lp.*, lp."currentPoints" as "pointsBalance",
             lt."name" as "tierName", lt."pointsThreshold" as "minimumPoints", lt."pointsMultiplier" as "multiplier"
      FROM "loyaltyPoints" lp
@@ -12,7 +25,7 @@ async function findMemberWithTier(customerId: string): Promise<unknown | null> {
 }
 
 async function findCustomerTransactions(customerId: string, limit: number, offset: number): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<DbLoyaltyTransaction[]>(
     `SELECT * FROM "loyaltyTransaction" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
     [customerId, limit, offset],
   );
@@ -27,7 +40,7 @@ async function countCustomerTransactions(customerId: string): Promise<number> {
 }
 
 async function findAvailableRewards(pointsBalance: number): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<DbLoyaltyReward[]>(
     `SELECT * FROM "loyaltyReward" WHERE "isActive" = true AND "pointsCost" <= $1 ORDER BY "pointsCost" ASC`,
     [pointsBalance],
   );
@@ -35,26 +48,13 @@ async function findAvailableRewards(pointsBalance: number): Promise<unknown[]> {
 }
 
 async function findRewardById(rewardId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1 AND "isActive" = true`, [rewardId]);
+  return await queryOne<DbLoyaltyReward>(`SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1 AND "isActive" = true`, [rewardId]);
 }
 
 async function findMemberByCustomerId(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [customerId]);
-}
-
-async function deductPoints(customerId: string, points: number): Promise<void> {
-  await queryOne<unknown>(
-    `UPDATE "loyaltyPoints" SET "currentPoints" = "currentPoints" - $1, "lastActivity" = NOW(), "updatedAt" = NOW() WHERE "customerId" = $2 RETURNING "loyaltyPointsId"`,
-    [points, customerId],
-  );
-}
-
-async function createRedeemTransaction(customerId: string, points: number, description: string): Promise<void> {
-  await queryOne<unknown>(
-    `INSERT INTO "loyaltyTransaction" ("customerId", "action", "points", "description", "createdAt", "updatedAt")
-     VALUES ($1, 'debit', $2, $3, NOW(), NOW()) RETURNING "loyaltyTransactionId"`,
-    [customerId, -Math.abs(points), description],
-  );
+  return await queryOne<PointsBalanceRow>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [
+    customerId,
+  ]);
 }
 
 export default {
@@ -64,6 +64,4 @@ export default {
   findAvailableRewards,
   findRewardById,
   findMemberByCustomerId,
-  deductPoints,
-  createRedeemTransaction,
 };

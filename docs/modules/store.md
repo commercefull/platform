@@ -94,45 +94,43 @@ The module also owns the `Market` aggregate — the first-class, configuration-d
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                                                            | Controller                                                     | Description                                                    |
-| ------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
-| GET    | `/markets`                                                                          | `asyncHandler(listMarkets)`                                    | Markets — global commerce configuration                        |
-| POST   | `/markets`                                                                          | `asyncHandler(createMarket)`                                   | —                                                              |
-| GET    | `/markets/:marketId`                                                                | `asyncHandler(getMarket)`                                      | —                                                              |
-| PUT    | `/markets/:marketId`                                                                | `asyncHandler(updateMarket)`                                   | —                                                              |
-| DELETE | `/markets/:marketId`                                                                | `asyncHandler(deleteMarket)`                                   | —                                                              |
-| GET    | `/markets/:marketId/context`                                                        | `async (req: HttpRequest, res: HttpResponse) => {              |
-| try {  |
-| `      | Explicit market selection for the storefront market switcher                        |
-| POST   | `/markets/:marketId/disable`                                                        | `asyncHandler(disableMarket)`                                  | —                                                              |
-| POST   | `/markets/:marketId/launch`                                                         | `asyncHandler(launchMarket)`                                   | —                                                              |
-| GET    | `/markets/:marketId/readiness`                                                      | `asyncHandler(getMarketReadiness)`                             | —                                                              |
-| GET    | `/markets/context`                                                                  | `async (req: HttpRequest, res: HttpResponse) => {              |
-| try {  |
-| `      | Resolve the market context for this hostname (+ optional currency/locale overrides) |
-| POST   | `/stores`                                                                           | `asyncHandler(storeController.createStore.bind(storeControlle` | Create store                                                   |
-| GET    | `/stores`                                                                           | `asyncHandler(storeController.listStores.bind(storeController` | List stores with filtering and pagination                      |
-| GET    | `/stores`                                                                           | `async (req: HttpRequest, res: HttpResponse) => {              |
-| try {  |
-| `      | —                                                                                   |
-| GET    | `/stores/:storeId`                                                                  | `asyncHandler(storeController.getStore.bind(storeController))` | Get store by ID                                                |
-| PUT    | `/stores/:storeId`                                                                  | `asyncHandler(storeController.updateStore.bind(storeControlle` | Update store                                                   |
-| DELETE | `/stores/:storeId`                                                                  | `asyncHandler(storeController.deleteStore.bind(storeControlle` | Delete store                                                   |
-| GET    | `/stores/:storeId`                                                                  | `async (req: HttpRequest, res: HttpResponse) => {              |
-| try {  |
-| `      | —                                                                                   |
-| GET    | `/stores/:storeId/channels`                                                         | `asyncHandler(listStoreSalesChannels)`                         | —                                                              |
-| POST   | `/stores/:storeId/channels`                                                         | `asyncHandler(assignSalesChannel)`                             | —                                                              |
-| DELETE | `/stores/:storeId/channels/:channelId`                                              | `asyncHandler(unassignSalesChannel)`                           | —                                                              |
-| PUT    | `/stores/:storeId/local-delivery`                                                   | `asyncHandler(storeController.setLocalDelivery.bind(storeCont` | Set local delivery zone                                        |
-| PUT    | `/stores/:storeId/pickup`                                                           | `asyncHandler(storeController.configurePickup.bind(storeContr` | Configure store pickup (BOPIS)                                 |
-| GET    | `/stores/active`                                                                    | `asyncHandler(storeController.getActiveStores.bind(storeContr` | Get active stores (must be before :storeId to avoid collision) |
-| GET    | `/stores/business/:organizationId`                                                  | `asyncHandler(storeController.getStoresByBusiness.bind(storeC` | Get stores by business                                         |
-| GET    | `/stores/channels`                                                                  | `asyncHandler(listSalesChannels)`                              | —                                                              |
-| POST   | `/stores/channels`                                                                  | `asyncHandler(createSalesChannel)`                             | —                                                              |
-| PUT    | `/stores/channels/:channelId`                                                       | `asyncHandler(updateSalesChannel)`                             | —                                                              |
-| DELETE | `/stores/channels/:channelId`                                                       | `asyncHandler(deleteSalesChannel)`                             | —                                                              |
-| POST   | `/stores/hierarchy`                                                                 | `asyncHandler(storeController.createStoreHierarchy.bind(store` | Create store hierarchy                                         |
-| GET    | `/stores/slug/:slug`                                                                | `asyncHandler(storeController.getStoreBySlug.bind(storeContro` | Get store by slug                                              |
+| Method     | Endpoint                                                                            | Controller                                           | Description                                                    |
+| ---------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------- |
+| GET        | `/markets`                                                                          | `asyncHandler(listMarkets)`                          | Markets — global commerce configuration                        |
+| POST       | `/markets`                                                                          | `asyncHandler(createMarket)`                         | —                                                              |
+| GET        | `/markets/:marketId`                                                                | `asyncHandler(getMarket)`                            | —                                                              |
+| PUT        | `/markets/:marketId`                                                                | `asyncHandler(updateMarket)`                         | —                                                              |
+| DELETE     | `/markets/:marketId`                                                                | `asyncHandler(deleteMarket)`                         | —                                                              |
+| GET        | `/markets/:marketId/context`                                                        | `async (req: HttpRequest, res: HttpResponse) => {    |
+| const con` | Explicit market selection for the storefront market switcher                        |
+| POST       | `/markets/:marketId/disable`                                                        | `asyncHandler(disableMarket)`                        | —                                                              |
+| POST       | `/markets/:marketId/launch`                                                         | `asyncHandler(launchMarket)`                         | —                                                              |
+| GET        | `/markets/:marketId/readiness`                                                      | `asyncHandler(getMarketReadiness)`                   | —                                                              |
+| GET        | `/markets/context`                                                                  | `async (req: HttpRequest, res: HttpResponse) => {    |
+| const con` | Resolve the market context for this hostname (+ optional currency/locale overrides) |
+| POST       | `/stores`                                                                           | `asyncHandler(storeController.createStore)`          | Create store                                                   |
+| GET        | `/stores`                                                                           | `asyncHandler(storeController.listStores)`           | List stores with filtering and pagination                      |
+| GET        | `/stores`                                                                           | `async (req: HttpRequest, res: HttpResponse) => {    |
+| try {      |
+| `          | —                                                                                   |
+| GET        | `/stores/:storeId`                                                                  | `asyncHandler(storeController.getStore)`             | Get store by ID                                                |
+| PUT        | `/stores/:storeId`                                                                  | `asyncHandler(storeController.updateStore)`          | Update store                                                   |
+| DELETE     | `/stores/:storeId`                                                                  | `asyncHandler(storeController.deleteStore)`          | Delete store                                                   |
+| GET        | `/stores/:storeId`                                                                  | `async (req: HttpRequest, res: HttpResponse) => {    |
+| try {      |
+| `          | —                                                                                   |
+| GET        | `/stores/:storeId/channels`                                                         | `asyncHandler(listStoreSalesChannels)`               | —                                                              |
+| POST       | `/stores/:storeId/channels`                                                         | `asyncHandler(assignSalesChannel)`                   | —                                                              |
+| DELETE     | `/stores/:storeId/channels/:channelId`                                              | `asyncHandler(unassignSalesChannel)`                 | —                                                              |
+| PUT        | `/stores/:storeId/local-delivery`                                                   | `asyncHandler(storeController.setLocalDelivery)`     | Set local delivery zone                                        |
+| PUT        | `/stores/:storeId/pickup`                                                           | `asyncHandler(storeController.configurePickup)`      | Configure store pickup (BOPIS)                                 |
+| GET        | `/stores/active`                                                                    | `asyncHandler(storeController.getActiveStores)`      | Get active stores (must be before :storeId to avoid collision) |
+| GET        | `/stores/business/:organizationId`                                                  | `asyncHandler(storeController.getStoresByBusiness)`  | Get stores by business                                         |
+| GET        | `/stores/channels`                                                                  | `asyncHandler(listSalesChannels)`                    | —                                                              |
+| POST       | `/stores/channels`                                                                  | `asyncHandler(createSalesChannel)`                   | —                                                              |
+| PUT        | `/stores/channels/:channelId`                                                       | `asyncHandler(updateSalesChannel)`                   | —                                                              |
+| DELETE     | `/stores/channels/:channelId`                                                       | `asyncHandler(deleteSalesChannel)`                   | —                                                              |
+| POST       | `/stores/hierarchy`                                                                 | `asyncHandler(storeController.createStoreHierarchy)` | Create store hierarchy                                         |
+| GET        | `/stores/slug/:slug`                                                                | `asyncHandler(storeController.getStoreBySlug)`       | Get store by slug                                              |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -16,3 +16,11 @@ export interface StoredPaymentMethod {
 }
 
 export type StoredPaymentMethodCreateParams = Omit<StoredPaymentMethod, 'storedPaymentMethodId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+
+export interface StoredPaymentMethodRepository {
+  findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]>;
+  findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null>;
+  createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null>;
+  setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null>;
+  softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string): Promise<StoredPaymentMethod | null>;
+}

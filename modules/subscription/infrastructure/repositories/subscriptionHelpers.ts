@@ -18,7 +18,6 @@ import type {
   DunningAttempt,
 } from './subscriptionTypes';
 
-
 export async function generateSubscriptionNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const result = await queryOne<{ count: string }>(
@@ -118,7 +117,7 @@ export function mapToCustomerSubscription(row: Record<string, unknown>): Custome
   };
 }
 
-export function subscriptionIdentityFields(row: Record<string, unknown>) {
+function subscriptionIdentityFields(row: Record<string, unknown>) {
   return {
     customerSubscriptionId: row.customerSubscriptionId as string,
     subscriptionNumber: row.subscriptionNumber as string | undefined,
@@ -130,7 +129,7 @@ export function subscriptionIdentityFields(row: Record<string, unknown>) {
   };
 }
 
-export function subscriptionPricingFields(row: Record<string, unknown>) {
+function subscriptionPricingFields(row: Record<string, unknown>) {
   return {
     quantity: parseInt(row.quantity as string) || 1,
     unitPriceCents: parseFloat(row.unitPriceCents as string) || 0,
@@ -145,7 +144,7 @@ export function subscriptionPricingFields(row: Record<string, unknown>) {
   };
 }
 
-export function subscriptionDateFields(row: Record<string, unknown>) {
+function subscriptionDateFields(row: Record<string, unknown>) {
   return {
     trialStartAt: row.trialStartAt ? new Date(row.trialStartAt as string) : undefined,
     trialEndAt: row.trialEndAt ? new Date(row.trialEndAt as string) : undefined,
@@ -162,7 +161,7 @@ export function subscriptionDateFields(row: Record<string, unknown>) {
   };
 }
 
-export function subscriptionLifecycleFields(row: Record<string, unknown>) {
+function subscriptionLifecycleFields(row: Record<string, unknown>) {
   return {
     cancellationReason: row.cancellationReason as string | undefined,
     cancelledBy: row.cancelledBy as string | undefined,
@@ -265,4 +264,3 @@ export function mapToDunningAttempt(row: Record<string, unknown>): DunningAttemp
     updatedAt: new Date(row.updatedAt as string),
   };
 }
-

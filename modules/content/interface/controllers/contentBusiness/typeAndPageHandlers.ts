@@ -1,6 +1,5 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { getErrorStatusCode, getErrorMessage } from '../../../../../libs/errors';
 import {
   publishPageUseCase,
   unpublishPageUseCase,
@@ -427,26 +426,18 @@ export class TypeAndPageHandlers {
    * Publish a page
    */
   publishPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const result = await publishPageUseCase.execute(new PublishPageCommand(id, req.user?.id));
-      jsonResponse(res, 200, { success: true, data: result, message: 'Page published successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { id } = req.params;
+    const result = await publishPageUseCase.execute(new PublishPageCommand(id, req.user?.id));
+    jsonResponse(res, 200, { success: true, data: result, message: 'Page published successfully' });
   };
 
   /**
    * Unpublish a page
    */
   unpublishPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const result = await unpublishPageUseCase.execute(new UnpublishPageCommand(id));
-      jsonResponse(res, 200, { success: true, data: result, message: 'Page unpublished successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const { id } = req.params;
+    const result = await unpublishPageUseCase.execute(new UnpublishPageCommand(id));
+    jsonResponse(res, 200, { success: true, data: result, message: 'Page unpublished successfully' });
   };
 
   /**
@@ -456,14 +447,10 @@ export class TypeAndPageHandlers {
     const { id } = req.params;
     const { scheduledAt } = req.body;
 
-    try {
-      const result = await schedulePageUseCase.execute(
-        new SchedulePageCommand(id, scheduledAt ? new Date(scheduledAt) : (undefined as unknown as Date), req.user?.id),
-      );
-      jsonResponse(res, 200, { success: true, data: result, message: 'Page scheduled successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await schedulePageUseCase.execute(
+      new SchedulePageCommand(id, scheduledAt ? new Date(scheduledAt) : (undefined as unknown as Date), req.user?.id),
+    );
+    jsonResponse(res, 200, { success: true, data: result, message: 'Page scheduled successfully' });
   };
 
   /**
@@ -473,12 +460,8 @@ export class TypeAndPageHandlers {
     const { id } = req.params;
     const { title, slug } = req.body;
 
-    try {
-      const result = await duplicatePageUseCase.execute(new DuplicatePageCommand(id, title, slug, req.user?.id));
-      jsonResponse(res, 201, { success: true, data: result, message: 'Page duplicated successfully' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const result = await duplicatePageUseCase.execute(new DuplicatePageCommand(id, title, slug, req.user?.id));
+    jsonResponse(res, 201, { success: true, data: result, message: 'Page duplicated successfully' });
   };
 
   // Page Publication Handlers
@@ -487,12 +470,8 @@ export class TypeAndPageHandlers {
    * List a page's store/channel/locale publication assignments
    */
   getPagePublications = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    try {
-      const publications = await this.contentUC.findPagePublications(req.params.id);
-      jsonResponse(res, 200, { success: true, data: publications });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
-    }
+    const publications = await this.contentUC.findPagePublications(req.params.id);
+    jsonResponse(res, 200, { success: true, data: publications });
   };
 
   /**
@@ -503,48 +482,40 @@ export class TypeAndPageHandlers {
     req: HttpRequest<Record<string, string>, unknown, { storeId?: string; channelId?: string; locale?: string }>,
     res: HttpResponse,
   ): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { storeId, channelId, locale } = req.body;
-      if (!storeId) {
-        jsonResponse(res, 400, { success: false, message: 'storeId is required' });
-        return;
-      }
-      await manageSalesChannelsUseCase.assertStoreChannelAccess({
-        organizationId: req.user?.organizationId,
-        storeId,
-        channelId,
-      });
-      const page = await this.contentUC.findPageById(id);
-      if (!page) {
-        jsonResponse(res, 404, { success: false, message: 'Page not found' });
-        return;
-      }
-      const publication = await this.contentUC.createPagePublication({
-        contentPageId: id,
-        storeId,
-        channelId: channelId ?? null,
-        locale: locale ?? null,
-      });
-      jsonResponse(res, 201, { success: true, data: publication, message: 'Page publication created' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    const { id } = req.params;
+    const { storeId, channelId, locale } = req.body;
+    if (!storeId) {
+      jsonResponse(res, 400, { success: false, message: 'storeId is required' });
+      return;
     }
+    await manageSalesChannelsUseCase.assertStoreChannelAccess({
+      organizationId: req.user?.organizationId,
+      storeId,
+      channelId,
+    });
+    const page = await this.contentUC.findPageById(id);
+    if (!page) {
+      jsonResponse(res, 404, { success: false, message: 'Page not found' });
+      return;
+    }
+    const publication = await this.contentUC.createPagePublication({
+      contentPageId: id,
+      storeId,
+      channelId: channelId ?? null,
+      locale: locale ?? null,
+    });
+    jsonResponse(res, 201, { success: true, data: publication, message: 'Page publication created' });
   };
 
   /**
    * Remove a page's publication assignment
    */
   deletePagePublication = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    try {
-      const deleted = await this.contentUC.deletePagePublication(req.params.publicationId);
-      if (!deleted) {
-        jsonResponse(res, 404, { success: false, message: 'Publication not found' });
-        return;
-      }
-      jsonResponse(res, 200, { success: true, message: 'Page publication removed' });
-    } catch (error) {
-      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    const deleted = await this.contentUC.deletePagePublication(req.params.publicationId);
+    if (!deleted) {
+      jsonResponse(res, 404, { success: false, message: 'Publication not found' });
+      return;
     }
+    jsonResponse(res, 200, { success: true, message: 'Page publication removed' });
   };
 }

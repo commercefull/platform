@@ -10,3 +10,9 @@ export interface PaymentWebhook {
 }
 
 export type PaymentWebhookCreateParams = Omit<PaymentWebhook, 'paymentWebhookId' | 'createdAt' | 'updatedAt'>;
+
+export interface PaymentWebhookRepository {
+  findWebhookByExternalId(externalId: string): Promise<PaymentWebhook | null>;
+  createWebhook(params: PaymentWebhookCreateParams): Promise<PaymentWebhook | null>;
+  markWebhookProcessed(paymentWebhookId: string): Promise<PaymentWebhook | null>;
+}

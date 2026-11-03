@@ -1,5 +1,7 @@
 import type { MembershipSubscription } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
+import { InternalServerError } from '../../../../libs/errors';
+import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
 export interface MembershipSubscriptionsPort {
   findById(id: string): Promise<MembershipSubscription | null>;
@@ -71,14 +73,14 @@ export class ManageMembershipSubscriptionsUseCase {
             await this.membershipSubscriptionRepo.pause(membershipId);
             break;
           case 'upgrade':
-            if (!newTierId) throw new Error('New tier ID required for upgrade');
+            if (!newTierId) throw new MembershipValidationError('New tier ID required for upgrade');
             await this.membershipSubscriptionRepo.changePlan(membershipId, newTierId);
             break;
           case 'cancel':
             await this.membershipSubscriptionRepo.cancel(membershipId);
             break;
           default:
-            throw new Error(`Unknown operation: ${operation}`);
+            throw new MembershipValidationError(`Unknown operation: ${operation}`);
         }
         results.push({ id: membershipId, status: 'success', operation });
         successCount++;
@@ -103,17 +105,17 @@ export class ManageMembershipSubscriptionsUseCase {
     options: { effectiveDate?: Date; prorate?: boolean; notes?: string } = {},
   ): Promise<TierChangeResult> {
     if (!this.planLookup) {
-      throw new Error('Plan lookup is not configured for tier changes');
+      throw new InternalServerError('Plan lookup is not configured for tier changes');
     }
 
     const currentMembership = await this.membershipSubscriptionRepo.findById(membershipId);
     if (!currentMembership) {
-      throw new Error('Current membership not found');
+      throw new MembershipNotFoundError(membershipId);
     }
 
     const newTier = await this.planLookup.findById(newTierId);
     if (!newTier) {
-      throw new Error('New tier not found');
+      throw new MembershipPlanNotFoundError(newTierId);
     }
 
     const effective = options.effectiveDate ?? new Date();

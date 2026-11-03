@@ -7,10 +7,10 @@
 import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { InventoryReservation } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
-import crypto from 'crypto';
 import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
 import type { InventoryReservation as DbInventoryReservation } from '../../../../libs/db/types';
 
+import { generateUUID } from '../../../../libs/uuid';
 interface CreateReservationParams {
   orderId: string;
   productId: string;
@@ -23,7 +23,7 @@ interface CreateReservationParams {
 }
 
 async function create(params: CreateReservationParams): Promise<InventoryReservation> {
-  const reservationId = crypto.randomUUID();
+  const reservationId = generateUUID();
   const now = new Date();
 
   const sql = `
@@ -57,7 +57,7 @@ async function create(params: CreateReservationParams): Promise<InventoryReserva
 }
 
 async function createAtomic(params: CreateReservationParams): Promise<InventoryReservation | null> {
-  const reservationId = crypto.randomUUID();
+  const reservationId = generateUUID();
   const now = new Date();
 
   try {

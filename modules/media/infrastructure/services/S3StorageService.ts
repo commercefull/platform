@@ -8,6 +8,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { StorageService, UploadResult } from '../../domain/services/StorageService';
 import { MediaFileNotFoundError } from '../../domain/errors/MediaErrors';
 import path from 'path';
+import { promises as fs } from 'fs';
 
 export class S3StorageService implements StorageService {
   private s3Client: S3Client;
@@ -67,7 +68,6 @@ export class S3StorageService implements StorageService {
       metadata?: Record<string, string>;
     } = {},
   ): Promise<UploadResult> {
-    const { promises: fs } = await import('fs');
     const buffer = await fs.readFile(filePath);
     const mimeType = this.getMimeType(filePath);
 

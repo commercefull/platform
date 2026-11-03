@@ -288,7 +288,12 @@ export class OrderRepo implements IOrderRepository {
     }
 
     return rows.map(row =>
-      mapOrderRow(row, itemsByOrderId.get(row.orderId) || [], shippingByOrderId.get(row.orderId) || null, billingByOrderId.get(row.orderId) || null),
+      mapOrderRow(
+        row,
+        itemsByOrderId.get(row.orderId) || [],
+        shippingByOrderId.get(row.orderId) || null,
+        billingByOrderId.get(row.orderId) || null,
+      ),
     );
   }
 }

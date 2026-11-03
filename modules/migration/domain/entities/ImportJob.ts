@@ -1,3 +1,5 @@
+import { generateUUID } from '../../../../libs/uuid';
+
 export type ImportJobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'paused';
 
 export type ImportJobType =
@@ -70,7 +72,7 @@ export class ImportJob {
   }): ImportJob {
     const now = new Date();
     return new ImportJob({
-      importJobId: crypto.randomUUID(),
+      importJobId: generateUUID(),
       organizationId: props.organizationId,
       jobType: props.jobType,
       source: props.source,

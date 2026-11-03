@@ -8,17 +8,13 @@
 
 import { TaxQuotePort, TaxQuoteRequest, TaxQuoteResult } from '../../application/ports/TaxQuotePort';
 import type { CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
-import type taxSettingsRepo from '../../../tax/infrastructure/repositories/taxSettingsRepo';
-import {
-  extractCountryFromVat,
-  formatVatNumber,
-  validateVatNumberFormat,
-} from '../../../tax/infrastructure/repositories/taxVatRegistrationRepo';
+import type { TaxSettingsRepository } from '../../../tax/domain/repositories/TaxRepository';
+import { extractCountryFromVat, formatVatNumber, validateVatNumberFormat } from '../../../tax/domain/vatFormat';
 
 export class TaxTaxQuoteAdapter implements TaxQuotePort {
   constructor(
     private readonly taxUseCase: Pick<CalculateOrderTaxUseCase, 'execute'>,
-    private readonly taxSettings: Pick<typeof taxSettingsRepo, 'findByMerchant'>,
+    private readonly taxSettings: Pick<TaxSettingsRepository, 'findByMerchant'>,
   ) {}
 
   async calculateTax(request: TaxQuoteRequest): Promise<TaxQuoteResult> {

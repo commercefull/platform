@@ -5,16 +5,17 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { SubscriptionOrder, SubscriptionOrderStatus } from './subscriptionTypes';
 import { mapToSubscriptionOrder } from './subscriptionHelpers';
+import type { SubscriptionOrder as DbSubscriptionOrder } from '../../../../libs/db/types';
 
 export async function getSubscriptionOrder(subscriptionOrderId: string): Promise<SubscriptionOrder | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
+  const row = await queryOne<DbSubscriptionOrder>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
     subscriptionOrderId,
   ]);
   return row ? mapToSubscriptionOrder(row) : null;
 }
 
 export async function getSubscriptionOrders(customerSubscriptionId: string): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSubscriptionOrder[]>(
     'SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
     [customerSubscriptionId],
   );
@@ -22,21 +23,17 @@ export async function getSubscriptionOrders(customerSubscriptionId: string): Pro
 }
 
 export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionOrder" 
+  const rows = await query<DbSubscriptionOrder[]>(`SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'pending' 
-     ORDER BY "scheduledAt" ASC`,
-  );
+     ORDER BY "scheduledAt" ASC`);
   return (rows || []).map(mapToSubscriptionOrder);
 }
 
 export async function getFailedSubscriptionPayments(): Promise<SubscriptionOrder[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionOrder" 
+  const rows = await query<DbSubscriptionOrder[]>(`SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'failed' 
      ORDER BY "failedAt" DESC 
-     LIMIT 100`,
-  );
+     LIMIT 100`);
   return (rows || []).map(mapToSubscriptionOrder);
 }
 
@@ -55,7 +52,7 @@ export async function createSubscriptionOrder(order: {
   const totalAmountCents =
     order.subtotalCents - (order.discountAmountCents || 0) + (order.taxAmountCents || 0) + (order.shippingAmountCents || 0);
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSubscriptionOrder>(
     `INSERT INTO "subscriptionOrder" (
       "customerSubscriptionId", "billingCycleNumber", "periodStart", "periodEnd",
       "status", "subtotalCents", "discountAmountCents", "taxAmountCents", "shippingAmountCents",
@@ -119,4 +116,3 @@ export async function updateSubscriptionOrderStatus(
   params.push(subscriptionOrderId);
   await query(`UPDATE "subscriptionOrder" SET ${setClause} WHERE "subscriptionOrderId" = $${paramIndex}`, params);
 }
-

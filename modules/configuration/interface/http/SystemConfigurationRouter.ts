@@ -14,27 +14,18 @@ const systemConfigurationController = new SystemConfigurationController();
 router.use(isOrganizationLoggedIn);
 
 // Create system configuration
-router.post('/configuration', asyncHandler(systemConfigurationController.createSystemConfiguration.bind(systemConfigurationController)));
+router.post('/configuration', asyncHandler(systemConfigurationController.createSystemConfiguration));
 
 // Update system configuration
-router.put(
-  '/configuration/:configId',
-  asyncHandler(systemConfigurationController.updateSystemConfiguration.bind(systemConfigurationController)),
-);
+router.put('/configuration/:configId', asyncHandler(systemConfigurationController.updateSystemConfiguration));
 
 // Get active system configuration (must be before /:configId to avoid matching "active" as an ID)
-router.get(
-  '/configuration/active',
-  asyncHandler(systemConfigurationController.getActiveSystemConfiguration.bind(systemConfigurationController)),
-);
+router.get('/configuration/active', asyncHandler(systemConfigurationController.getActiveSystemConfiguration));
 
 // Get system configuration by ID
-router.get(
-  '/configuration/:configId',
-  asyncHandler(systemConfigurationController.getSystemConfiguration.bind(systemConfigurationController)),
-);
+router.get('/configuration/:configId', asyncHandler(systemConfigurationController.getSystemConfiguration));
 
 // List all system configurations
-router.get('/configuration', asyncHandler(systemConfigurationController.listSystemConfigurations.bind(systemConfigurationController)));
+router.get('/configuration', asyncHandler(systemConfigurationController.listSystemConfigurations));
 
 export { router as systemConfigurationRouter };

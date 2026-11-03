@@ -5,14 +5,8 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { SupportTicketNotFoundError } from '../../domain/errors/SupportErrors';
-import type {
-  TicketStatus,
-  TicketPriority,
-  TicketCategory,
-  TicketChannel,
-} from '../../domain/entities/SupportTicket';
+import type { TicketStatus, TicketPriority, TicketCategory, TicketChannel } from '../../domain/entities/SupportTicket';
 import type { SupportAgent, AgentRole } from '../../domain/repositories/SupportRepository';
-
 
 export type {
   TicketStatus,
@@ -29,18 +23,19 @@ export type { SupportTicket } from './supportTicketOpsQueries';
 import type { SupportTicket } from './supportTicketOpsQueries';
 
 import { getTicket, mapToTicket, updateAgentTicketCount } from './supportTicketOpsQueries';
+import type { SupportAgent as DbSupportAgent, SupportTicket as DbSupportTicket } from '../../../../libs/db/types';
 
 // ============================================================================
 // Support Agents
 // ============================================================================
 
 export async function getAgent(supportAgentId: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
+  const row = await queryOne<DbSupportAgent>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
   return row ? mapToAgent(row) : null;
 }
 
 async function getAvailableAgent(_category?: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbSupportAgent>(
     `SELECT * FROM "supportAgent" 
      WHERE "isActive" = true AND "isAvailable" = true 
      AND "currentTickets" < "maxTickets"
@@ -49,7 +44,6 @@ async function getAvailableAgent(_category?: string): Promise<SupportAgent | nul
   );
   return row ? mapToAgent(row) : null;
 }
-
 
 // ============================================================================
 // Support Tickets
@@ -116,10 +110,8 @@ function mapToAgent(row: Record<string, unknown>): SupportAgent {
   };
 }
 
-
-
 export async function getAgentByEmail(email: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
+  const row = await queryOne<DbSupportAgent>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
   return row ? mapToAgent(row) : null;
 }
 
@@ -141,10 +133,7 @@ export async function getAgents(filters?: { isActive?: boolean; isAvailable?: bo
     params.push(filters.department);
   }
 
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportAgent" WHERE ${whereClause} ORDER BY "lastName", "firstName"`,
-    params,
-  );
+  const rows = await query<DbSupportAgent[]>(`SELECT * FROM "supportAgent" WHERE ${whereClause} ORDER BY "lastName", "firstName"`, params);
   return (rows || []).map(mapToAgent);
 }
 
@@ -184,7 +173,7 @@ export async function saveAgent(
     );
     return (await getAgent(agent.supportAgentId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbSupportAgent>(
       `INSERT INTO "supportAgent" (
         "email", "firstName", "lastName", "displayName", "avatarUrl", "role",
         "department", "skills", "languages", "isActive", "isAvailable", "maxTickets",
@@ -235,7 +224,7 @@ export async function getTickets(
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<Record<string, unknown>[]>(
+  const rows = await query<DbSupportTicket[]>(
     `SELECT * FROM "supportTicket" WHERE ${whereClause}
      ORDER BY
        CASE "priority" WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
@@ -300,7 +289,7 @@ export async function createTicket(ticket: {
   // Auto-assign to available agent
   const agent = await getAvailableAgent(ticket.category);
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSupportTicket>(
     `INSERT INTO "supportTicket" (
       "ticketNumber", "customerId", "orderId", "email", "name", "phone",
       "subject", "description", "status", "priority", "category", "channel",

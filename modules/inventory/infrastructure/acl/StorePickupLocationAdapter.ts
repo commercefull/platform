@@ -14,22 +14,12 @@ import {
   CreatePickupLocationInput,
   UpdatePickupLocationInput,
 } from '../../application/ports/PickupLocationPort';
-import type {
-  PickupLocation,
-  saveLocation,
-  getLocation,
-  getLocations,
-  updateLocation,
-  deleteLocation,
-} from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type { PickupLocation, PickupLocationRepository } from '../../../store';
 
-type PickupLocationRepoPort = {
-  saveLocation: typeof saveLocation;
-  getLocation: typeof getLocation;
-  getLocations: typeof getLocations;
-  updateLocation: typeof updateLocation;
-  deleteLocation: typeof deleteLocation;
-};
+type PickupLocationRepoPort = Pick<
+  PickupLocationRepository,
+  'saveLocation' | 'getLocation' | 'getLocations' | 'updateLocation' | 'deleteLocation'
+>;
 
 function toSummary(loc: PickupLocation): PickupLocationSummary {
   return {

@@ -1,6 +1,7 @@
 import { ApplyGatewayWebhookEventUseCase } from './ApplyGatewayWebhookEvent';
 import { ProcessPaymentWebhookUseCase } from './ProcessPaymentWebhook';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
+import type { PaymentWebhookRepository } from '../../domain/repositories/PaymentWebhookRepository';
 import type { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import type { GatewayWebhookPort } from '../ports/GatewayWebhookPort';
 import type { OrderStatusSyncPort } from '../ports/OrderStatusSyncPort';
@@ -40,13 +41,13 @@ const makeTransaction = (status: string): PaymentTransaction =>
   }) as unknown as PaymentTransaction;
 
 describe('ApplyGatewayWebhookEventUseCase', () => {
-  let payments: jest.Mocked<PaymentRepository>;
+  let payments: jest.Mocked<PaymentTransactionRepository & PaymentWebhookRepository>;
   let gatewayWebhooks: jest.Mocked<GatewayWebhookPort>;
   let orderStatusSync: jest.Mocked<OrderStatusSyncPort>;
   let useCase: ApplyGatewayWebhookEventUseCase;
 
   beforeEach(() => {
-    payments = lazyMock<PaymentRepository>();
+    payments = lazyMock<PaymentTransactionRepository & PaymentWebhookRepository>();
     gatewayWebhooks = lazyMock<GatewayWebhookPort>();
     orderStatusSync = lazyMock<OrderStatusSyncPort>();
     useCase = new ApplyGatewayWebhookEventUseCase(payments, gatewayWebhooks, orderStatusSync, new ProcessPaymentWebhookUseCase(payments));

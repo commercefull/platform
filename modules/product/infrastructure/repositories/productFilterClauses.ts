@@ -72,4 +72,3 @@ function addPriceClauses(
     b.params.push(options.priceMaxCents);
   }
 }
-

@@ -11,7 +11,11 @@ import { query, queryOne } from '../../../../libs/db';
 import { Inventory, InventoryLocation } from '../../domain/entities/Inventory';
 import { InventoryLocation as DbInventoryLocation, DistributionWarehouse as DbDistributionWarehouse } from '../../../../libs/db/types';
 import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
-import { InventoryItemNotFoundError, FailedToCreateInventoryError, InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
+import {
+  InventoryItemNotFoundError,
+  FailedToCreateInventoryError,
+  InventoryLocationNotFoundError,
+} from '../../domain/errors/InventoryErrors';
 import { getItemsNeedingReorder, getLowStockAlerts, getOutOfStockItems } from './inventoryAlertQueries';
 import {
   createTransfer,

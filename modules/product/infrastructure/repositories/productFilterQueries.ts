@@ -90,4 +90,3 @@ function addIdListFilter(
   b.conditions.push(`${column} ${negate ? 'NOT IN' : 'IN'} (${placeholders})`);
   b.params.push(...ids);
 }
-

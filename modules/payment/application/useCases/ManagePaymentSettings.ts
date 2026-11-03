@@ -1,7 +1,9 @@
-import { PaymentRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentRepository';
+import { PaymentSettingsRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentSettingsRepository';
 
 export class ManagePaymentSettingsUseCase {
-  constructor(private readonly paymentRepo: PaymentRepository) {}
+  constructor(
+    private readonly paymentRepo: Pick<PaymentSettingsRepository, 'findAllSettings' | 'findSettingsByMerchant' | 'upsertSettings'>,
+  ) {}
 
   async findAll() {
     return this.paymentRepo.findAllSettings();

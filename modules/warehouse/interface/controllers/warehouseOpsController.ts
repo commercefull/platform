@@ -5,7 +5,6 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { useCaseErrorResponse } from './warehouseControllerShared';
 import type {
   UpdateBinInput,
   CreateBinInput,
@@ -36,12 +35,8 @@ interface CreateBinBody {
 export const createBin = async (req: HttpRequest<Record<string, string>, unknown, CreateBinBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const bin = await manageBinsUseCase.create(id, req.body as Omit<CreateBinInput, 'distributionWarehouseId'>);
-    successResponse(res, bin, 201);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const bin = await manageBinsUseCase.create(id, req.body as Omit<CreateBinInput, 'distributionWarehouseId'>);
+  successResponse(res, bin, 201);
 };
 
 export const getBins = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -63,23 +58,15 @@ export const getBinById = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const updateBin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
 
-  try {
-    const bin = await manageBinsUseCase.update(binId, req.body as UpdateBinInput);
-    successResponse(res, bin);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const bin = await manageBinsUseCase.update(binId, req.body as UpdateBinInput);
+  successResponse(res, bin);
 };
 
 export const deleteBin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
 
-  try {
-    await manageBinsUseCase.delete(binId);
-    successResponse(res, { message: 'Bin deleted successfully' });
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  await manageBinsUseCase.delete(binId);
+  successResponse(res, { message: 'Bin deleted successfully' });
 };
 
 // ============================================================================
@@ -105,12 +92,8 @@ export const createReceiving = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const record = await manageReceivingUseCase.create(id, req.body as Omit<CreateReceivingInput, 'distributionWarehouseId'>);
-    successResponse(res, record, 201);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await manageReceivingUseCase.create(id, req.body as Omit<CreateReceivingInput, 'distributionWarehouseId'>);
+  successResponse(res, record, 201);
 };
 
 export const getReceiving = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -138,12 +121,8 @@ export const completeReceiving = async (req: HttpRequest, res: HttpResponse): Pr
     hasDiscrepancies?: boolean;
   };
 
-  try {
-    const record = await manageReceivingUseCase.complete(receivingId, { receivedBy, items, hasDiscrepancies });
-    successResponse(res, record);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await manageReceivingUseCase.complete(receivingId, { receivedBy, items, hasDiscrepancies });
+  successResponse(res, record);
 };
 
 // ============================================================================
@@ -165,12 +144,8 @@ export const createPickPack = async (
 ): Promise<void> => {
   const { id } = req.params;
 
-  try {
-    const record = await managePickPackUseCase.create(id, req.body as Omit<CreatePickPackInput, 'distributionWarehouseId'>);
-    successResponse(res, record, 201);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await managePickPackUseCase.create(id, req.body as Omit<CreatePickPackInput, 'distributionWarehouseId'>);
+  successResponse(res, record, 201);
 };
 
 export const getPickPacks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -193,55 +168,35 @@ export const getPickPackById = async (req: HttpRequest, res: HttpResponse): Prom
 export const startPicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
 
-  try {
-    const record = await managePickPackUseCase.startPicking(pickPackId);
-    successResponse(res, record);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await managePickPackUseCase.startPicking(pickPackId);
+  successResponse(res, record);
 };
 
 export const completePicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
 
-  try {
-    const record = await managePickPackUseCase.completePicking(pickPackId);
-    successResponse(res, record);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await managePickPackUseCase.completePicking(pickPackId);
+  successResponse(res, record);
 };
 
 export const startPacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
 
-  try {
-    const record = await managePickPackUseCase.startPacking(pickPackId);
-    successResponse(res, record);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await managePickPackUseCase.startPacking(pickPackId);
+  successResponse(res, record);
 };
 
 export const completePacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
 
-  try {
-    const record = await managePickPackUseCase.completePacking(pickPackId);
-    successResponse(res, record);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await managePickPackUseCase.completePacking(pickPackId);
+  successResponse(res, record);
 };
 
 export const assignPickPack = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const { assignedTo } = req.body as { assignedTo: string };
 
-  try {
-    const record = await managePickPackUseCase.assign(pickPackId, assignedTo);
-    successResponse(res, record);
-  } catch (error: unknown) {
-    useCaseErrorResponse(res, error);
-  }
+  const record = await managePickPackUseCase.assign(pickPackId, assignedTo);
+  successResponse(res, record);
 };

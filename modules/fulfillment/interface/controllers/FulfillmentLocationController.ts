@@ -8,11 +8,6 @@ import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageFulfillmentLocationsUseCase } from '../../application/wired';
 import { CreateFulfillmentLocationParams, UpdateFulfillmentLocationParams, FulfillmentPartner } from '../../application/wired';
-import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
-
-function respondError(res: HttpResponse, error: unknown, fallback: string): void {
-  jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) || fallback });
-}
 
 // ============================================================================
 // Fulfillment Locations
@@ -20,20 +15,13 @@ function respondError(res: HttpResponse, error: unknown, fallback: string): void
 
 export const createLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateFulfillmentLocationParams;
-  try {
-    const result = await manageFulfillmentLocationsUseCase.createLocation(body);
-    jsonResponse(res, 201, { success: true, data: result });
-  } catch (error) {
-    respondError(res, error, 'Failed to create location');
-  }
+
+  const result = await manageFulfillmentLocationsUseCase.createLocation(body);
+  jsonResponse(res, 201, { success: true, data: result });
 };
 
 export const getLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    jsonResponse(res, 200, { success: true, data: await manageFulfillmentLocationsUseCase.getLocation(req.params.locationId) });
-  } catch (error) {
-    respondError(res, error, 'Location not found');
-  }
+  jsonResponse(res, 200, { success: true, data: await manageFulfillmentLocationsUseCase.getLocation(req.params.locationId) });
 };
 
 export const listLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -45,15 +33,8 @@ export const listLocations = async (req: HttpRequest, res: HttpResponse): Promis
 };
 
 export const updateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const result = await manageFulfillmentLocationsUseCase.updateLocation(
-      req.params.locationId,
-      req.body as UpdateFulfillmentLocationParams,
-    );
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error) {
-    respondError(res, error, 'Location not found');
-  }
+  const result = await manageFulfillmentLocationsUseCase.updateLocation(req.params.locationId, req.body as UpdateFulfillmentLocationParams);
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const activateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -69,16 +50,13 @@ export const deactivateLocation = async (req: HttpRequest, res: HttpResponse): P
 export const findNearestLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const latitude = parseFloat(req.query.latitude as string);
   const longitude = parseFloat(req.query.longitude as string);
-  try {
-    const result = await manageFulfillmentLocationsUseCase.findNearestLocations(latitude, longitude, {
-      limit: parseInt(req.query.limit as string) || 10,
-      type: req.query.type as string,
-      organizationId: req.query.organizationId as string,
-    });
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error) {
-    respondError(res, error, 'Failed to find nearest locations');
-  }
+
+  const result = await manageFulfillmentLocationsUseCase.findNearestLocations(latitude, longitude, {
+    limit: parseInt(req.query.limit as string) || 10,
+    type: req.query.type as string,
+    organizationId: req.query.organizationId as string,
+  });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 // ============================================================================
@@ -92,34 +70,24 @@ export const listPartners = async (req: HttpRequest, res: HttpResponse): Promise
 };
 
 export const getPartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    jsonResponse(res, 200, { success: true, data: await manageFulfillmentLocationsUseCase.getPartner(req.params.partnerId) });
-  } catch (error) {
-    respondError(res, error, 'Partner not found');
-  }
+  jsonResponse(res, 200, { success: true, data: await manageFulfillmentLocationsUseCase.getPartner(req.params.partnerId) });
 };
 
 export const createPartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>;
-  try {
-    const result = await manageFulfillmentLocationsUseCase.createPartner(body);
-    jsonResponse(res, 201, { success: true, data: result });
-  } catch (error) {
-    respondError(res, error, 'Failed to create partner');
-  }
+
+  const result = await manageFulfillmentLocationsUseCase.createPartner(body);
+  jsonResponse(res, 201, { success: true, data: result });
 };
 
 export const updatePartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { partnerId } = req.params;
-  try {
-    const result = await manageFulfillmentLocationsUseCase.updatePartner(
-      partnerId,
-      req.body as Parameters<typeof manageFulfillmentLocationsUseCase.updatePartner>[1],
-    );
-    jsonResponse(res, 200, { success: true, data: result });
-  } catch (error) {
-    respondError(res, error, 'Partner not found');
-  }
+
+  const result = await manageFulfillmentLocationsUseCase.updatePartner(
+    partnerId,
+    req.body as Parameters<typeof manageFulfillmentLocationsUseCase.updatePartner>[1],
+  );
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const deletePartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

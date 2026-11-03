@@ -30,25 +30,13 @@ export const scheduledJobs: ScheduledJobDefinition[] = [
     name: 'Inventory Sync',
     handler: async () => {
       try {
-        const result = await query<Array<{ productId: string; totalQuantity: string; totalReserved: string }>>(
-          `SELECT "productId",
-             COALESCE(SUM(quantity), 0) as "totalQuantity",
-             COALESCE(SUM(reserved), 0) as "totalReserved"
-           FROM "inventoryLevel"
-           GROUP BY "productId"`,
+        const synced = await query<{ inventoryLocationId: string }[]>(
+          `UPDATE "inventoryLocation"
+           SET "availableQuantity" = "quantity" - "reservedQuantity", "updatedAt" = now()
+           WHERE "availableQuantity" <> "quantity" - "reservedQuantity"
+           RETURNING "inventoryLocationId"`,
         );
-
-        const products = result || [];
-        let synced = 0;
-        for (const p of products) {
-          const available = parseInt(p.totalQuantity, 10) - parseInt(p.totalReserved, 10);
-          await query(`UPDATE "inventoryItem" SET "availableQuantity" = $1, "updatedAt" = now() WHERE "productId" = $2`, [
-            available,
-            p.productId,
-          ]);
-          synced++;
-        }
-        logger.info(`[cron] inventory-sync: synced ${synced} products`);
+        logger.info(`[cron] inventory-sync: synced ${synced?.length || 0} inventory locations`);
       } catch (err: unknown) {
         logger.error('inventory-sync error', { error: (err as Error).message });
       }

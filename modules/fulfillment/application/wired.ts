@@ -20,6 +20,7 @@ import { PlanFulfillmentUseCase } from './useCases/PlanFulfillment';
 import { FulfillmentSourceAdapter } from '../infrastructure/acl/FulfillmentSourceAdapter';
 import { OrderRouter } from '../../order/domain/services/OrderRouter';
 import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
+import WarehouseRepo from '../../warehouse/infrastructure/repositories/warehouseRepo';
 import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
 
 export const manageOperationsUseCase = new ManageOperationsUseCase(fulfillmentDataRepository.admin);
@@ -51,7 +52,7 @@ const orderRouter = new OrderRouter(
   },
 );
 
-export const planFulfillmentUseCase = new PlanFulfillmentUseCase(orderRouter, new FulfillmentSourceAdapter());
+export const planFulfillmentUseCase = new PlanFulfillmentUseCase(orderRouter, new FulfillmentSourceAdapter(StoreRepo, WarehouseRepo));
 
 import { GetFulfillmentUseCase } from './useCases/GetFulfillment';
 import { CreateFulfillmentUseCase } from './useCases/CreateFulfillment';

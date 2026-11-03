@@ -4,9 +4,10 @@
  * Represents the fulfillment of an order, including picking, packing,
  * shipping, and delivery tracking.
  */
-import { randomUUID } from 'node:crypto';
+
 import { FulfillmentValidationError } from '../errors/FulfillmentErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export type FulfillmentStatus =
   | 'pending'
   | 'assigned'
@@ -427,6 +428,6 @@ export class Fulfillment {
 }
 
 function generateFulfillmentId(): string {
-  // Use crypto.randomUUID for proper UUID format
-  return randomUUID();
+  // Use generateUUID for proper UUIDv7 format
+  return generateUUID();
 }

@@ -16,6 +16,7 @@ import { logger } from '../../../../libs/logger';
 import type { GatewayWebhookPort } from '../../application/ports/GatewayWebhookPort';
 import { gatewayWebhookPort } from '../../application/wired';
 import { applyGatewayWebhookEventUseCase, managePaymentRecordsUseCase } from '../../application/useCases/wired';
+import { logCaughtError } from '../../../../libs/errors';
 
 // ============================================================================
 // Helpers
@@ -75,7 +76,7 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
 
     jsonResponse(res, 200, { received: true });
   } catch (error: unknown) {
-    logger.error('[webhook] Unhandled error:', error);
+    logCaughtError('[webhook] Unhandled error:', error);
     jsonResponse(res, 200, { received: true });
   }
 }

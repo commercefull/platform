@@ -113,4 +113,3 @@ export interface ProductFilterOptions {
   orderBy?: string;
   orderDirection?: 'ASC' | 'DESC';
 }
-

@@ -5,15 +5,11 @@
 
 import { eventBus } from '../../../libs/events/eventBus';
 import type { LoyaltyTier, LoyaltyPoints, LoyaltyReward, LoyaltyRedemption } from '../../../libs/db/types';
-import type { LoyaltyRepository } from '../domain/repositories/LoyaltyRepository';
-import type { CalculateTierStatusUseCase } from '../application/useCases/CalculateTierStatus';
 import type { CheckPointsBalanceUseCase } from '../application/useCases/CheckPointsBalance';
 import type { CreateRewardUseCase } from '../application/useCases/CreateReward';
-import type { EarnPointsUseCase } from '../application/useCases/EarnPoints';
-import type { GetPointsHistoryUseCase } from '../application/useCases/GetPointsHistory';
-import type { ProcessPointsExpirationUseCase } from '../application/useCases/ProcessPointsExpiration';
 import type { RedeemPointsUseCase } from '../application/useCases/RedeemPoints';
-import type { RedeemRewardUseCase } from '../application/useCases/RedeemReward';
+import type { ManageLoyaltyAdminUseCase } from '../application/useCases/ManageLoyaltyAdmin';
+import type { ManageStorefrontLoyaltyUseCase } from '../application/useCases/ManageStorefrontLoyalty';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   __esModule: true,
@@ -40,12 +36,15 @@ function lazyMock<T>(): jest.Mocked<T> {
   }) as jest.Mocked<T>;
 }
 
-export function createLoyaltyRepository(): jest.Mocked<LoyaltyRepository> {
-  return lazyMock<LoyaltyRepository>();
+export function createLoyaltyAdminRepository(): jest.Mocked<ConstructorParameters<typeof ManageLoyaltyAdminUseCase>[0]> {
+  return lazyMock();
 }
 
-export function createTierStatusRepository(): jest.Mocked<ConstructorParameters<typeof CalculateTierStatusUseCase>[0]> {
-  return lazyMock();
+export function createStorefrontLoyaltyRepositories(): {
+  storefrontLoyaltyRepository: jest.Mocked<ConstructorParameters<typeof ManageStorefrontLoyaltyUseCase>[0]>;
+  loyaltyPointsRepository: jest.Mocked<ConstructorParameters<typeof ManageStorefrontLoyaltyUseCase>[1]>;
+} {
+  return { storefrontLoyaltyRepository: lazyMock(), loyaltyPointsRepository: lazyMock() };
 }
 
 export function createPointsBalanceRepository(): jest.Mocked<ConstructorParameters<typeof CheckPointsBalanceUseCase>[0]> {
@@ -56,30 +55,11 @@ export function createRewardRepository(): jest.Mocked<ConstructorParameters<type
   return lazyMock();
 }
 
-export function createEarnPointsRepositories(): {
-  loyaltyRepository: jest.Mocked<ConstructorParameters<typeof EarnPointsUseCase>[0]>;
-  programRepository: jest.Mocked<ConstructorParameters<typeof EarnPointsUseCase>[1]>;
-} {
-  return { loyaltyRepository: lazyMock(), programRepository: lazyMock() };
-}
-
-export function createPointsHistoryRepository(): jest.Mocked<ConstructorParameters<typeof GetPointsHistoryUseCase>[0]> {
-  return lazyMock();
-}
-
-export function createExpirationRepository(): jest.Mocked<ConstructorParameters<typeof ProcessPointsExpirationUseCase>[0]> {
-  return lazyMock();
-}
-
 export function createRedeemPointsRepositories(): {
   loyaltyRepository: jest.Mocked<ConstructorParameters<typeof RedeemPointsUseCase>[0]>;
   rewardRepository: jest.Mocked<ConstructorParameters<typeof RedeemPointsUseCase>[1]>;
 } {
   return { loyaltyRepository: lazyMock(), rewardRepository: lazyMock() };
-}
-
-export function createRedeemRewardRepository(): jest.Mocked<ConstructorParameters<typeof RedeemRewardUseCase>[0]> {
-  return lazyMock();
 }
 
 // ---------------------------------------------------------------------------

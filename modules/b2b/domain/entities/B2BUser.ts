@@ -3,6 +3,7 @@ export type B2BUserRole = 'admin' | 'buyer' | 'approver' | 'viewer';
 
 import { B2BUserStatusError } from '../errors/B2BErrors';
 
+import { generateUUID } from '../../../../libs/uuid';
 export interface SpendingLimit {
   perOrderLimit?: number;
   monthlyLimit?: number;
@@ -49,7 +50,7 @@ export class B2BUser {
   }): B2BUser {
     const now = new Date();
     return new B2BUser({
-      userId: crypto.randomUUID(),
+      userId: generateUUID(),
       companyId: input.companyId,
       organizationId: input.organizationId,
       email: input.email,

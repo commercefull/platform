@@ -2,6 +2,8 @@
 // Do not touch them, or risk, your modifications being lost.
 
 export enum Table {
+  AdminUser = "adminUser",
+  AdminUserRole = "adminUserRole",
   AgenticCheckoutIdempotencyRecord = "agenticCheckoutIdempotencyRecord",
   AgenticCheckoutSession = "agenticCheckoutSession",
   AnalyticsCustomerCohort = "analyticsCustomerCohort",
@@ -291,6 +293,7 @@ export enum Table {
   ThemeAssignment = "themeAssignment",
   ThemeOverride = "themeOverride",
   TrackingConfig = "trackingConfig",
+  User = "user",
   WarehousePickPack = "warehousePickPack",
   WarehouseReceiving = "warehouseReceiving",
   WebhookDelivery = "webhookDelivery",
@@ -298,6 +301,8 @@ export enum Table {
 }
 
 export type Tables = {
+  "adminUser": AdminUser,
+  "adminUserRole": AdminUserRole,
   "agenticCheckoutIdempotencyRecord": AgenticCheckoutIdempotencyRecord,
   "agenticCheckoutSession": AgenticCheckoutSession,
   "analyticsCustomerCohort": AnalyticsCustomerCohort,
@@ -587,10 +592,31 @@ export type Tables = {
   "themeAssignment": ThemeAssignment,
   "themeOverride": ThemeOverride,
   "trackingConfig": TrackingConfig,
+  "user": User,
   "warehousePickPack": WarehousePickPack,
   "warehouseReceiving": WarehouseReceiving,
   "webhookDelivery": WebhookDelivery,
   "webhookEndpoint": WebhookEndpoint,
+};
+
+export type AdminUser = {
+  adminId: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  role: string;
+  permissions: unknown[];
+  status: string;
+  lastLoginAt: Date | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type AdminUserRole = {
+  userId: string;
+  roleId: string;
+  createdAt: Date;
 };
 
 export type AgenticCheckoutIdempotencyRecord = {
@@ -6181,6 +6207,23 @@ export type TrackingConfig = {
   defaultConsentCategory: string;
   hashPii: boolean;
   serverSideEnabled: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type User = {
+  userId: string;
+  email: string;
+  passwordHash: string;
+  userType: string;
+  status: string;
+  firstName: string | null;
+  lastName: string | null;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  mfaEnabled: boolean;
+  loginCount: number;
+  failedLoginAttempts: number;
   createdAt: Date;
   updatedAt: Date;
 };
