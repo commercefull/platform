@@ -3,11 +3,16 @@
  * Handles legacy tax queries for the admin hub.
  * taxRate requires taxCategoryId + taxZoneId (resolved from the form's
  * taxClass/country/state inputs); tax "classes" map onto taxCategory.
+ *
+ * Writes delegate to TaxCommandRepo — the single owner of
+ * taxRate/taxZone/taxCategory mutation SQL.
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
+import { TaxCommandRepo } from './taxCommandRepo';
 import type { TaxZone as DbTaxZone } from '../../../../libs/db/types';
+
+const commands = new TaxCommandRepo();
 
 // ============================================================================
 // Types
@@ -50,6 +55,8 @@ interface AdminTaxClass {
 // ============================================================================
 // Resolution helpers
 // ============================================================================
+
+const deriveCode = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
 async function resolveTaxCategoryId(nameOrCode?: string): Promise<string> {
   const row = await queryOne<{ taxCategoryId: string }>(
@@ -109,11 +116,19 @@ export async function createTaxRate(params: {
     resolveTaxCategoryId(params.taxClass),
     resolveTaxZoneId(params.country, params.state),
   ]);
-  await query(
-    `INSERT INTO "taxRate" ("taxRateId", "taxCategoryId", "taxZoneId", "name", "rate", "type", "priority", "isCompound", "includeInPrice", "isShippingTaxable", "startDate", "isActive", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, 'percentage', 0, false, false, false, NOW(), $6, NOW(), NOW())`,
-    [generateUUID(), taxCategoryId, taxZoneId, params.name, params.rate, params.isActive],
-  );
+  await commands.createTaxRate({
+    taxCategoryId,
+    taxZoneId,
+    name: params.name,
+    rate: params.rate,
+    type: 'percentage',
+    priority: 0,
+    isCompound: false,
+    includeInPrice: false,
+    isShippingTaxable: false,
+    startDate: new Date(),
+    isActive: params.isActive,
+  });
 }
 
 export async function updateTaxRate(
@@ -131,15 +146,17 @@ export async function updateTaxRate(
     resolveTaxCategoryId(params.taxClass),
     resolveTaxZoneId(params.country, params.state),
   ]);
-  await query(
-    `UPDATE "taxRate" SET "name" = $1, "rate" = $2, "taxCategoryId" = $3, "taxZoneId" = $4, "isActive" = $5, "updatedAt" = NOW()
-     WHERE "taxRateId" = $6`,
-    [params.name, params.rate, taxCategoryId, taxZoneId, params.isActive, taxRateId],
-  );
+  await commands.updateTaxRate(taxRateId, {
+    name: params.name,
+    rate: params.rate,
+    taxCategoryId,
+    taxZoneId,
+    isActive: params.isActive,
+  });
 }
 
 export async function softDeleteTaxRate(taxRateId: string): Promise<void> {
-  await query(`UPDATE "taxRate" SET "isActive" = false, "updatedAt" = NOW() WHERE "taxRateId" = $1`, [taxRateId]);
+  await commands.updateTaxRate(taxRateId, { isActive: false });
 }
 
 // ============================================================================
@@ -147,7 +164,7 @@ export async function softDeleteTaxRate(taxRateId: string): Promise<void> {
 // ============================================================================
 
 export async function findAllTaxZones(): Promise<AdminTaxZone[]> {
-  const rows = await query<DbTaxZone[]>(`SELECT * FROM "taxZone" ORDER BY "name"`);
+  const rows = (await query<DbTaxZone[]>(`SELECT * FROM "taxZone" ORDER BY "name"`)) as DbTaxZone[] | null;
   return (rows || []).map(row => ({
     taxZoneId: row.taxZoneId,
     name: row.name,
@@ -160,11 +177,14 @@ export async function findAllTaxZones(): Promise<AdminTaxZone[]> {
 }
 
 export async function createTaxZone(params: { name: string; description?: string; countries: string[]; isActive: boolean }): Promise<void> {
-  await query(
-    `INSERT INTO "taxZone" ("taxZoneId", "name", "description", "countries", "isDefault", "isActive", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4::jsonb, false, $5, NOW(), NOW())`,
-    [generateUUID(), params.name, params.description || null, JSON.stringify(params.countries), params.isActive],
-  );
+  await commands.createTaxZone({
+    name: params.name,
+    code: deriveCode(params.name),
+    description: params.description,
+    isDefault: false,
+    countries: params.countries,
+    isActive: params.isActive,
+  });
 }
 
 export async function updateTaxZone(
@@ -176,19 +196,20 @@ export async function updateTaxZone(
     isActive: boolean;
   },
 ): Promise<void> {
-  await query(
-    `UPDATE "taxZone" SET "name" = $1, "description" = $2, "countries" = $3::jsonb, "isActive" = $4, "updatedAt" = NOW()
-     WHERE "taxZoneId" = $5`,
-    [params.name, params.description || null, JSON.stringify(params.countries), params.isActive, taxZoneId],
-  );
+  await commands.updateTaxZone(taxZoneId, {
+    name: params.name,
+    description: (params.description || null) as string | undefined,
+    countries: params.countries,
+    isActive: params.isActive,
+  });
 }
 
 export async function softDeleteTaxZone(taxZoneId: string): Promise<void> {
-  await query(`UPDATE "taxZone" SET "isActive" = false, "updatedAt" = NOW() WHERE "taxZoneId" = $1`, [taxZoneId]);
+  await commands.updateTaxZone(taxZoneId, { isActive: false });
 }
 
 // ============================================================================
-// Tax Class Functions — backed by the taxCategory table
+// Tax Class Functions (mapped onto taxCategory)
 // ============================================================================
 
 export async function findAllTaxClasses(): Promise<AdminTaxClass[]> {
@@ -205,21 +226,20 @@ export async function findAllTaxClasses(): Promise<AdminTaxClass[]> {
 }
 
 export async function createTaxClass(params: { name: string; description?: string }): Promise<void> {
-  await query(
-    `INSERT INTO "taxCategory" ("taxCategoryId", "code", "name", "description", "sortOrder", "isDefault", "isActive", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4, 0, false, true, NOW(), NOW())`,
-    [generateUUID(), params.name.toLowerCase().replace(/[^a-z0-9]+/g, '_'), params.name, params.description || null],
-  );
+  await commands.createTaxCategory({
+    name: params.name,
+    code: deriveCode(params.name),
+    description: params.description,
+    isDefault: false,
+    sortOrder: 0,
+    isActive: true,
+  });
 }
 
 export async function updateTaxClass(taxClassId: string, params: { name: string; description?: string }): Promise<void> {
-  await query(`UPDATE "taxCategory" SET "name" = $1, "description" = $2, "updatedAt" = NOW() WHERE "taxCategoryId" = $3`, [
-    params.name,
-    params.description || null,
-    taxClassId,
-  ]);
+  await commands.updateTaxCategory(taxClassId, { name: params.name, description: (params.description || null) as string | undefined });
 }
 
 export async function softDeleteTaxClass(taxClassId: string): Promise<void> {
-  await query(`UPDATE "taxCategory" SET "isActive" = false, "updatedAt" = NOW() WHERE "taxCategoryId" = $1`, [taxClassId]);
+  await commands.updateTaxCategory(taxClassId, { isActive: false });
 }
