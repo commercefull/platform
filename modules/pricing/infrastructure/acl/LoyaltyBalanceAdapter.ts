@@ -2,17 +2,17 @@
  * LoyaltyBalanceAdapter
  *
  * ACL adapter implementing pricing's LoyaltyBalancePort.
- * Translates loyalty's LoyaltyRepo into pricing's flat
+ * Translates loyalty's points repository into pricing's flat
  * number vocabulary.
  *
- * Only this adapter may import from loyalty's infrastructure.
+ * Types against loyalty's public repository port.
  */
 
 import { LoyaltyBalancePort } from '../../application/ports/LoyaltyBalancePort';
-import type { LoyaltyRepo } from '../../../loyalty/infrastructure/repositories/loyaltyRepo';
+import type { LoyaltyPointsRepository } from '../../../loyalty';
 
 export class LoyaltyBalanceAdapter implements LoyaltyBalancePort {
-  constructor(private readonly loyaltyRepo: Pick<LoyaltyRepo, 'findCustomerPoints'>) {}
+  constructor(private readonly loyaltyRepo: Pick<LoyaltyPointsRepository, 'findCustomerPoints'>) {}
 
   async getCustomerPoints(customerId: string): Promise<number> {
     const points = await this.loyaltyRepo.findCustomerPoints(customerId);

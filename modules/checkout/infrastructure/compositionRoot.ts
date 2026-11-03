@@ -64,8 +64,7 @@ import InventoryRepo from '../../inventory/infrastructure/repositories/inventory
 import { reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase } from '../../inventory/application/wired';
 import { repriceBasketUseCase } from '../../basket/application/useCases/wired';
 import { LoyaltyLoyaltyAdapter } from './acl/LoyaltyLoyaltyAdapter';
-import LoyaltyDataRepository from '../../loyalty/infrastructure/repositories/LoyaltyDataRepository';
-import { redeemPointsUseCase } from '../../loyalty/application/wired';
+import { loyaltyDataRepository, redeemPointsUseCase } from '../../loyalty/application/wired';
 import { LoyaltyQuotePort, LoyaltyRedemptionPort } from '../application/ports/LoyaltyPort';
 
 export interface CheckoutPorts {
@@ -105,7 +104,7 @@ export function getCheckoutPorts(): CheckoutPorts {
     stockAvailability: new InventoryStockAvailabilityAdapter(InventoryRepo),
     inventoryReservation: new InventoryReservationAdapter(reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase),
     ...(() => {
-      const loyalty = new LoyaltyLoyaltyAdapter(LoyaltyDataRepository.points, redeemPointsUseCase);
+      const loyalty = new LoyaltyLoyaltyAdapter(loyaltyDataRepository.points, redeemPointsUseCase);
       return { loyaltyQuote: loyalty, loyaltyRedemption: loyalty };
     })(),
     storeContext: new StoreStoreContextAdapter(getStoreUseCase),

@@ -4,8 +4,8 @@ import currencyRepository from '../infrastructure/repositories/CurrencyRepositor
 import { pricingRuleRepo } from '../infrastructure';
 import { MembershipBenefitsAdapter } from '../infrastructure/acl/MembershipBenefitsAdapter';
 import { LoyaltyBalanceAdapter } from '../infrastructure/acl/LoyaltyBalanceAdapter';
-import { MembershipRepo } from '../../membership/infrastructure/repositories/membershipRepo';
-import { LoyaltyRepo } from '../../loyalty/infrastructure/repositories/loyaltyRepo';
+import membershipSubscriptionDataRepository from '../../membership/infrastructure/repositories/MembershipSubscriptionDataRepository';
+import { loyaltyDataRepository } from '../../loyalty/application/wired';
 import { CachedCurrencyCatalog } from '../infrastructure/services/CachedCurrencyCatalog';
 import { PricingAdjustmentType } from '../domain/pricingRule';
 import type { CurrencyCatalogPort } from '../domain/repositories/CurrencyCatalog';
@@ -76,8 +76,8 @@ export const calculatePriceUseCase = new CalculatePriceUseCase({
   currencyCatalog: currencyCatalog,
   pricingData: pricingDataQuery,
   pricingRules: pricingRuleQuery,
-  membershipBenefits: new MembershipBenefitsAdapter(new MembershipRepo()),
-  loyaltyBalance: new LoyaltyBalanceAdapter(new LoyaltyRepo()),
+  membershipBenefits: new MembershipBenefitsAdapter(membershipSubscriptionDataRepository.memberships),
+  loyaltyBalance: new LoyaltyBalanceAdapter(loyaltyDataRepository.points),
   convertPrice: convertPriceUseCase,
 });
 export const calculatePricesUseCase = new CalculatePricesUseCase(calculatePriceUseCase);

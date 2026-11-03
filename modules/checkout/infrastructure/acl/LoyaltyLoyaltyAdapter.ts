@@ -7,8 +7,7 @@
  */
 
 import type { LoyaltyQuotePort, LoyaltyRedemptionPort, LoyaltyRewardQuote } from '../../application/ports/LoyaltyPort';
-import type { LoyaltyPointsRepository } from '../../../loyalty/domain/repositories/LoyaltyPointsRepository';
-import type { LoyaltyRewardRepository } from '../../../loyalty/domain/repositories/LoyaltyRewardRepository';
+import type { LoyaltyPointsRepository, LoyaltyRewardRepository } from '../../../loyalty';
 import type { RedeemPointsUseCase } from '../../../loyalty/application/useCases/RedeemPoints';
 
 export class LoyaltyLoyaltyAdapter implements LoyaltyQuotePort, LoyaltyRedemptionPort {

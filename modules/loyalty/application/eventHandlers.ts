@@ -10,12 +10,16 @@
 import { eventBus } from '../../../libs/events/eventBus';
 import { logger } from '../../../libs/logger';
 import { JobScheduler } from '../../../libs/jobs/cronScheduler';
-import type { OrderRepository } from '../../order/domain/repositories/OrderRepository';
 import type { LoyaltyPointsRepository } from '../domain/repositories/LoyaltyPointsRepository';
 import type { LoyaltyTransactionRepository } from '../domain/repositories/LoyaltyTransactionRepository';
 
+/** Minimal order surface the handler needs — consumer-owned, no order-module dependency. */
+interface OrderTotalLookup {
+  findById(orderId: string): Promise<{ totalAmount?: { amount: number } | null } | null>;
+}
+
 export interface LoyaltyEventHandlerDeps {
-  orders: Pick<OrderRepository, 'findById'>;
+  orders: OrderTotalLookup;
   points: Pick<
     LoyaltyPointsRepository & LoyaltyTransactionRepository,
     | 'processOrderPoints'
