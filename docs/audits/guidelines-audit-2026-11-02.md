@@ -198,6 +198,36 @@ Fixed in the associated PR:
 - §8 `SELECT *`/`RETURNING *` typed `Db{Table}` (79 sites); projection/join queries left for per-site `*Row` types
 - §9 tracking event handler logs expected domain errors at `debug`
 
-Deferred: projection/join `*Row` typing, stale-table queries above, tax domain
-type corrections, catch-all `logger.error` audit in interface layer, EJS/jobs
-`console.*` triage.
+Follow-up resolution (2026-11-03), all previously-deferred items except the
+deliberate watchlist:
+
+- **Stale-table queries** — all broken SQL paths remapped to real schema tables:
+  `"warehouse"`→`distributionWarehouse`, `"gdprRequest"`→`gdprDataRequest`
+  (incl. `gdprDataRequestId`/`deadlineAt`/`reason`/`adminNotes` columns),
+  `"userMembership"`/`"membershipTier"`/`"subscription"`→`membershipSubscription`/
+  `membershipPlan`/`customerSubscription`, `"wishlistItem"`→`customerWishlistItem`
+  +`customerWishlist`, `"subscriptionBilling"`→`subscriptionOrder`,
+  `"shipment"`→`fulfillment`, `"productVariantAttribute"`→
+  `productAttributeValueMap`+`productAttribute`, `inventoryItem`/`quantity`/
+  `reserved`→`inventoryLocation` (`quantity - reservedQuantity`). The missing
+  `adminUser`/`user`/`adminUserRole` identity tables (admin login + `job:new:admin`
+  were dead paths) were created via `migrations/20261102130000_identity_createAdminUserTables.js`
+  and `libs/db/types.ts` regenerated. Stale-table refs remaining: **0**.
+- **Tax domain types** — epoch-`number` timestamps (already inconsistent: seconds
+  vs milliseconds across call sites) changed to `Date`; `rate`/`exemptionPercent`
+  converted with `Number()` at the repo boundary; `as unknown as` casts removed.
+- **Projection/join `*Row` typing** — all remaining `Record<string, unknown>`/
+  `unknown` query generics typed (~116 sites): `Db{Table}` for full-row,
+  per-site `*Row` intersections for `t.*`+joined-column queries, `Pick<Db{Table}>`
+  for column projections. Latent bugs fixed: GDPR export selected non-existent
+  `cookieCategory`/`consentGiven`/`consentDate` (now exports real consent-flag
+  columns via typed `*ExportRow` interfaces on the `GdprService` port);
+  localization `TABLE_MAP.category` → `localizationCategoryTranslation`;
+  payment method `displayName` dead `row.type` fallback removed.
+- **Interface-layer `logger.error` audit** — added `logCaughtError` in
+  `libs/errors.ts` (logs `AppError` at declared severity, unexpected at `error`)
+  and applied it at all 35 catch sites across 17 interface files.
+- **Still deferred (watchlist)** — 5 `TranslatableEntityType` values map to
+  translation tables that don't exist in the schema (dead paths, unreachable
+  today); EJS `console.*` (~36 sites); jobs `console.*`; ~1,300 controller
+  catch blocks → `asyncHandler` + RFC 7807 (guideline Phase 2/3).
