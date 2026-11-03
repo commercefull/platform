@@ -4,7 +4,8 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { withTransaction } from '../../../../libs/db';
-import { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
+import { PaymentRefundRepository } from '../../domain/repositories/PaymentRefundRepository';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { eventBus } from '../../../../libs/events/eventBus';
 import {
@@ -44,7 +45,10 @@ export interface ProcessRefundResponse {
 // ============================================================================
 
 export class ProcessPaymentRefundUseCase {
-  constructor(private readonly paymentRepository: PaymentRepository) {}
+  constructor(
+    private readonly paymentRepository: Pick<PaymentTransactionRepository, 'findTransactionById' | 'saveTransaction'>,
+    private readonly refundRepository: Pick<PaymentRefundRepository, 'saveRefund'>,
+  ) {}
 
   async execute(command: ProcessPaymentRefundCommand): Promise<ProcessRefundResponse> {
     const transaction = await this.paymentRepository.findTransactionById(command.transactionId);
@@ -73,7 +77,7 @@ export class ProcessPaymentRefundUseCase {
     });
 
     await withTransaction(async () => {
-      await this.paymentRepository.saveRefund(refund);
+      await this.refundRepository.saveRefund(refund);
 
       // Update transaction
       transaction.recordRefund(command.amountCents);

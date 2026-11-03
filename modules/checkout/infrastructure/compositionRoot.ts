@@ -15,7 +15,8 @@ import { OrderDataRepository as OrderDataRepo } from '../../order/infrastructure
 const OrderRepo = OrderDataRepo.commands;
 import { PaymentDataRepository as PaymentDataRepo } from '../../payment/infrastructure';
 
-const PaymentRepo = PaymentDataRepo.payments;
+const paymentTransactions = PaymentDataRepo.transactions;
+const paymentGatewayConfig = PaymentDataRepo.gatewayConfig;
 
 import { BasketSnapshotPort } from '../application/ports/BasketSnapshotPort';
 import { CouponRedemptionPort } from '../application/ports/CouponRedemptionPort';
@@ -98,7 +99,7 @@ export function getCheckoutPorts(): CheckoutPorts {
     shippingQuote: new ShippingShippingQuoteAdapter(calculateShippingRatesUseCase),
     promotionQuote: new PromotionPromotionQuoteAdapter(evaluatePromotionsUseCase),
     orderPlacement: new OrderOrderPlacementAdapter(OrderRepo, createOrderUseCase, cancelOrderUseCase),
-    paymentAuthorization: new PaymentPaymentAuthorizationAdapter(new InitiatePaymentUseCase(PaymentRepo)),
+    paymentAuthorization: new PaymentPaymentAuthorizationAdapter(new InitiatePaymentUseCase(paymentTransactions, paymentGatewayConfig)),
     fraudScreening: new PaymentFraudScreeningAdapter(screenForFraudUseCase),
     storeFulfillment: new StoreStoreFulfillmentAdapter(StoreRepo, { getLocations, getLocation, findNearestLocations }),
     stockAvailability: new InventoryStockAvailabilityAdapter(InventoryRepo),

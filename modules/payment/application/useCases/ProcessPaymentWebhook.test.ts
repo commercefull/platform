@@ -1,14 +1,14 @@
 import { lazyMock, createPaymentWebhook } from '../../tests/testUtils';
 import { ProcessPaymentWebhookUseCase, ProcessPaymentWebhookCommand } from './ProcessPaymentWebhook';
 import { FailedToCreatePaymentWebhookError } from '../../domain/errors/PaymentErrors';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentWebhookRepository } from '../../domain/repositories/PaymentWebhookRepository';
 
 describe('ProcessPaymentWebhookUseCase', () => {
   let useCase: ProcessPaymentWebhookUseCase;
-  let repo: jest.Mocked<PaymentRepository>;
+  let repo: jest.Mocked<PaymentWebhookRepository>;
 
   beforeEach(() => {
-    repo = lazyMock<PaymentRepository>();
+    repo = lazyMock<PaymentWebhookRepository>();
     repo.findWebhookByExternalId.mockResolvedValue(null);
     repo.createWebhook.mockResolvedValue(createPaymentWebhook({ paymentWebhookId: 'w1' }));
     useCase = new ProcessPaymentWebhookUseCase(repo);

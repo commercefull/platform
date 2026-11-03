@@ -16,7 +16,7 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
 import type { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
 import type { WebhookEvent } from '../../infrastructure/services/GatewayAdapter';
 import type { GatewayWebhookPort } from '../ports/GatewayWebhookPort';
 import type { OrderStatusSyncPort } from '../ports/OrderStatusSyncPort';
@@ -24,7 +24,7 @@ import { ProcessPaymentWebhookCommand, ProcessPaymentWebhookUseCase } from './Pr
 
 export class ApplyGatewayWebhookEventUseCase {
   constructor(
-    private readonly payments: PaymentRepository,
+    private readonly payments: Pick<PaymentTransactionRepository, 'findTransactionByExternalId' | 'saveTransaction'>,
     private readonly gatewayWebhooks: GatewayWebhookPort,
     private readonly orderStatusSync: OrderStatusSyncPort,
     private readonly recordWebhook: ProcessPaymentWebhookUseCase,

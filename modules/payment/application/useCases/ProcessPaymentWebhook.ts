@@ -7,7 +7,7 @@
  * Validates: Requirements 1.4, 1.10
  */
 
-import { PaymentRepository, PaymentWebhook } from '../../domain/repositories/PaymentRepository';
+import { PaymentWebhookRepository, PaymentWebhook } from '../../domain/repositories/PaymentWebhookRepository';
 
 import { FailedToCreatePaymentWebhookError } from '../../domain/errors/PaymentErrors';
 
@@ -43,7 +43,7 @@ export interface ProcessPaymentWebhookResponse {
 // ============================================================================
 
 export class ProcessPaymentWebhookUseCase {
-  constructor(private readonly repo: PaymentRepository) {}
+  constructor(private readonly repo: Pick<PaymentWebhookRepository, 'findWebhookByExternalId' | 'createWebhook'>) {}
 
   async execute(command: ProcessPaymentWebhookCommand): Promise<ProcessPaymentWebhookResponse> {
     // Idempotency check: skip insert if this externalId already exists

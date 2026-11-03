@@ -1,11 +1,11 @@
 import { ListTransactionsUseCase, ListTransactionsCommand } from './ListTransactions';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 
 describe('ListTransactionsUseCase', () => {
   let useCase: ListTransactionsUseCase;
-  let mockRepo: jest.Mocked<Pick<PaymentRepository, 'findAllTransactions'>>;
+  let mockRepo: jest.Mocked<Pick<PaymentTransactionRepository, 'findAllTransactions'>>;
 
   const makeTxn = (): PaymentTransaction => {
     const txn = PaymentTransaction.create({
@@ -32,7 +32,7 @@ describe('ListTransactionsUseCase', () => {
         length: 1,
       }),
     };
-    useCase = new ListTransactionsUseCase(mockRepo as unknown as PaymentRepository);
+    useCase = new ListTransactionsUseCase(mockRepo);
   });
 
   it('should list transactions (happy path)', async () => {

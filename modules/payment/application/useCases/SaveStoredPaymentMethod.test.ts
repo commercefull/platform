@@ -1,14 +1,14 @@
 import { lazyMock, createStoredPaymentMethod } from '../../tests/testUtils';
 import { SaveStoredPaymentMethodUseCase, SaveStoredPaymentMethodCommand } from './SaveStoredPaymentMethod';
 import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { StoredPaymentMethodRepository } from '../../domain/repositories/StoredPaymentMethodRepository';
 
 describe('SaveStoredPaymentMethodUseCase', () => {
   let useCase: SaveStoredPaymentMethodUseCase;
-  let repo: jest.Mocked<PaymentRepository>;
+  let repo: jest.Mocked<StoredPaymentMethodRepository>;
 
   beforeEach(() => {
-    repo = lazyMock<PaymentRepository>();
+    repo = lazyMock<StoredPaymentMethodRepository>();
     repo.createStoredMethod.mockResolvedValue(createStoredPaymentMethod({ storedPaymentMethodId: 'spm1', isDefault: true }));
     repo.findStoredMethodById.mockResolvedValue(createStoredPaymentMethod({ storedPaymentMethodId: 'spm1', isDefault: true }));
     useCase = new SaveStoredPaymentMethodUseCase(repo);

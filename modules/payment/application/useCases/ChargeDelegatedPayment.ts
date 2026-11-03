@@ -12,7 +12,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
 import type { OrderStatusSyncPort } from '../ports/OrderStatusSyncPort';
 import type { RoutePaymentUseCase } from './RoutePayment';
 import { RoutePaymentCommand } from './RoutePayment';
@@ -75,7 +75,7 @@ export interface ChargeDelegatedPaymentResponse {
 
 export class ChargeDelegatedPaymentUseCase {
   constructor(
-    private readonly payments: Pick<PaymentRepository, 'findTransactionById' | 'saveTransaction'>,
+    private readonly payments: Pick<PaymentTransactionRepository, 'findTransactionById' | 'saveTransaction'>,
     private readonly routePayment: Pick<RoutePaymentUseCase, 'execute'>,
     private readonly orderStatusSync: Pick<OrderStatusSyncPort, 'findCheckoutByPaymentIntentId' | 'markOrderPaid'>,
   ) {}

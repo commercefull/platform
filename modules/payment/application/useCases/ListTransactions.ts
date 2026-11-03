@@ -1,4 +1,4 @@
-import { PaymentRepository, PaymentFilters } from '../../domain/repositories/PaymentRepository';
+import { PaymentTransactionRepository, PaymentFilters } from '../../domain/repositories/PaymentTransactionRepository';
 import { PaginationOptions } from 'libs/types/pagination';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import type { TransactionDetailResponse } from './GetTransaction';
@@ -37,7 +37,7 @@ export interface ListTransactionsResponse {
 // ============================================================================
 
 export class ListTransactionsUseCase {
-  constructor(private readonly paymentRepository: PaymentRepository) {}
+  constructor(private readonly paymentRepository: Pick<PaymentTransactionRepository, 'findAllTransactions'>) {}
 
   async execute(command: ListTransactionsCommand): Promise<ListTransactionsResponse> {
     const filters: PaymentFilters = command.filters || {};

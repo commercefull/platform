@@ -1,7 +1,8 @@
 import { emitMock, uuidMock } from '../../tests/testUtils';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from './InitiatePayment';
 import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../../domain/errors/PaymentErrors';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
+import type { PaymentGatewayConfigRepository } from '../../domain/repositories/PaymentGatewayConfigRepository';
 import type { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 
 beforeEach(() => {
@@ -11,7 +12,10 @@ beforeEach(() => {
 
 describe('InitiatePaymentUseCase', () => {
   let useCase: InitiatePaymentUseCase;
-  let mockRepo: jest.Mocked<Pick<PaymentRepository, 'getDefaultGateway' | 'saveTransaction' | 'findTransactionsByOrderId'>>;
+  let mockRepo: jest.Mocked<
+    Pick<PaymentTransactionRepository, 'saveTransaction' | 'findTransactionsByOrderId'> &
+      Pick<PaymentGatewayConfigRepository, 'getDefaultGateway'>
+  >;
 
   beforeEach(() => {
     mockRepo = {
@@ -19,7 +23,7 @@ describe('InitiatePaymentUseCase', () => {
       saveTransaction: jest.fn().mockResolvedValue(undefined as unknown as PaymentTransaction),
       findTransactionsByOrderId: jest.fn().mockResolvedValue([]),
     };
-    useCase = new InitiatePaymentUseCase(mockRepo as unknown as PaymentRepository);
+    useCase = new InitiatePaymentUseCase(mockRepo, mockRepo);
   });
 
   it('should initiate payment (happy path)', async () => {

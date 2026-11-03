@@ -33,11 +33,16 @@ import { GetPaymentMethodsUseCase } from './GetPaymentMethods';
 import { CapturePaymentUseCase } from './CapturePayment';
 import { gatewayWebhookPort, orderStatusSyncAdapter } from '../wired';
 
-const paymentRepo = paymentDataRepository.payments;
+const transactions = paymentDataRepository.transactions;
+const refunds = paymentDataRepository.refunds;
+const gatewayConfig = paymentDataRepository.gatewayConfig;
+const settingsRepo = paymentDataRepository.settings;
+const webhooks = paymentDataRepository.webhooks;
+const storedMethods = paymentDataRepository.storedMethods;
 const billingRepo = paymentBillingDataRepository.billing;
 const gatewayRepo = paymentDataRepository.gateways;
 
-const processPaymentWebhookUseCase = new ProcessPaymentWebhookUseCase(paymentRepo);
+const processPaymentWebhookUseCase = new ProcessPaymentWebhookUseCase(webhooks);
 export const getPaymentBalanceUseCase = new GetPaymentBalanceUseCase(billingRepo);
 export const getPaymentBalancesUseCase = new GetPaymentBalancesUseCase(billingRepo);
 
@@ -45,17 +50,17 @@ export const managePaymentDisputesUseCase = new ManagePaymentDisputesUseCase(bil
 export const managePaymentFeesUseCase = new ManagePaymentFeesUseCase(billingRepo);
 export const managePaymentGatewaysUseCase = new ManagePaymentGatewaysUseCase(gatewayRepo);
 export const managePaymentReportsUseCase = new ManagePaymentReportsUseCase(billingRepo);
-export const managePaymentSettingsUseCase = new ManagePaymentSettingsUseCase(paymentRepo);
+export const managePaymentSettingsUseCase = new ManagePaymentSettingsUseCase(settingsRepo);
 
-export const saveStoredPaymentMethodUseCase = new SaveStoredPaymentMethodUseCase(paymentRepo);
+export const saveStoredPaymentMethodUseCase = new SaveStoredPaymentMethodUseCase(storedMethods);
 export const manageFraudRecordsUseCase = new ManageFraudRecordsUseCase(paymentBillingDataRepository.fraud);
-export const managePaymentRecordsUseCase = new ManagePaymentRecordsUseCase(paymentRepo);
-export const initiatePaymentUseCase = new InitiatePaymentUseCase(paymentRepo);
-export const getTransactionUseCase = new GetTransactionUseCase(paymentRepo);
-export const listTransactionsUseCase = new ListTransactionsUseCase(paymentRepo);
-export const processPaymentRefundUseCase = new ProcessPaymentRefundUseCase(paymentRepo);
+export const managePaymentRecordsUseCase = new ManagePaymentRecordsUseCase(transactions, refunds, gatewayConfig, storedMethods);
+export const initiatePaymentUseCase = new InitiatePaymentUseCase(transactions, gatewayConfig);
+export const getTransactionUseCase = new GetTransactionUseCase(transactions);
+export const listTransactionsUseCase = new ListTransactionsUseCase(transactions);
+export const processPaymentRefundUseCase = new ProcessPaymentRefundUseCase(transactions, refunds);
 
-// Adapters bridging PaymentRepository to the narrower use-case port interfaces.
+// Adapters bridging the repositories to the narrower use-case port interfaces.
 const paymentMethodsRepoAdapter = {
   findSavedPaymentMethods: async (_customerId: string) => {
     // PaymentRepo does not currently expose saved methods at this level;
@@ -76,7 +81,7 @@ const paymentMethodsRepoAdapter = {
 
 const paymentConfigRepoAdapter = {
   findActiveConfigs: async (_params: { storeId?: string; channelId?: string }) => {
-    const methods = await paymentRepo.getEnabledPaymentMethods('default');
+    const methods = await gatewayConfig.getEnabledPaymentMethods('default');
     return methods.map(m => ({
       paymentMethodConfigId: m.paymentMethodConfigId,
       type: 'card' as const,
@@ -93,7 +98,7 @@ const paymentConfigRepoAdapter = {
 
 const captureRepoAdapter = {
   findTransactionById: async (id: string) => {
-    const txn = await paymentRepo.findTransactionById(id);
+    const txn = await transactions.findTransactionById(id);
     if (!txn) return null;
     const json = txn.toJSON() as Record<string, unknown>;
     return {
@@ -106,7 +111,7 @@ const captureRepoAdapter = {
     };
   },
   updateTransaction: async () => {
-    // Transaction updates via the domain entity are handled through PaymentRepo.saveTransaction
+    // Transaction updates via the domain entity are handled through PaymentTransactionRepo.saveTransaction
   },
 };
 
@@ -120,7 +125,7 @@ const captureGatewayAdapter = {
 export const getPaymentMethodsUseCase = new GetPaymentMethodsUseCase(paymentMethodsRepoAdapter, paymentConfigRepoAdapter);
 export const capturePaymentUseCase = new CapturePaymentUseCase(captureRepoAdapter, captureGatewayAdapter);
 export const applyGatewayWebhookEventUseCase = new ApplyGatewayWebhookEventUseCase(
-  paymentRepo,
+  transactions,
   gatewayWebhookPort,
   orderStatusSyncAdapter,
   processPaymentWebhookUseCase,
@@ -139,4 +144,4 @@ const failoverRoutingEngine = new FailoverRoutingEngine({
 
 const pspRoutingRepo = new PSPRoutingRepositoryImpl(gatewayRepo);
 const routePaymentUseCase = new RoutePaymentUseCase(pspRoutingRepo, failoverRoutingEngine);
-export const chargeDelegatedPaymentUseCase = new ChargeDelegatedPaymentUseCase(paymentRepo, routePaymentUseCase, orderStatusSyncAdapter);
+export const chargeDelegatedPaymentUseCase = new ChargeDelegatedPaymentUseCase(transactions, routePaymentUseCase, orderStatusSyncAdapter);

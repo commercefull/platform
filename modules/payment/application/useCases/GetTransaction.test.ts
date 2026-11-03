@@ -1,11 +1,11 @@
 import { GetTransactionUseCase, GetTransactionCommand } from './GetTransaction';
 import { TransactionIdOrExternalIdRequiredError } from '../../domain/errors/PaymentErrors';
-import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository } from '../../domain/repositories/PaymentTransactionRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 
 describe('GetTransactionUseCase', () => {
   let useCase: GetTransactionUseCase;
-  let mockRepo: jest.Mocked<Pick<PaymentRepository, 'findTransactionById' | 'findTransactionByExternalId'>>;
+  let mockRepo: jest.Mocked<Pick<PaymentTransactionRepository, 'findTransactionById' | 'findTransactionByExternalId'>>;
 
   const makeTxn = (): PaymentTransaction => {
     const txn = PaymentTransaction.create({
@@ -26,7 +26,7 @@ describe('GetTransactionUseCase', () => {
       findTransactionById: jest.fn().mockResolvedValue(makeTxn()),
       findTransactionByExternalId: jest.fn().mockResolvedValue(null),
     };
-    useCase = new GetTransactionUseCase(mockRepo as unknown as PaymentRepository);
+    useCase = new GetTransactionUseCase(mockRepo);
   });
 
   it('should get transaction by ID (happy path)', async () => {

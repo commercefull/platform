@@ -1,38 +1,10 @@
 import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import {
-  findSettingsByMerchant as qFindSettingsByMerchant,
-  upsertSettings as qUpsertSettings,
-  findAllSettings as qFindAllSettings,
-  findWebhookByExternalId as qFindWebhookByExternalId,
-  createWebhook as qCreateWebhook,
-  markWebhookProcessed as qMarkWebhookProcessed,
-  findStoredMethodsByCustomer as qFindStoredMethodsByCustomer,
-  findStoredMethodById as qFindStoredMethodById,
-  createStoredMethod as qCreateStoredMethod,
-  setDefaultStoredMethod as qSetDefaultStoredMethod,
-  softDeleteStoredMethod as qSoftDeleteStoredMethod,
-} from './paymentSettingsQueries';
-import {
-  PaymentRepository as IPaymentRepository,
-  PaymentFilters,
-  PaymentSettings,
-  PaymentSettingsUpsertParams,
-  PaymentWebhook,
-  PaymentWebhookCreateParams,
-  StoredPaymentMethod,
-  StoredPaymentMethodCreateParams,
-} from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransactionRepository, PaymentFilters } from '../../domain/repositories/PaymentTransactionRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
-import { PaymentRefund } from '../../domain/entities/PaymentRefund';
-import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
-import type {
-  PaymentTransaction as DbPaymentTransaction,
-  PaymentRefund as DbPaymentRefund,
-  PaymentGateway as DbPaymentGateway,
-  PaymentMethodConfig as DbPaymentMethodConfig,
-} from '../../../../libs/db/types';
+import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
+import type { PaymentTransaction as DbPaymentTransaction } from '../../../../libs/db/types';
 
 function paginatedResult<T>(
   rows: Record<string, unknown>[] | null | undefined,
@@ -52,7 +24,7 @@ function paginatedResult<T>(
   };
 }
 
-export class PaymentRepo implements IPaymentRepository {
+class PaymentTransactionRepo implements PaymentTransactionRepository {
   async findTransactionById(transactionId: string): Promise<PaymentTransaction | null> {
     const row = await queryOne<DbPaymentTransaction>(
       'SELECT * FROM "paymentTransaction" WHERE "paymentTransactionId" = $1 AND "deletedAt" IS NULL',
@@ -209,131 +181,11 @@ export class PaymentRepo implements IPaymentRepository {
     return parseInt(result?.count || '0');
   }
 
-  async findRefundById(refundId: string): Promise<PaymentRefund | null> {
-    const row = await queryOne<DbPaymentRefund>('SELECT * FROM "paymentRefund" WHERE "paymentRefundId" = $1', [refundId]);
-    return row ? this.mapToRefund(row) : null;
-  }
-
-  async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
-    const rows = await query<DbPaymentRefund[]>(
-      'SELECT * FROM "paymentRefund" WHERE "paymentTransactionId" = $1 ORDER BY "createdAt" DESC',
-      [transactionId],
-    );
-    return (rows || []).map(row => this.mapToRefund(row));
-  }
-
-  async saveRefund(refund: PaymentRefund): Promise<PaymentRefund> {
-    const now = new Date().toISOString();
-
-    const existing = await queryOne<{ paymentRefundId: string }>(
-      'SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1',
-      [refund.refundId],
-    );
-
-    if (existing) {
-      await query(
-        `UPDATE "paymentRefund" SET
-          "externalRefundId" = $1, status = $2, "gatewayResponse" = $3,
-          "errorCode" = $4, "errorMessage" = $5, "processedAt" = $6,
-          metadata = $7, "updatedAt" = $8
-        WHERE "paymentRefundId" = $9`,
-        [
-          refund.externalRefundId,
-          refund.status,
-          refund.gatewayResponse ? JSON.stringify(refund.gatewayResponse) : null,
-          refund.errorCode,
-          refund.errorMessage,
-          refund.processedAt?.toISOString(),
-          refund.metadata ? JSON.stringify(refund.metadata) : null,
-          now,
-          refund.refundId,
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO "paymentRefund" (
-          "paymentRefundId", "paymentTransactionId", "amountCents", "currencyCode", reason, status, metadata, "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [
-          refund.refundId,
-          refund.transactionId,
-          refund.amountCents,
-          refund.currency,
-          refund.reason,
-          refund.status,
-          refund.metadata ? JSON.stringify(refund.metadata) : null,
-          now,
-          now,
-        ],
-      );
-    }
-
-    return refund;
-  }
-
-  async getEnabledPaymentMethods(
-    organizationId: string,
-    currency?: string,
-  ): Promise<
-    Array<{
-      paymentMethodConfigId: string;
-      paymentMethod: string;
-      displayName: string;
-      description?: string;
-      icon?: string;
-      processingFeeCents?: number;
-    }>
-  > {
-    const conditions = ['"isEnabled" = true', '"deletedAt" IS NULL'];
-    const params: unknown[] = [];
-
-    if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)) {
-      conditions.push(`"organizationId" = $${params.length + 1}`);
-      params.push(organizationId);
-    }
-
-    if (currency) {
-      conditions.push(`("supportedCurrencies" IS NULL OR $${params.length + 1} = ANY("supportedCurrencies"))`);
-      params.push(currency);
-    }
-
-    const sql = `SELECT * FROM "paymentMethodConfig" WHERE ${conditions.join(' AND ')} ORDER BY "displayOrder" ASC`;
-
-    const rows = await query<DbPaymentMethodConfig[]>(sql, params);
-    return (rows || []).map(row => ({
-      paymentMethodConfigId: row.paymentMethodConfigId,
-      paymentMethod: row.paymentMethod,
-      displayName: row.displayName || row.paymentMethod,
-      description: row.description || undefined,
-      icon: row.icon || undefined,
-      processingFeeCents: row.processingFeeCents ? Number(row.processingFeeCents) : undefined,
-    }));
-  }
-
-  async getDefaultGateway(organizationId: string): Promise<{
-    gatewayId: string;
-    provider: string;
-    isTestMode: boolean;
-  } | null> {
-    const orgGateway =
-      organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)
-        ? await queryOne<DbPaymentGateway>(
-            'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
-            [organizationId],
-          )
-        : null;
-
-    const row =
-      orgGateway ??
-      (await queryOne<DbPaymentGateway>(
-        'SELECT * FROM "paymentGateway" WHERE "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
-      )) ??
-      (await queryOne<DbPaymentGateway>(
-        'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
-      ));
-
-    if (!row) return null;
-    return { gatewayId: row.paymentGatewayId, provider: row.provider, isTestMode: Boolean(row.isTestMode) };
+  async deleteTransaction(transactionId: string): Promise<void> {
+    await query(`UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2`, [
+      new Date().toISOString(),
+      transactionId,
+    ]);
   }
 
   private buildWhereClause(filters?: PaymentFilters): { whereClause: string; params: unknown[] } {
@@ -409,80 +261,6 @@ export class PaymentRepo implements IPaymentRepository {
       updatedAt: new Date(row.updatedAt as string),
     });
   }
-
-  findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
-    return qFindSettingsByMerchant(organizationId);
-  }
-
-  upsertSettings(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null> {
-    return qUpsertSettings(params);
-  }
-
-  findAllSettings(): Promise<PaymentSettings[]> {
-    return qFindAllSettings();
-  }
-
-  findWebhookByExternalId(externalId: string): Promise<PaymentWebhook | null> {
-    return qFindWebhookByExternalId(externalId);
-  }
-
-  createWebhook(params: PaymentWebhookCreateParams): Promise<PaymentWebhook | null> {
-    return qCreateWebhook(params);
-  }
-
-  markWebhookProcessed(paymentWebhookId: string): Promise<PaymentWebhook | null> {
-    return qMarkWebhookProcessed(paymentWebhookId);
-  }
-
-  findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]> {
-    return qFindStoredMethodsByCustomer(customerId);
-  }
-
-  findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return qFindStoredMethodById(storedPaymentMethodId);
-  }
-
-  createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
-    return qCreateStoredMethod(params);
-  }
-
-  setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
-    return qSetDefaultStoredMethod(storedPaymentMethodId, customerId);
-  }
-
-  softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string): Promise<StoredPaymentMethod | null> {
-    return qSoftDeleteStoredMethod(storedPaymentMethodId, customerId);
-  }
-
-  async deleteTransaction(transactionId: string): Promise<void> {
-    await query(`UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2`, [
-      new Date().toISOString(),
-      transactionId,
-    ]);
-  }
-
-  private mapToRefund(row: Record<string, unknown>): PaymentRefund {
-    return PaymentRefund.reconstitute({
-      refundId: row.paymentRefundId as string,
-      transactionId: row.paymentTransactionId as string,
-      externalRefundId: row.externalRefundId as string | undefined,
-      amountCents: Number(row.amountCents),
-      currency: row.currencyCode as string,
-      reason: row.reason as string | undefined,
-      status: row.status as RefundStatus,
-      gatewayResponse: row.gatewayResponse
-        ? typeof row.gatewayResponse === 'string'
-          ? JSON.parse(row.gatewayResponse)
-          : row.gatewayResponse
-        : undefined,
-      errorCode: row.errorCode as string | undefined,
-      errorMessage: row.errorMessage as string | undefined,
-      processedAt: row.processedAt ? new Date(row.processedAt as string) : undefined,
-      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
-      createdAt: new Date(row.createdAt as string),
-      updatedAt: new Date(row.updatedAt as string),
-    });
-  }
 }
 
-export default new PaymentRepo();
+export default new PaymentTransactionRepo();

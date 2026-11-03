@@ -1,17 +1,22 @@
 /**
  * Consolidated Payment Data Repository
  *
- * Merges PaymentRepository and paymentRepo
- * into a single aggregate-aligned repository.
- *
- * Aggregate: Payment (core payment settings, stored methods, webhooks, gateways)
+ * Exposes the per-area repository implementations.
  */
 
-import PaymentRepo from './PaymentRepository';
+import transactionRepo from './PaymentTransactionRepositoryImpl';
+import refundRepo from './PaymentRefundRepositoryImpl';
+import gatewayConfigRepo from './PaymentGatewayConfigRepositoryImpl';
+import { paymentSettingsRepo, paymentWebhookRepo, storedPaymentMethodRepo } from './PaymentSettingsRepositoryImpl';
 import paymentGatewayRepo from './paymentRepo';
 
 class PaymentDataRepository {
-  readonly payments = PaymentRepo;
+  readonly transactions = transactionRepo;
+  readonly refunds = refundRepo;
+  readonly gatewayConfig = gatewayConfigRepo;
+  readonly settings = paymentSettingsRepo;
+  readonly webhooks = paymentWebhookRepo;
+  readonly storedMethods = storedPaymentMethodRepo;
   readonly gateways = paymentGatewayRepo;
 }
 

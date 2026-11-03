@@ -3,14 +3,9 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import type {
-  PaymentSettings,
-  PaymentSettingsUpsertParams,
-  PaymentWebhook,
-  PaymentWebhookCreateParams,
-  StoredPaymentMethod,
-  StoredPaymentMethodCreateParams,
-} from '../../domain/repositories/PaymentRepository';
+import type { PaymentSettings, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentSettingsRepository';
+import type { PaymentWebhook, PaymentWebhookCreateParams } from '../../domain/repositories/PaymentWebhookRepository';
+import type { StoredPaymentMethod, StoredPaymentMethodCreateParams } from '../../domain/repositories/StoredPaymentMethodRepository';
 import type { PaymentSettings as DbPaymentSettings, PaymentWebhook as DbPaymentWebhook } from '../../../../libs/db/types';
 
 // Maps repository-facing field names onto the actual storedPaymentMethod schema

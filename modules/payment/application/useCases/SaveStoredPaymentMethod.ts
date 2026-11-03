@@ -7,7 +7,7 @@
  * Validates: Requirements 1.9
  */
 
-import { PaymentRepository, StoredPaymentMethod } from '../../domain/repositories/PaymentRepository';
+import { StoredPaymentMethodRepository, StoredPaymentMethod } from '../../domain/repositories/StoredPaymentMethodRepository';
 
 import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';
 export interface SaveStoredPaymentMethodCommandProps {
@@ -76,7 +76,9 @@ export interface SaveStoredPaymentMethodResponse {
 // ============================================================================
 
 export class SaveStoredPaymentMethodUseCase {
-  constructor(private readonly repo: PaymentRepository) {}
+  constructor(
+    private readonly repo: Pick<StoredPaymentMethodRepository, 'createStoredMethod' | 'findStoredMethodById' | 'setDefaultStoredMethod'>,
+  ) {}
 
   async execute(command: SaveStoredPaymentMethodCommand): Promise<SaveStoredPaymentMethodResponse> {
     const method = await this.repo.createStoredMethod({

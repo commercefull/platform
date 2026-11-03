@@ -4,7 +4,12 @@
  */
 
 export * from './application/useCases';
-export * from './domain/repositories/PaymentRepository';
+export * from './domain/repositories/PaymentTransactionRepository';
+export * from './domain/repositories/PaymentRefundRepository';
+export * from './domain/repositories/PaymentGatewayConfigRepository';
+export * from './domain/repositories/PaymentSettingsRepository';
+export * from './domain/repositories/PaymentWebhookRepository';
+export * from './domain/repositories/StoredPaymentMethodRepository';
 export * from './domain/repositories/PaymentBillingRepository';
 export * from './domain/repositories/FraudRepository';
 export * from './domain/repositories/PaymentGatewayRepository';
