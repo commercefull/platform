@@ -13,12 +13,12 @@ import {
   AnalyticsReportEvent as AnalyticsReportEventRow,
   AnalyticsReportSnapshot as AnalyticsReportSnapshotRow,
 } from '../../../../libs/db/types';
-import type { AnalyticsReportEvent, AnalyticsReportSnapshot, AnalyticsReportDashboard } from '../../domain/types';
+import type { AnalyticsReportEvent, AnalyticsReportSnapshot } from '../../domain/types';
 import type {
   AnalyticsReportEvent as DbAnalyticsReportEvent,
   AnalyticsReportSnapshot as DbAnalyticsReportSnapshot,
 } from '../../../../libs/db/types';
-export type { AnalyticsReportEvent, AnalyticsReportSnapshot, AnalyticsReportDashboard };
+export type { AnalyticsReportEvent, AnalyticsReportSnapshot };
 
 // ============================================================================
 // Table Names

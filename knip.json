@@ -3,6 +3,7 @@
   "exclude": ["nsExports", "nsTypes"],
   "entry": [
     "boot/**/*.ts",
+    "modules/*/index.ts",
     "modules/*/interface/routers/**/*.ts",
     "modules/*/application/wired.ts",
     "modules/*/infrastructure/repositories/*DataRepository.ts",

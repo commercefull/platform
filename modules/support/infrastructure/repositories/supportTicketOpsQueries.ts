@@ -73,7 +73,7 @@ export function mapToTicket(row: Record<string, unknown>): SupportTicket {
   };
 }
 
-export function mapToMessage(row: Record<string, unknown>): SupportMessage {
+function mapToMessage(row: Record<string, unknown>): SupportMessage {
   return {
     supportMessageId: row.supportMessageId as string,
     supportTicketId: row.supportTicketId as string,
@@ -94,7 +94,7 @@ export function mapToMessage(row: Record<string, unknown>): SupportMessage {
   };
 }
 
-export function mapToAttachment(row: Record<string, unknown>): SupportAttachment {
+function mapToAttachment(row: Record<string, unknown>): SupportAttachment {
   return {
     supportAttachmentId: row.supportAttachmentId as string,
     supportTicketId: row.supportTicketId as string,

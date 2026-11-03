@@ -5,17 +5,7 @@
  * the full surface for backwards compatibility.
  */
 
-export {
-  SubscriptionStatus,
-  SubscriptionOrderStatus,
-  DunningStatus,
-  SubscriptionProduct,
-  SubscriptionPlan,
-  CustomerSubscription,
-  SubscriptionOrder,
-  SubscriptionPause,
-  DunningAttempt,
-} from './subscriptionTypes';
+export { SubscriptionStatus, SubscriptionProduct, SubscriptionPlan } from './subscriptionTypes';
 export {
   getSubscriptionProduct,
   getSubscriptionProductByProductId,

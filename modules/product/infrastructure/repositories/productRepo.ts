@@ -14,8 +14,8 @@ import {
 } from './productListingQueries';
 import { ProductStatus, ProductVisibility } from './productTypes';
 import type { Product, ProductCreateProps, ProductUpdateProps, ProductFilterOptions } from './productTypes';
-export { ProductStatus, ProductVisibility, ProductType } from './productTypes';
-export type { Product, ProductCreateProps, ProductUpdateProps, ProductFilterOptions } from './productTypes';
+export { ProductStatus, ProductVisibility } from './productTypes';
+export type { Product } from './productTypes';
 
 class ProductRepo {
   private readonly tableName = Table.Product;

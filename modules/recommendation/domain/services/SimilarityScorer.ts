@@ -5,7 +5,7 @@
  * a similar price band adds a small bonus.
  */
 
-export interface SimilarityFeatures {
+interface SimilarityFeatures {
   productId: string;
   primaryCategoryId: string | null;
   secondaryCategoryIds: string[];
@@ -15,7 +15,7 @@ export interface SimilarityFeatures {
   basePriceCents: number | null;
 }
 
-export interface SimilarityWeights {
+interface SimilarityWeights {
   samePrimaryCategory: number;
   perSharedSecondaryCategory: number;
   maxSecondaryCategoryBonus: number;
