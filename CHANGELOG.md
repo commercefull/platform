@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.7.4](https://github.com/commercefull/platform/compare/v1.7.3...v1.7.4) (2026-11-03)
+
+
+### Bug Fixes
+
+* **fulfillment:** throw typed domain error for invalid DeliveryPromise window ([795adb6](https://github.com/commercefull/platform/commit/795adb6c8cecafcb10967975591891e5b130c27d))
+* **localization:** restrict generic translations to implemented entity types ([dc205f3](https://github.com/commercefull/platform/commit/dc205f368314a52d3f52f60e6b90e54d800ac527))
+* **pricing:** inject loyalty and membership singletons instead of new instances ([2f3b1b5](https://github.com/commercefull/platform/commit/2f3b1b59e158a6d5b8cf87374e9b90586eb567a2))
+* repair queries against non-existent tables and add missing identity schema ([0112352](https://github.com/commercefull/platform/commit/011235287d9f33b4c7a6014c53591944041ca6d5))
+* **tax:** coerce startDate in rate creation instead of trusting body type ([5122e28](https://github.com/commercefull/platform/commit/5122e283ff97ede3c94c08288bb6175fda19671f))
+
 ## [1.7.3](https://github.com/commercefull/platform/compare/v1.7.2...v1.7.3) (2026-11-02)
 
 ### Bug Fixes
