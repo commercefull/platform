@@ -70,73 +70,63 @@ The Notification feature manages in-app notifications for merchants and administ
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint                                 | Controller                            | Description                                                                                                                                                                                                                          |
-| ------ | ---------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/notification-preferences`              | `asyncHandler(getAllPreferences)`     | ============================================================================ Admin preference routes ============================================================================                                                    |
-| PUT    | `/notification-preferences/:id`          | `asyncHandler(updatePreferenceAdmin)` | —                                                                                                                                                                                                                                    |
-| GET    | `/notification-preferences/user/:userId` | `asyncHandler(getPreferencesByUser)`  | —                                                                                                                                                                                                                                    |
-| GET    | `/notification-templates`                | `asyncHandler(getAllTemplates)`       | ============================================================================ Template routes ============================================================================                                                            |
-| POST   | `/notification-templates`                | `asyncHandler(createTemplate)`        | —                                                                                                                                                                                                                                    |
-| GET    | `/notification-templates/:id`            | `asyncHandler(getTemplateById)`       | —                                                                                                                                                                                                                                    |
-| PUT    | `/notification-templates/:id`            | `asyncHandler(updateTemplate)`        | —                                                                                                                                                                                                                                    |
-| DELETE | `/notification-templates/:id`            | `asyncHandler(deleteTemplate)`        | —                                                                                                                                                                                                                                    |
-| POST   | `/notification-templates/:id/preview`    | `asyncHandler(previewTemplate)`       | —                                                                                                                                                                                                                                    |
-| GET    | `/notification-templates/type/:type`     | `asyncHandler(getTemplatesByType)`    | —                                                                                                                                                                                                                                    |
-| GET    | `/notifications`                         | `asyncHandler(getAllNotifications)`   | ============================================================================ Literal notification routes — must be registered before /notifications/:id ============================================================================ |
-| POST   | `/notifications`                         | `asyncHandler(createNotification)`    | —                                                                                                                                                                                                                                    |
-| GET    | `/notifications`                         | `async (req, res) => {                |
-| try {  |
-
-    const customerId = req.use` | — |
-
-| GET | `/notifications/:id` | `asyncHandler(getNotificationById)` | ============================================================================ Admin CRUD routes for notifications (parameterized — after all literals) ============================================================================ |
-| PUT | `/notifications/:id` | `asyncHandler(updateNotification)` | — |
-| DELETE | `/notifications/:id` | `asyncHandler(deleteNotification)` | — |
-| GET | `/notifications/:id` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| PUT | `/notifications/:id/read` | `asyncHandler(markNotificationAsRead)` | — |
-| POST | `/notifications/:id/send` | `asyncHandler(markNotificationAsSent)` | — |
-| PUT | `/notifications/:notificationId/read` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| PATCH | `/notifications/:notificationId/read` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| GET | `/notifications/batches` | `asyncHandler(listBatches)` | ============================================================================ Batch routes ============================================================================ |
-| POST | `/notifications/batches` | `asyncHandler(sendBatch)` | — |
-| GET | `/notifications/batches/:batchId` | `asyncHandler(getBatch)` | — |
-| GET | `/notifications/count` | `asyncHandler(getUnreadCount)` | — |
-| GET | `/notifications/count` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| GET | `/notifications/devices` | `asyncHandler(listDevices)` | — |
-| POST | `/notifications/devices` | `asyncHandler(registerDevice)` | — |
-| DELETE | `/notifications/devices/:deviceToken` | `asyncHandler(deleteDevice)` | — |
-| GET | `/notifications/preferences` | `asyncHandler(getPreferences)` | — |
-| POST | `/notifications/preferences` | `asyncHandler(createPreference)` | — |
-| GET | `/notifications/preferences/:id` | `asyncHandler(getPreferenceById)` | — |
-| PUT | `/notifications/preferences/:id` | `asyncHandler(updatePreference)` | — |
-| DELETE | `/notifications/preferences/:id` | `asyncHandler(deletePreference)` | — |
-| PUT | `/notifications/preferences/:id/schedule` | `asyncHandler(updateSchedule)` | — |
-| POST | `/notifications/preferences/bulk` | `asyncHandler(bulkUpdatePreferences)` | — |
-| GET | `/notifications/preferences/type/:type` | `asyncHandler(getPreferenceByType)` | — |
-| PUT | `/notifications/read` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| POST | `/notifications/read` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| PUT | `/notifications/read-all` | `asyncHandler(markAllNotificationsAsRead)` | — |
-| GET | `/notifications/recent` | `asyncHandler(getRecentNotifications)` | — |
-| GET | `/notifications/templates/:templateId/translations` | `asyncHandler(listTranslations)` | ============================================================================ Template translation routes ============================================================================ |
-| POST | `/notifications/templates/:templateId/translations` | `asyncHandler(upsertTranslation)` | — |
-| GET | `/notifications/unread` | `asyncHandler(getUnreadNotifications)` | — |
-| GET | `/notifications/unread-count` | `async (req, res) => {
-  try {
-    const customerId = req.use` | — |
-| GET | `/notifications/webhooks` | `asyncHandler(listWebhooks)` | ============================================================================ Webhook routes ============================================================================ |
-| POST | `/notifications/webhooks` | `asyncHandler(createWebhook)` | — |
-| DELETE | `/notifications/webhooks/:webhookId` | `asyncHandler(deactivateWebhook)` | — |
+| Method                                | Endpoint                                            | Controller                                 | Description                                                                                                                                                                                                                          |
+| ------------------------------------- | --------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET                                   | `/notification-preferences`                         | `asyncHandler(getAllPreferences)`          | ============================================================================ Admin preference routes ============================================================================                                                    |
+| PUT                                   | `/notification-preferences/:id`                     | `asyncHandler(updatePreferenceAdmin)`      | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notification-preferences/user/:userId`            | `asyncHandler(getPreferencesByUser)`       | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notification-templates`                           | `asyncHandler(getAllTemplates)`            | ============================================================================ Template routes ============================================================================                                                            |
+| POST                                  | `/notification-templates`                           | `asyncHandler(createTemplate)`             | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notification-templates/:id`                       | `asyncHandler(getTemplateById)`            | —                                                                                                                                                                                                                                    |
+| PUT                                   | `/notification-templates/:id`                       | `asyncHandler(updateTemplate)`             | —                                                                                                                                                                                                                                    |
+| DELETE                                | `/notification-templates/:id`                       | `asyncHandler(deleteTemplate)`             | —                                                                                                                                                                                                                                    |
+| POST                                  | `/notification-templates/:id/preview`               | `asyncHandler(previewTemplate)`            | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notification-templates/type/:type`                | `asyncHandler(getTemplatesByType)`         | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications`                                    | `asyncHandler(getAllNotifications)`        | ============================================================================ Literal notification routes — must be registered before /notifications/:id ============================================================================ |
+| POST                                  | `/notifications`                                    | `asyncHandler(createNotification)`         | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications`                                    | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| GET                                   | `/notifications/:id`                                | `asyncHandler(getNotificationById)`        | ============================================================================ Admin CRUD routes for notifications (parameterized — after all literals) ============================================================================   |
+| PUT                                   | `/notifications/:id`                                | `asyncHandler(updateNotification)`         | —                                                                                                                                                                                                                                    |
+| DELETE                                | `/notifications/:id`                                | `asyncHandler(deleteNotification)`         | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/:id`                                | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| PUT                                   | `/notifications/:id/read`                           | `asyncHandler(markNotificationAsRead)`     | —                                                                                                                                                                                                                                    |
+| POST                                  | `/notifications/:id/send`                           | `asyncHandler(markNotificationAsSent)`     | —                                                                                                                                                                                                                                    |
+| PUT                                   | `/notifications/:notificationId/read`               | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| PATCH                                 | `/notifications/:notificationId/read`               | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| GET                                   | `/notifications/batches`                            | `asyncHandler(listBatches)`                | ============================================================================ Batch routes ============================================================================                                                               |
+| POST                                  | `/notifications/batches`                            | `asyncHandler(sendBatch)`                  | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/batches/:batchId`                   | `asyncHandler(getBatch)`                   | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/count`                              | `asyncHandler(getUnreadCount)`             | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/count`                              | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| GET                                   | `/notifications/devices`                            | `asyncHandler(listDevices)`                | —                                                                                                                                                                                                                                    |
+| POST                                  | `/notifications/devices`                            | `asyncHandler(registerDevice)`             | —                                                                                                                                                                                                                                    |
+| DELETE                                | `/notifications/devices/:deviceToken`               | `asyncHandler(deleteDevice)`               | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/preferences`                        | `asyncHandler(getPreferences)`             | —                                                                                                                                                                                                                                    |
+| POST                                  | `/notifications/preferences`                        | `asyncHandler(createPreference)`           | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/preferences/:id`                    | `asyncHandler(getPreferenceById)`          | —                                                                                                                                                                                                                                    |
+| PUT                                   | `/notifications/preferences/:id`                    | `asyncHandler(updatePreference)`           | —                                                                                                                                                                                                                                    |
+| DELETE                                | `/notifications/preferences/:id`                    | `asyncHandler(deletePreference)`           | —                                                                                                                                                                                                                                    |
+| PUT                                   | `/notifications/preferences/:id/schedule`           | `asyncHandler(updateSchedule)`             | —                                                                                                                                                                                                                                    |
+| POST                                  | `/notifications/preferences/bulk`                   | `asyncHandler(bulkUpdatePreferences)`      | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/preferences/type/:type`             | `asyncHandler(getPreferenceByType)`        | —                                                                                                                                                                                                                                    |
+| PUT                                   | `/notifications/read`                               | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| POST                                  | `/notifications/read`                               | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| PUT                                   | `/notifications/read-all`                           | `asyncHandler(markAllNotificationsAsRead)` | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/recent`                             | `asyncHandler(getRecentNotifications)`     | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/templates/:templateId/translations` | `asyncHandler(listTranslations)`           | ============================================================================ Template translation routes ============================================================================                                                |
+| POST                                  | `/notifications/templates/:templateId/translations` | `asyncHandler(upsertTranslation)`          | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/unread`                             | `asyncHandler(getUnreadNotifications)`     | —                                                                                                                                                                                                                                    |
+| GET                                   | `/notifications/unread-count`                       | `async (req, res) => {                     |
+| const customerId = req.user?.custome` | —                                                   |
+| GET                                   | `/notifications/webhooks`                           | `asyncHandler(listWebhooks)`               | ============================================================================ Webhook routes ============================================================================                                                             |
+| POST                                  | `/notifications/webhooks`                           | `asyncHandler(createWebhook)`              | —                                                                                                                                                                                                                                    |
+| DELETE                                | `/notifications/webhooks/:webhookId`                | `asyncHandler(deactivateWebhook)`          | —                                                                                                                                                                                                                                    |
 
 <!-- GENERATED:ENDPOINTS:END -->
