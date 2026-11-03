@@ -36,12 +36,12 @@ import type { SupportAgent as DbSupportAgent, SupportTicket as DbSupportTicket }
 // ============================================================================
 
 export async function getAgent(supportAgentId: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
+  const row = await queryOne<DbSupportAgent>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
   return row ? mapToAgent(row) : null;
 }
 
 async function getAvailableAgent(_category?: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbSupportAgent>(
     `SELECT * FROM "supportAgent" 
      WHERE "isActive" = true AND "isAvailable" = true 
      AND "currentTickets" < "maxTickets"
@@ -120,7 +120,7 @@ function mapToAgent(row: Record<string, unknown>): SupportAgent {
 
 
 export async function getAgentByEmail(email: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
+  const row = await queryOne<DbSupportAgent>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
   return row ? mapToAgent(row) : null;
 }
 
@@ -184,7 +184,7 @@ export async function saveAgent(
     );
     return (await getAgent(agent.supportAgentId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbSupportAgent>(
       `INSERT INTO "supportAgent" (
         "email", "firstName", "lastName", "displayName", "avatarUrl", "role",
         "department", "skills", "languages", "isActive", "isAvailable", "maxTickets",
@@ -299,7 +299,7 @@ export async function createTicket(ticket: {
   // Auto-assign to available agent
   const agent = await getAvailableAgent(ticket.category);
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSupportTicket>(
     `INSERT INTO "supportTicket" (
       "ticketNumber", "customerId", "orderId", "email", "name", "phone",
       "subject", "description", "status", "priority", "category", "channel",

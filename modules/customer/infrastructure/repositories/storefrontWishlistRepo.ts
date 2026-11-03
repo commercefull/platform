@@ -1,4 +1,14 @@
 import { query, queryOne } from '../../../../libs/db';
+import type { CustomerWishlistItem as DbCustomerWishlistItem } from '../../../../libs/db/types';
+
+type WishlistItemRow = DbCustomerWishlistItem & {
+  name: string;
+  priceCents: number | null;
+  salePriceCents: number | null;
+  sku: string;
+  status: string;
+  imageUrl: string | null;
+};
 import { FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 import { WishlistItem } from '../../domain/repositories/StorefrontWishlistRepository';
 
@@ -24,7 +34,7 @@ async function findOrCreateWishlistId(customerId: string): Promise<string> {
 }
 
 async function findByCustomer(customerId: string): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<WishlistItemRow[]>(
     `SELECT w.*, p."name", bp."priceCents", bp."salePriceCents", p."sku", p."status",
             pm."url" as "imageUrl"
      FROM "customerWishlistItem" w

@@ -28,7 +28,7 @@ export type FaqArticle = DbSupportFaqArticle;
 // ============================================================================
 
 export async function getCategory(faqCategoryId: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
+  const row = await queryOne<DbSupportFaqCategory>('SELECT * FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
   return row ? mapToCategory(row) : null;
 }
 
@@ -37,7 +37,7 @@ export async function getCategory(faqCategoryId: string): Promise<FaqCategory | 
 // ============================================================================
 
 export async function getArticle(faqArticleId: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
+  const row = await queryOne<DbSupportFaqArticle>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
   return row ? mapToArticle(row) : null;
 }
 
@@ -108,7 +108,7 @@ function mapToArticle(row: Record<string, unknown>): FaqArticle {
   };
 }
 export async function getCategoryBySlug(slug: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "slug" = $1', [slug]);
+  const row = await queryOne<DbSupportFaqCategory>('SELECT * FROM "supportFaqCategory" WHERE "slug" = $1', [slug]);
   return row ? mapToCategory(row) : null;
 }
 
@@ -164,7 +164,7 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
     );
     return (await getCategory(category.faqCategoryId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbSupportFaqCategory>(
       `INSERT INTO "supportFaqCategory" (
         "parentCategoryId", "name", "slug", "description", "icon", "color",
         "imageUrl", "sortOrder", "isActive", "isFeatured", "metadata",
@@ -198,7 +198,7 @@ export async function deleteCategory(faqCategoryId: string): Promise<void> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "slug" = $1', [slug]);
+  const row = await queryOne<DbSupportFaqArticle>('SELECT * FROM "supportFaqArticle" WHERE "slug" = $1', [slug]);
   return row ? mapToArticle(row) : null;
 }
 
@@ -343,7 +343,7 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
 
     return (await getArticle(article.faqArticleId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbSupportFaqArticle>(
       `INSERT INTO "supportFaqArticle" (
         "faqCategoryId", "title", "slug", "content", "contentHtml", "excerpt",
         "keywords", "relatedArticleIds", "sortOrder", "isPublished", "isFeatured",

@@ -95,7 +95,7 @@ function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
 // ============================================================================
 
 export async function getStockAlert(stockAlertId: string): Promise<StockAlert | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "inventoryStockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
+  const row = await queryOne<DbInventoryStockAlert>('SELECT * FROM "inventoryStockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
   return row ? mapToStockAlert(row) : null;
 }
 
@@ -166,7 +166,7 @@ export async function createStockAlert(alert: {
   const now = new Date().toISOString();
   const expiresAt = alert.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days default
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbInventoryStockAlert>(
     `INSERT INTO "inventoryStockAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "desiredQuantity",
@@ -220,7 +220,7 @@ export async function cancelStockAlert(stockAlertId: string): Promise<void> {
 // ============================================================================
 
 export async function getPriceAlert(priceAlertId: string): Promise<PriceAlert | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportPriceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
+  const row = await queryOne<DbSupportPriceAlert>('SELECT * FROM "supportPriceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
   return row ? mapToPriceAlert(row) : null;
 }
 
@@ -295,7 +295,7 @@ export async function createPriceAlert(alert: {
   const now = new Date().toISOString();
   const expiresAt = alert.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days default
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSupportPriceAlert>(
     `INSERT INTO "supportPriceAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "alertType",

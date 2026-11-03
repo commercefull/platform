@@ -3,10 +3,29 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import type { CustomerSubscription as DbCustomerSubscription } from '../../../../libs/db/types';
+import type {
+  CustomerSubscription as DbCustomerSubscription,
+  SubscriptionOrder as DbSubscriptionOrder,
+  SubscriptionPlan as DbSubscriptionPlan,
+} from '../../../../libs/db/types';
+
+type PlanWithProductRow = DbSubscriptionPlan & {
+  productName: string | null;
+  productDescription: string | null;
+};
+type SubscriptionWithPlanRow = DbCustomerSubscription & {
+  planName: string | null;
+  billingInterval: string | null;
+  priceCents: number | null;
+  currencyCode: string | null;
+};
+type SubscriptionWithPlanDetailRow = SubscriptionWithPlanRow & {
+  features: unknown | null;
+  planDescription: string | null;
+};
 
 export async function findActivePlansWithProduct(): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<PlanWithProductRow[]>(
     `SELECT sp.*, p."name" as "productName", p."description" as "productDescription"
      FROM "subscriptionPlan" sp
      LEFT JOIN "subscriptionProduct" sprod ON sp."subscriptionProductId" = sprod."subscriptionProductId"
@@ -19,7 +38,7 @@ export async function findActivePlansWithProduct(): Promise<unknown[]> {
 }
 
 export async function findByCustomerIdWithPlan(customerId: string): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<SubscriptionWithPlanRow[]>(
     `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currencyCode"
      FROM "customerSubscription" cs
      LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
@@ -31,7 +50,7 @@ export async function findByCustomerIdWithPlan(customerId: string): Promise<unkn
 }
 
 export async function findByIdWithPlan(subscriptionId: string, customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(
+  return await queryOne<SubscriptionWithPlanDetailRow>(
     `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currencyCode",
             sp."features", sp."description" as "planDescription"
      FROM "customerSubscription" cs
@@ -55,7 +74,7 @@ export async function cancelSubscriptionStorefront(subscriptionId: string, reaso
 }
 
 export async function findBillingHistory(subscriptionId: string): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<DbSubscriptionOrder[]>(
     `SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "periodStart" DESC LIMIT 12`,
     [subscriptionId],
   );

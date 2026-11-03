@@ -2,8 +2,16 @@ import { query, queryOne } from '../../../../libs/db';
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import type { MembershipPlan as DbMembershipPlan, MembershipPlanBenefit as DbMembershipPlanBenefit, MembershipSubscription as DbMembershipSubscription } from '../../../../libs/db/types';
 
+type MembershipPlanWithCountRow = DbMembershipPlan & { benefitCount: string };
+type MembershipWithPlanRow = DbMembershipSubscription & {
+  planName: string | null;
+  tier: number | null;
+  priceCents: number | null;
+  currencyCode: string | null;
+};
+
 export async function findActivePlansWithBenefitCount(): Promise<unknown[]> {
-  const results = await query<unknown[]>(
+  const results = await query<MembershipPlanWithCountRow[]>(
     `SELECT mp.*, COUNT(mpb."membershipPlanBenefitId") as "benefitCount"
      FROM "membershipPlan" mp
      LEFT JOIN "membershipPlanBenefit" mpb ON mp."membershipPlanId" = mpb."planId" AND mpb."isActive" = true
@@ -30,7 +38,7 @@ export async function findBenefitsByPlanId(planId: string): Promise<unknown[]> {
 }
 
 export async function findActiveMembershipWithPlan(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(
+  return await queryOne<MembershipWithPlanRow>(
     `SELECT m.*, mp."name" as "planName", mp."level" as "tier", mp."priceCents", mp."currencyCode"
      FROM "membershipSubscription" m
      LEFT JOIN "membershipPlan" mp ON m."membershipPlanId" = mp."membershipPlanId"

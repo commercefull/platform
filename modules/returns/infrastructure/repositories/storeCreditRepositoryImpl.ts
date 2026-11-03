@@ -106,7 +106,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
         referenceType: row.referenceType as string | undefined,
         referenceId: row.referenceId as string | undefined,
         amountCents: Number(row.amountCents),
-        balanceAfterCents: parseFloat(row.balanceAfterCents as string),
+        balanceAfterCents: Number(row.balanceAfterCents),
         currency: row.currencyCode as string,
         reason: row.reason as string | undefined,
         notes: row.notes as string | undefined,
@@ -119,7 +119,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   }
 
   async findByReference(referenceType: string, referenceId: string): Promise<StoreCreditLedgerEntry | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStoreCreditLedger>(
       `SELECT * FROM "storeCreditLedger" WHERE "referenceType" = $1 AND "referenceId" = $2`,
       [referenceType, referenceId],
     );
@@ -131,7 +131,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       referenceType: row.referenceType as string | undefined,
       referenceId: row.referenceId as string | undefined,
       amountCents: Number(row.amountCents),
-      balanceAfterCents: parseFloat(row.balanceAfterCents as string),
+      balanceAfterCents: Number(row.balanceAfterCents),
       currency: row.currencyCode as string,
       reason: row.reason as string | undefined,
       notes: row.notes as string | undefined,

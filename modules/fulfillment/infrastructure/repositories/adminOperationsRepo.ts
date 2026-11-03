@@ -4,6 +4,10 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { Fulfillment as DbFulfillment, DistributionWarehouse as DbDistributionWarehouse } from '../../../../libs/db/types';
+
+type FulfillmentWithOrderNumberRow = DbFulfillment & { orderNumber: string | null };
+type WarehouseWithCountRow = DbDistributionWarehouse & { productCount: string };
 
 // ============================================================================
 // Types
@@ -65,7 +69,7 @@ async function getOperationsStats(): Promise<OperationsStats> {
 
 async function findRecentFulfillments(limit: number = 10): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<FulfillmentWithOrderNumberRow[]>(
       `SELECT f.*, o."orderNumber"
        FROM "fulfillment" f
        LEFT JOIN "order" o ON f."orderId" = o."orderId"::text
@@ -78,7 +82,7 @@ async function findRecentFulfillments(limit: number = 10): Promise<unknown[]> {
 
 async function findWarehousesWithCounts(): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<WarehouseWithCountRow[]>(
       `SELECT w.*, COUNT(il."inventoryLevelId") as "productCount"
        FROM "distributionWarehouse" w
        LEFT JOIN "inventoryLevel" il ON w."distributionWarehouseId" = il."distributionWarehouseId"

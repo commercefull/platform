@@ -18,7 +18,7 @@ export async function createDunningAttempt(attempt: {
 }): Promise<DunningAttempt> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSubscriptionDunningAttempt>(
     `INSERT INTO "subscriptionDunningAttempt" (
       "customerSubscriptionId", "subscriptionOrderId", "attemptNumber",
       "status", "amountCents", "currencyCode", "scheduledAt", "createdAt", "updatedAt"

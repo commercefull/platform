@@ -4,6 +4,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { GdprDataRequest as DbGdprDataRequest } from '../../../../libs/db/types';
+
+type GdprRequestWithCustomerRow = DbGdprDataRequest & {
+  customerName: string | null;
+  customerEmail: string | null;
+};
 import { generateUUID } from '../../../../libs/uuid';
 import { CustomerIdRequiredError } from '../../domain/errors/GdprErrors';
 
@@ -69,7 +75,7 @@ async function getConsentStats(): Promise<ConsentStats> {
 
 async function findRecentRequests(limit: number = 20): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<GdprRequestWithCustomerRow[]>(
       `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
        FROM "gdprDataRequest" gr
        LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
@@ -81,7 +87,7 @@ async function findRecentRequests(limit: number = 20): Promise<unknown[]> {
 }
 
 async function findRequestById(requestId: string): Promise<unknown | null> {
-  return queryOne<unknown>(
+  return queryOne<GdprRequestWithCustomerRow>(
     `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
      FROM "gdprDataRequest" gr
      LEFT JOIN "customer" c ON gr."customerId" = c."customerId"

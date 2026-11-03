@@ -8,14 +8,14 @@ import type { IdentityScimProvisioningRecord as DbIdentityScimProvisioningRecord
 
 export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepository {
   async findByScimUserId(scimUserId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityScimProvisioningRecord" WHERE "scimUserId" = $1', [
+    const row = await queryOne<DbIdentityScimProvisioningRecord>('SELECT * FROM "identityScimProvisioningRecord" WHERE "scimUserId" = $1', [
       scimUserId,
     ]);
     return row ? this.mapToRecord(row) : null;
   }
 
   async findByUserId(userId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityScimProvisioningRecord" WHERE "userId" = $1', [userId]);
+    const row = await queryOne<DbIdentityScimProvisioningRecord>('SELECT * FROM "identityScimProvisioningRecord" WHERE "userId" = $1', [userId]);
     return row ? this.mapToRecord(row) : null;
   }
 
@@ -27,7 +27,7 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async save(record: ScimProvisioningRecord): Promise<ScimProvisioningRecord> {
-    const existing = await queryOne<Record<string, unknown>>(
+    const existing = await queryOne<Pick<DbIdentityScimProvisioningRecord, 'recordId'>>(
       'SELECT "recordId" FROM "identityScimProvisioningRecord" WHERE "recordId" = $1',
       [record.recordId],
     );

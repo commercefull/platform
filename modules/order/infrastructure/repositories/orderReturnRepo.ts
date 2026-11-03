@@ -10,7 +10,10 @@ import type {
   OrderReturnCreateParams,
   OrderReturnUpdateParams,
 } from '../../domain/repositories/OrderReturnRepository';
-import type {OrderReturn as DbOrderReturn, Order as DbOrder} from '../../../../libs/db/types';
+import type {OrderReturn as DbOrderReturn, Order as DbOrder, OrderItem as DbOrderItem} from '../../../../libs/db/types';
+
+type OrderReturnWithOrderNumberRow = DbOrderReturn & { orderNumber: string };
+type OrderItemWithProductRow = DbOrderItem & { productName: string | null; sku: string | null };
 
 /** Columns stored nullable in the DB but optional (undefined) in the domain type. */
 const NULLABLE_RETURN_FIELDS = [
@@ -502,7 +505,7 @@ class OrderReturnRepo {
   }
 
   async findByCustomerIdWithOrderNumber(customerId: string): Promise<unknown[]> {
-    const results = await query<unknown[]>(
+    const results = await query<OrderReturnWithOrderNumberRow[]>(
       `SELECT r.*, o."orderNumber"
        FROM "orderReturn" r
        JOIN "order" o ON r."orderId" = o."orderId"
@@ -514,7 +517,7 @@ class OrderReturnRepo {
   }
 
   async findByIdWithOrderNumber(orderReturnId: string, customerId: string): Promise<unknown | null> {
-    return await queryOne<unknown>(
+    return await queryOne<OrderReturnWithOrderNumberRow>(
       `SELECT r.*, o."orderNumber"
        FROM "orderReturn" r
        JOIN "order" o ON r."orderId" = o."orderId"
@@ -547,7 +550,7 @@ class OrderReturnRepo {
   }
 
   async findOrderItemsWithProduct(orderId: string): Promise<unknown[]> {
-    const results = await query<unknown[]>(
+    const results = await query<OrderItemWithProductRow[]>(
       `SELECT oi.*, p."name" as "productName", p."sku"
        FROM "orderItem" oi
        JOIN "product" p ON oi."productId" = p."productId"

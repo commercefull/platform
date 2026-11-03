@@ -69,7 +69,15 @@ const PRICE_JOIN_SQL = `
   ) bp ON true
 `;
 
-function mapSearchRow(row: Record<string, unknown>): ProductSearchRow {
+type ProductSearchQueryRow = DbProduct & {
+  priceCents?: string | number | null;
+  salePriceCents?: string | number | null;
+  effectivePriceCents?: string | number | null;
+  currencyCode?: string | null;
+  match_count?: string;
+};
+
+function mapSearchRow(row: ProductSearchQueryRow): ProductSearchRow {
   const cents = (v: unknown): number | null => (v == null ? null : Number(v));
   const priceCents = cents(row.priceCents);
   const salePriceCents = cents(row.salePriceCents);
@@ -504,7 +512,7 @@ class ProductSearchService implements ProductSearchServicePort {
       ORDER BY p."name"
     `;
 
-    return ((await query<Record<string, unknown>[]>(sql, [attributeCode, value])) || []).map(mapSearchRow);
+    return ((await query<ProductSearchQueryRow[]>(sql, [attributeCode, value])) || []).map(mapSearchRow);
   }
 
   /**
@@ -545,7 +553,7 @@ class ProductSearchService implements ProductSearchServicePort {
     }
     params.push(String(limit));
 
-    return ((await query<Record<string, unknown>[]>(sql, params)) || []).map(mapSearchRow);
+    return ((await query<ProductSearchQueryRow[]>(sql, params)) || []).map(mapSearchRow);
   }
 }
 

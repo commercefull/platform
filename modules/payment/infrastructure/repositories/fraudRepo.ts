@@ -37,7 +37,7 @@ export type {
 // ============================================================================
 
 export async function getRule(fraudRuleId: string): Promise<FraudRule | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudRule" WHERE "fraudRuleId" = $1', [fraudRuleId]);
+  const row = await queryOne<DbFraudRule>('SELECT * FROM "fraudRule" WHERE "fraudRuleId" = $1', [fraudRuleId]);
   return row ? mapToRule(row) : null;
 }
 
@@ -85,7 +85,7 @@ export async function saveRule(
     );
     return (await getRule(rule.fraudRuleId))!;
   } else {
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbFraudRule>(
       `INSERT INTO "fraudRule" (
         "name", "description", "ruleType", "entityType", "conditions",
         "action", "riskScore", "priority", "isActive", "metadata",
@@ -132,12 +132,12 @@ export async function incrementRuleTrigger(fraudRuleId: string): Promise<void> {
 // ============================================================================
 
 export async function getCheck(fraudCheckId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudCheck" WHERE "fraudCheckId" = $1', [fraudCheckId]);
+  const row = await queryOne<DbFraudCheck>('SELECT * FROM "fraudCheck" WHERE "fraudCheckId" = $1', [fraudCheckId]);
   return row ? mapToCheck(row) : null;
 }
 
 export async function getCheckByOrderId(orderId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [
+  const row = await queryOne<DbFraudCheck>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [
     orderId,
   ]);
   return row ? mapToCheck(row) : null;
@@ -221,7 +221,7 @@ export async function createCheck(check: {
     isFirstOrder = previousOrders === 0;
   }
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbFraudCheck>(
     `INSERT INTO "fraudCheck" (
       "orderId", "customerId", "checkType", "status", "riskScore", "riskLevel",
       "deviceFingerprint", "ipAddress", "billingCountry", "shippingCountry",

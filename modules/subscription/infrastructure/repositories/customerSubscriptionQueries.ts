@@ -7,17 +7,17 @@ import { SubscriptionNotFoundError, SubscriptionPlanNotFoundError } from '../../
 import type { CustomerSubscription, SubscriptionPlan, SubscriptionPause, SubscriptionStatus } from './subscriptionTypes';
 import { mapToCustomerSubscription, mapToSubscriptionPause, generateSubscriptionNumber, calculateNextBillingDate } from './subscriptionHelpers';
 import { getSubscriptionPlan } from './subscriptionPlanQueries';
-import type { CustomerSubscription as DbCustomerSubscription } from '../../../../libs/db/types';
+import type { CustomerSubscription as DbCustomerSubscription, SubscriptionPause as DbSubscriptionPause} from '../../../../libs/db/types';
 
 export async function getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
+  const row = await queryOne<DbCustomerSubscription>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
     customerSubscriptionId,
   ]);
   return row ? mapToCustomerSubscription(row) : null;
 }
 
 export async function getCustomerSubscriptionByNumber(subscriptionNumber: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
+  const row = await queryOne<DbCustomerSubscription>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
     subscriptionNumber,
   ]);
   return row ? mapToCustomerSubscription(row) : null;
@@ -136,7 +136,7 @@ async function insertCustomerSubscription(
   const pricing = subscriptionPricing(plan, quantity);
   const { trialDays, trialStartAt, trialEndAt, currentPeriodStart, currentPeriodEnd, nextBillingAt } = schedule;
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbCustomerSubscription>(
     `INSERT INTO "customerSubscription" (
       "subscriptionNumber", "customerId", "subscriptionPlanId", "subscriptionProductId",
       "productVariantId", "status", "quantity", "unitPriceCents", "discountAmountCents",
@@ -261,7 +261,7 @@ export async function pauseSubscription(
   );
 
   // Create pause record
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSubscriptionPause>(
     `INSERT INTO "subscriptionPause" (
       "customerSubscriptionId", "status", "pausedAt", "scheduledResumeAt",
       "reason", "pausedBy", "createdAt", "updatedAt"

@@ -25,7 +25,7 @@ export type VatValidationLog = DbTaxVatValidationLog;
 // ============================================================================
 
 export async function getVatRegistration(vatRegistrationId: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "taxVatRegistration" WHERE "vatRegistrationId" = $1', [
+  const row = await queryOne<DbTaxVatRegistration>('SELECT * FROM "taxVatRegistration" WHERE "vatRegistrationId" = $1', [
     vatRegistrationId,
   ]);
   return row ? mapToVatRegistration(row) : null;
@@ -39,7 +39,7 @@ export async function getVatRegistrationsByMerchant(organizationId: string): Pro
 }
 
 export async function getVatRegistrationByCountry(organizationId: string, countryCode: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbTaxVatRegistration>(
     'SELECT * FROM "taxVatRegistration" WHERE "organizationId" = $1 AND "countryCode" = $2 AND "isActive" = true',
     [organizationId, countryCode],
   );
@@ -47,7 +47,7 @@ export async function getVatRegistrationByCountry(organizationId: string, countr
 }
 
 export async function getActiveOssRegistration(organizationId: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbTaxVatRegistration>(
     `SELECT * FROM "taxVatRegistration" 
      WHERE "organizationId" = $1 AND "registrationType" = 'oss' AND "isActive" = true`,
     [organizationId],
@@ -116,7 +116,7 @@ export async function saveVatRegistration(
     return (await getVatRegistration(data.vatRegistrationId))!;
   } else {
     // Insert new
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxVatRegistration>(
       `INSERT INTO "taxVatRegistration" (
         "organizationId", "countryCode", "vatNumber", "tradingName", "legalName", "registrationType",
         "isVerified", "registrationDate", "effectiveFrom",
@@ -168,7 +168,7 @@ export async function deactivateVatRegistration(vatRegistrationId: string): Prom
 export async function logVatValidation(data: Omit<VatValidationLog, 'vatValidationLogId' | 'createdAt'>): Promise<VatValidationLog> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbTaxVatValidationLog>(
     `INSERT INTO "taxVatValidationLog" (
       "customerId", "organizationId", "orderId", "vatNumber", "countryCode", "vatNumberFormatted",
       "isValid", "validationStatus", "validationSource", "requestId", "response",
@@ -211,7 +211,7 @@ export async function getRecentValidation(
   countryCode: string,
   maxAgeHours: number = 24,
 ): Promise<VatValidationLog | null> {
-  const row = await queryOne<Record<string, unknown>>(
+  const row = await queryOne<DbTaxVatValidationLog>(
     `SELECT * FROM "taxVatValidationLog" 
      WHERE "vatNumber" = $1 AND "countryCode" = $2 
      AND "validatedAt" > NOW() - INTERVAL '${maxAgeHours} hours'

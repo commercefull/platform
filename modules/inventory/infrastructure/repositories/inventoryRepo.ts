@@ -283,7 +283,7 @@ class InventoryRepo {
     delta: number,
     allowBackorder: boolean,
   ): Promise<{ appliedQuantity: number; quantity: number; reservedQuantity: number; availableQuantity: number } | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<{ quantity: number; oldReserved: number; newReserved: number }>(
       `WITH locked AS (
          SELECT "inventoryLocationId", "quantity", "reservedQuantity"
          FROM "inventoryLocation"

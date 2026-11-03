@@ -9,7 +9,7 @@ import type { IdentitySamlProvider as DbIdentitySamlProvider } from '../../../..
 
 export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   async findById(providerId: string): Promise<SamlProvider | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identitySamlProvider" WHERE "providerId" = $1', [providerId]);
+    const row = await queryOne<DbIdentitySamlProvider>('SELECT * FROM "identitySamlProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
@@ -29,7 +29,7 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
 
   async save(provider: SamlProvider): Promise<SamlProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1', [
+    const existing = await queryOne<Pick<DbIdentitySamlProvider, 'providerId'>>('SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1', [
       props.providerId,
     ]);
 

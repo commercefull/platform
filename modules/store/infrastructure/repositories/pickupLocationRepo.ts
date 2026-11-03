@@ -79,7 +79,7 @@ export async function saveLocation(params: CreatePickupLocationParams): Promise<
     RETURNING *
   `;
 
-  const result = await query<Record<string, unknown>[]>(sql, [
+  const result = await query<DbStorePickupLocation[]>(sql, [
     pickupLocationId,
     params.storeId,
     params.name,
@@ -109,7 +109,7 @@ export async function saveLocation(params: CreatePickupLocationParams): Promise<
  * Get a pickup location by ID
  */
 export async function getLocation(pickupLocationId: string): Promise<PickupLocation | null> {
-  const result = await queryOne<Record<string, unknown>>('SELECT * FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [
+  const result = await queryOne<DbStorePickupLocation>('SELECT * FROM "storePickupLocation" WHERE "pickupLocationId" = $1', [
     pickupLocationId,
   ]);
 
@@ -129,7 +129,7 @@ export async function getLocations(storeId?: string): Promise<PickupLocation[]> 
   }
   sql += ' ORDER BY "name" ASC';
 
-  const result = await query<Record<string, unknown>[]>(sql, params);
+  const result = await query<DbStorePickupLocation[]>(sql, params);
   return (result ?? []).map(mapToPickupLocation);
 }
 
@@ -176,7 +176,7 @@ export async function updateLocation(pickupLocationId: string, params: UpdatePic
     RETURNING *
   `;
 
-  const result = await query<Record<string, unknown>[]>(sql, values);
+  const result = await query<DbStorePickupLocation[]>(sql, values);
   return (result?.length ?? 0) > 0 ? mapToPickupLocation(result![0]) : null;
 }
 
@@ -224,7 +224,7 @@ export async function findNearestLocations(
     )
     LIMIT $3
   `;
-  const results = await query<Record<string, unknown>[]>(sql, [latitude, longitude, limit]);
+  const results = await query<DbStorePickupLocation[]>(sql, [latitude, longitude, limit]);
 
   return (results || [])
     .map((row: Record<string, unknown>) => {

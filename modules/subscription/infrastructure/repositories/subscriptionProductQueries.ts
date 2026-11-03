@@ -8,14 +8,14 @@ import { mapToSubscriptionProduct } from './subscriptionHelpers';
 import type { SubscriptionProduct as DbSubscriptionProduct } from '../../../../libs/db/types';
 
 export async function getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1', [
+  const row = await queryOne<DbSubscriptionProduct>('SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1', [
     subscriptionProductId,
   ]);
   return row ? mapToSubscriptionProduct(row) : null;
 }
 
 export async function getSubscriptionProductByProductId(productId: string): Promise<SubscriptionProduct | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionProduct" WHERE "productId" = $1', [productId]);
+  const row = await queryOne<DbSubscriptionProduct>('SELECT * FROM "subscriptionProduct" WHERE "productId" = $1', [productId]);
   return row ? mapToSubscriptionProduct(row) : null;
 }
 
@@ -110,7 +110,7 @@ async function insertSubscriptionProduct(
 ): Promise<Record<string, unknown> | null> {
   const now = new Date().toISOString();
   const v = subscriptionProductRowValues(product);
-  return queryOne<Record<string, unknown>>(
+  return queryOne<DbSubscriptionProduct>(
     `INSERT INTO "subscriptionProduct" (
         "productId", "isSubscriptionOnly", "allowOneTimePurchase", "minSubscriptionLength",
         "maxSubscriptionLength", "trialDays", "trialRequiresPayment", "billingAnchor",

@@ -7,7 +7,7 @@ import type { BlacklistType, FraudBlacklist } from '../../domain/entities/FraudR
 import type { FraudBlacklist as DbFraudBlacklist } from '../../../../libs/db/types';
 
 export async function getBlacklistEntry(fraudBlacklistId: string): Promise<FraudBlacklist | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1', [fraudBlacklistId]);
+  const row = await queryOne<DbFraudBlacklist>('SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1', [fraudBlacklistId]);
   return row ? mapToBlacklist(row) : null;
 }
 
@@ -66,7 +66,7 @@ export async function addToBlacklist(entry: {
 }): Promise<FraudBlacklist> {
   const now = new Date().toISOString();
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbFraudBlacklist>(
     `INSERT INTO "fraudBlacklist" (
       "type", "value", "reason", "source", "relatedOrderId", "relatedCustomerId",
       "isActive", "expiresAt", "addedBy", "createdAt", "updatedAt"

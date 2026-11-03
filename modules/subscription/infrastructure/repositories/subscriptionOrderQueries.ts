@@ -8,7 +8,7 @@ import { mapToSubscriptionOrder } from './subscriptionHelpers';
 import type { SubscriptionOrder as DbSubscriptionOrder } from '../../../../libs/db/types';
 
 export async function getSubscriptionOrder(subscriptionOrderId: string): Promise<SubscriptionOrder | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
+  const row = await queryOne<DbSubscriptionOrder>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
     subscriptionOrderId,
   ]);
   return row ? mapToSubscriptionOrder(row) : null;
@@ -53,7 +53,7 @@ export async function createSubscriptionOrder(order: {
   const totalAmountCents =
     order.subtotalCents - (order.discountAmountCents || 0) + (order.taxAmountCents || 0) + (order.shippingAmountCents || 0);
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSubscriptionOrder>(
     `INSERT INTO "subscriptionOrder" (
       "customerSubscriptionId", "billingCycleNumber", "periodStart", "periodEnd",
       "status", "subtotalCents", "discountAmountCents", "taxAmountCents", "shippingAmountCents",

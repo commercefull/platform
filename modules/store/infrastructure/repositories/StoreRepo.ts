@@ -36,7 +36,7 @@ class StoreRepo implements IStoreRepository {
   async save(store: Store): Promise<Store> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, unknown>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
+    const existing = await queryOne<Pick<DbStore, 'storeId'>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
 
     if (existing) {
       await this.updateStoreRow(store, now);
@@ -244,7 +244,7 @@ class StoreRepo implements IStoreRepository {
   }
 
   async findHeadquarters(organizationId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStore>(
       'SELECT * FROM store WHERE "organizationId" = $1 AND "isHeadquarters" = true ORDER BY "createdAt" ASC LIMIT 1',
       [organizationId],
     );
@@ -303,7 +303,7 @@ class StoreRepo implements IStoreRepository {
   }
 
   async updatePickupSettings(storeId: string, pickupSettings: Record<string, unknown>): Promise<Store> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStore>(
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('pickup', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(pickupSettings), new Date().toISOString(), storeId],
     );
@@ -312,7 +312,7 @@ class StoreRepo implements IStoreRepository {
   }
 
   async updateLocalDeliverySettings(storeId: string, deliverySettings: Record<string, unknown>): Promise<Store> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbStore>(
       `UPDATE store SET "settings" = COALESCE("settings", '{}'::jsonb) || jsonb_build_object('localDelivery', $1::jsonb), "updatedAt" = $2 WHERE "storeId" = $3 RETURNING *`,
       [JSON.stringify(deliverySettings), new Date().toISOString(), storeId],
     );

@@ -5,6 +5,21 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type {
+  MembershipPlan as DbMembershipPlan,
+  MembershipSubscription as DbMembershipSubscription,
+  SubscriptionPlan as DbSubscriptionPlan,
+  CustomerSubscription as DbCustomerSubscription,
+  LoyaltyReward as DbLoyaltyReward,
+  LoyaltyTransaction as DbLoyaltyTransaction,
+} from '../../../../libs/db/types';
+
+type MembershipTierRow = DbMembershipPlan & { memberCount: string };
+type MembershipRow = DbMembershipSubscription & { tierName: string | null; email: string | null; customerName: string | null };
+type SubscriptionPlanRow = DbSubscriptionPlan & { subscriberCount: string };
+type SubscriptionRow = DbCustomerSubscription & { planName: string | null; email: string | null; customerName: string | null };
+type LoyaltyRewardRow = DbLoyaltyReward & { redemptionCount: string };
+type LoyaltyTransactionRow = DbLoyaltyTransaction & { email: string | null; customerName: string | null };
 
 // ============================================================================
 // Membership Dashboard
@@ -32,7 +47,7 @@ export async function getMembershipStats(): Promise<{
 
 export async function findMembershipTiersWithCounts(): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<MembershipTierRow[]>(
       `SELECT mt.*, COUNT(um."membershipSubscriptionId") as "memberCount"
        FROM "membershipPlan" mt
        LEFT JOIN "membershipSubscription" um ON mt."membershipPlanId" = um."membershipPlanId"
@@ -45,7 +60,7 @@ export async function findMembershipTiersWithCounts(): Promise<unknown[]> {
 
 export async function findRecentMemberships(limit: number = 20): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<MembershipRow[]>(
       `SELECT um.*, mt."name" as "tierName", c."email",
               COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
        FROM "membershipSubscription" um
@@ -90,7 +105,7 @@ export async function getSubscriptionStats(): Promise<{
 
 export async function findSubscriptionPlansWithCounts(): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<SubscriptionPlanRow[]>(
       `SELECT sp.*, COUNT(s."customerSubscriptionId") as "subscriberCount"
        FROM "subscriptionPlan" sp
        LEFT JOIN "customerSubscription" s ON sp."subscriptionPlanId" = s."subscriptionPlanId"
@@ -103,7 +118,7 @@ export async function findSubscriptionPlansWithCounts(): Promise<unknown[]> {
 
 export async function findRecentSubscriptions(limit: number = 20): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<SubscriptionRow[]>(
       `SELECT s.*, sp."name" as "planName", c."email",
               COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
        FROM "customerSubscription" s
@@ -142,7 +157,7 @@ export async function getLoyaltyStats(): Promise<{
 
 export async function findLoyaltyRewardsWithCounts(): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<LoyaltyRewardRow[]>(
       `SELECT lr.*, COUNT(lrd."redemptionId") as "redemptionCount"
        FROM "loyaltyReward" lr
        LEFT JOIN "loyaltyRedemption" lrd ON lr."rewardId" = lrd."rewardId"
@@ -155,7 +170,7 @@ export async function findLoyaltyRewardsWithCounts(): Promise<unknown[]> {
 
 export async function findRecentLoyaltyTransactions(limit: number = 20): Promise<unknown[]> {
   return (
-    (await query<unknown[]>(
+    (await query<LoyaltyTransactionRow[]>(
       `SELECT lt.*, c."email",
               COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
        FROM "loyaltyTransaction" lt

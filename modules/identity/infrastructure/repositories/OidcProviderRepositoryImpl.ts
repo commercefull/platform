@@ -9,7 +9,7 @@ import type { IdentityOidcProvider as DbIdentityOidcProvider } from '../../../..
 
 export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   async findById(providerId: string): Promise<OidcProvider | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityOidcProvider" WHERE "providerId" = $1', [providerId]);
+    const row = await queryOne<DbIdentityOidcProvider>('SELECT * FROM "identityOidcProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
@@ -29,7 +29,7 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
 
   async save(provider: OidcProvider): Promise<OidcProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "identityOidcProvider" WHERE "providerId" = $1', [
+    const existing = await queryOne<Pick<DbIdentityOidcProvider, 'providerId'>>('SELECT "providerId" FROM "identityOidcProvider" WHERE "providerId" = $1', [
       props.providerId,
     ]);
 

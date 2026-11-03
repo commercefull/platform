@@ -1,8 +1,18 @@
 import { query, queryOne } from '../../../../libs/db';
-import type { LoyaltyTransaction as DbLoyaltyTransaction, LoyaltyReward as DbLoyaltyReward } from '../../../../libs/db/types';
+import type { LoyaltyPoints as DbLoyaltyPoints, LoyaltyTransaction as DbLoyaltyTransaction, LoyaltyReward as DbLoyaltyReward } from '../../../../libs/db/types';
+
+type MemberWithTierRow = DbLoyaltyPoints & {
+  pointsBalance: number;
+  tierName: string | null;
+  minimumPoints: number | null;
+  multiplier: string | null;
+};
+type PointsBalanceRow = DbLoyaltyPoints & { pointsBalance: number };
+type LoyaltyPointsIdRow = { loyaltyPointsId: string };
+type LoyaltyTransactionIdRow = { loyaltyTransactionId: string };
 
 async function findMemberWithTier(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(
+  return await queryOne<MemberWithTierRow>(
     `SELECT lp.*, lp."currentPoints" as "pointsBalance",
             lt."name" as "tierName", lt."pointsThreshold" as "minimumPoints", lt."pointsMultiplier" as "multiplier"
      FROM "loyaltyPoints" lp
@@ -38,18 +48,18 @@ async function findRewardById(rewardId: string): Promise<unknown | null> {
 }
 
 async function findMemberByCustomerId(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [customerId]);
+  return await queryOne<PointsBalanceRow>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [customerId]);
 }
 
 async function deductPoints(customerId: string, points: number): Promise<void> {
-  await queryOne<unknown>(
+  await queryOne<LoyaltyPointsIdRow>(
     `UPDATE "loyaltyPoints" SET "currentPoints" = "currentPoints" - $1, "lastActivity" = NOW(), "updatedAt" = NOW() WHERE "customerId" = $2 RETURNING "loyaltyPointsId"`,
     [points, customerId],
   );
 }
 
 async function createRedeemTransaction(customerId: string, points: number, description: string): Promise<void> {
-  await queryOne<unknown>(
+  await queryOne<LoyaltyTransactionIdRow>(
     `INSERT INTO "loyaltyTransaction" ("customerId", "action", "points", "description", "createdAt", "updatedAt")
      VALUES ($1, 'debit', $2, $3, NOW(), NOW()) RETURNING "loyaltyTransactionId"`,
     [customerId, -Math.abs(points), description],

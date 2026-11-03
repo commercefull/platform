@@ -15,18 +15,18 @@ import {
   ThemeAssetConfig,
 } from '../../domain/entities/Theme';
 import { ThemeOverride, ThemeOverrideProps } from '../../domain/entities/ThemeOverride';
-import type { Theme as DbTheme, ThemeOverride as DbThemeOverride } from '../../../../libs/db/types';
+import type { Theme as DbTheme, ThemeOverride as DbThemeOverride, ThemeAssignment as DbThemeAssignment} from '../../../../libs/db/types';
 
 export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme CRUD ──────────────────────────────────────────────
 
   async findById(themeId: string): Promise<Theme | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "theme" WHERE "themeId" = $1', [themeId]);
+    const row = await queryOne<DbTheme>('SELECT * FROM "theme" WHERE "themeId" = $1', [themeId]);
     return row ? this.mapToTheme(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Theme | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "theme" WHERE slug = $1', [slug]);
+    const row = await queryOne<DbTheme>('SELECT * FROM "theme" WHERE slug = $1', [slug]);
     return row ? this.mapToTheme(row) : null;
   }
 
@@ -74,7 +74,7 @@ export class ThemeRepositoryImpl implements ThemeRepository {
     const now = new Date().toISOString();
     const json = theme.toJSON();
 
-    const existing = await queryOne<Record<string, unknown>>('SELECT "themeId" FROM "theme" WHERE "themeId" = $1', [theme.themeId]);
+    const existing = await queryOne<Pick<DbTheme, 'themeId'>>('SELECT "themeId" FROM "theme" WHERE "themeId" = $1', [theme.themeId]);
 
     if (existing) {
       await query(
@@ -152,14 +152,14 @@ export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme Override CRUD ─────────────────────────────────────
 
   async findOverrideByStore(storeId: string): Promise<ThemeOverride | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "themeOverride" WHERE "storeId" = $1 AND "isActive" = true', [
+    const row = await queryOne<DbThemeOverride>('SELECT * FROM "themeOverride" WHERE "storeId" = $1 AND "isActive" = true', [
       storeId,
     ]);
     return row ? this.mapToOverride(row) : null;
   }
 
   async findOverrideById(overrideId: string): Promise<ThemeOverride | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "themeOverride" WHERE "overrideId" = $1', [overrideId]);
+    const row = await queryOne<DbThemeOverride>('SELECT * FROM "themeOverride" WHERE "overrideId" = $1', [overrideId]);
     return row ? this.mapToOverride(row) : null;
   }
 
@@ -181,7 +181,7 @@ export class ThemeRepositoryImpl implements ThemeRepository {
     const now = new Date().toISOString();
     const json = override.toJSON();
 
-    const existing = await queryOne<Record<string, unknown>>('SELECT "overrideId" FROM "themeOverride" WHERE "overrideId" = $1', [
+    const existing = await queryOne<Pick<DbThemeOverride, 'overrideId'>>('SELECT "overrideId" FROM "themeOverride" WHERE "overrideId" = $1', [
       override.overrideId,
     ]);
 
@@ -245,7 +245,7 @@ export class ThemeRepositoryImpl implements ThemeRepository {
   // ── Theme Assignment ────────────────────────────────────────
 
   async findThemeAssignment(storeId: string): Promise<{ themeId: string; overrideId?: string } | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT "themeId", "overrideId" FROM "themeAssignment" WHERE "storeId" = $1', [
+    const row = await queryOne<Pick<DbThemeAssignment, 'themeId' | 'overrideId'>>('SELECT "themeId", "overrideId" FROM "themeAssignment" WHERE "storeId" = $1', [
       storeId,
     ]);
     if (!row) return null;
@@ -257,7 +257,7 @@ export class ThemeRepositoryImpl implements ThemeRepository {
 
   async assignThemeToStore(storeId: string, themeId: string, organizationId: string): Promise<void> {
     const now = new Date().toISOString();
-    const existing = await queryOne<Record<string, unknown>>('SELECT "storeId" FROM "themeAssignment" WHERE "storeId" = $1', [storeId]);
+    const existing = await queryOne<Pick<DbThemeAssignment, 'storeId'>>('SELECT "storeId" FROM "themeAssignment" WHERE "storeId" = $1', [storeId]);
 
     if (existing) {
       await query('UPDATE "themeAssignment" SET "themeId" = $1, "organizationId" = $2, "updatedAt" = $3 WHERE "storeId" = $4', [

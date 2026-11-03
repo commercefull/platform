@@ -8,7 +8,7 @@ import { mapToSubscriptionPlan } from './subscriptionHelpers';
 import type { SubscriptionPlan as DbSubscriptionPlan } from '../../../../libs/db/types';
 
 export async function getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [
+  const row = await queryOne<DbSubscriptionPlan>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [
     subscriptionPlanId,
   ]);
   return row ? mapToSubscriptionPlan(row) : null;
@@ -124,7 +124,7 @@ async function updateSubscriptionPlan(plan: Partial<SubscriptionPlan> & { subscr
 async function insertSubscriptionPlan(plan: SubscriptionPlanInput): Promise<Record<string, unknown> | null> {
   const now = new Date().toISOString();
   const v = planRowValues(plan);
-  return queryOne<Record<string, unknown>>(
+  return queryOne<DbSubscriptionPlan>(
     `INSERT INTO "subscriptionPlan" (
         "subscriptionProductId", "name", "slug", "description", "billingInterval",
         "billingIntervalCount", "priceCents", "compareAtPriceCents", "currencyCode", "setupFeeCents",

@@ -12,14 +12,14 @@ import type {
   SenderType,
   SupportTicketProps,
 } from '../../domain/entities/SupportTicket';
-import type { SupportAttachment as DbSupportAttachment, SupportMessage as DbSupportMessage } from '../../../../libs/db/types';
+import type { SupportAttachment as DbSupportAttachment, SupportMessage as DbSupportMessage, SupportTicket as DbSupportTicket} from '../../../../libs/db/types';
 
 export type SupportTicket = SupportTicketProps;
 type SupportMessage = DbSupportMessage;
 type SupportAttachment = DbSupportAttachment;
 
 export async function getTicket(supportTicketId: string): Promise<SupportTicket | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
+  const row = await queryOne<DbSupportTicket>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
   return row ? mapToTicket(row) : null;
 }
 
@@ -214,7 +214,7 @@ export async function addMessage(message: {
   const ticket = await getTicket(message.supportTicketId);
   if (!ticket) throw new SupportTicketNotFoundError(message.supportTicketId);
 
-  const result = await queryOne<Record<string, unknown>>(
+  const result = await queryOne<DbSupportMessage>(
     `INSERT INTO "supportMessage" (
       "supportTicketId", "senderId", "senderType", "senderName", "senderEmail",
       "message", "messageHtml", "messageType", "isInternal", "isAutoReply", "createdAt"

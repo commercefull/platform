@@ -17,6 +17,7 @@ import {
   TaxExemptionNotFoundError,
   TaxSettingsNotFoundError,
 } from '../../domain/errors/TaxErrors';
+import type { CustomerTaxExemption as DbCustomerTaxExemption, TaxCategory as DbTaxCategory, TaxRate as DbTaxRate, TaxSettings as DbTaxSettings, TaxZone as DbTaxZone } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -138,7 +139,7 @@ export class TaxCommandRepo {
 
     // Use taxRate directly - DB uses camelCase
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxRate>(
       `INSERT INTO "${TABLES.TAX_RATE}" (
         "taxRateId", "taxCategoryId", "taxZoneId", "name",
         "rate", "type", "priority", "isCompound", "includeInPrice",
@@ -190,7 +191,7 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxRate>(
       `UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`,
       [id, ...params, unixTimestamp()],
     );
@@ -217,7 +218,7 @@ export class TaxCommandRepo {
 
     // Use category directly - DB uses camelCase
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxCategory>(
       `INSERT INTO "${TABLES.TAX_CATEGORY}" (
         "taxCategoryId", "name", "code", "description", "isDefault", "sortOrder",
         "isActive", "createdAt", "updatedAt"
@@ -245,7 +246,7 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxCategory>(
       `UPDATE "${TABLES.TAX_CATEGORY}" SET ${sets.join(', ')} WHERE "taxCategoryId" = $1 RETURNING *`,
       [id, ...params, unixTimestamp()],
     );
@@ -273,7 +274,7 @@ export class TaxCommandRepo {
 
     // Use taxZone directly - DB uses camelCase
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxZone>(
       `INSERT INTO "${TABLES.TAX_ZONE}" (
         "taxZoneId", "name", "code", "description", "isDefault", "countries", "states", 
         "postcodes", "cities", "isActive", "createdAt", "updatedAt"
@@ -312,7 +313,7 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxZone>(
       `UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`,
       [id, ...params, unixTimestamp()],
     );
@@ -339,7 +340,7 @@ export class TaxCommandRepo {
 
     // Use exemption directly - DB uses camelCase
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbCustomerTaxExemption>(
       `INSERT INTO "${TABLES.CUSTOMER_TAX_EXEMPTION}" (
         "customerTaxExemptionId", "customerId", "taxZoneId", "type", "status", 
         "name", "exemptionNumber", "businessName", "exemptionReason", "documentUrl", 
@@ -396,7 +397,7 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbCustomerTaxExemption>(
       `UPDATE "${TABLES.CUSTOMER_TAX_EXEMPTION}" SET ${sets.join(', ')} WHERE "customerTaxExemptionId" = $1 RETURNING *`,
       [id, ...params, unixTimestamp()],
     );
@@ -424,7 +425,7 @@ export class TaxCommandRepo {
 
     // Use settings directly - DB uses camelCase
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxSettings>(
       `INSERT INTO "${TABLES.TAX_SETTINGS}" (
         "taxSettingsId", "organizationId", "calculationMethod", "pricesIncludeTax", 
         "displayPricesWithTax", "taxBasedOn", "shippingTaxClass", 
@@ -478,7 +479,7 @@ export class TaxCommandRepo {
       throw new TaxValidationError('No fields to update');
     }
 
-    const result = await queryOne<Record<string, unknown>>(
+    const result = await queryOne<DbTaxSettings>(
       `UPDATE "${TABLES.TAX_SETTINGS}" SET ${sets.join(', ')} WHERE "taxSettingsId" = $1 RETURNING *`,
       [id, ...params, unixTimestamp()],
     );

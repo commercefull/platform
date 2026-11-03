@@ -32,7 +32,7 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
-import type { PaymentTransaction as DbPaymentTransaction, PaymentRefund as DbPaymentRefund } from '../../../../libs/db/types';
+import type { PaymentTransaction as DbPaymentTransaction, PaymentRefund as DbPaymentRefund, PaymentGateway as DbPaymentGateway, PaymentMethodConfig as DbPaymentMethodConfig } from '../../../../libs/db/types';
 
 function paginatedResult<T>(rows: Record<string, unknown>[] | null | undefined, total: number, limit: number, offset: number, map: (row: Record<string, unknown>) => T): PaginatedResult<T> {
   const length = rows?.length || 0;
@@ -48,7 +48,7 @@ function paginatedResult<T>(rows: Record<string, unknown>[] | null | undefined, 
 
 export class PaymentRepo implements IPaymentRepository {
   async findTransactionById(transactionId: string): Promise<PaymentTransaction | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbPaymentTransaction>(
       'SELECT * FROM "paymentTransaction" WHERE "paymentTransactionId" = $1 AND "deletedAt" IS NULL',
       [transactionId],
     );
@@ -56,7 +56,7 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findTransactionByExternalId(externalId: string): Promise<PaymentTransaction | null> {
-    const row = await queryOne<Record<string, unknown>>(
+    const row = await queryOne<DbPaymentTransaction>(
       'SELECT * FROM "paymentTransaction" WHERE "externalTransactionId" = $1 AND "deletedAt" IS NULL',
       [externalId],
     );
@@ -111,7 +111,7 @@ export class PaymentRepo implements IPaymentRepository {
   async saveTransaction(transaction: PaymentTransaction): Promise<PaymentTransaction> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, unknown>>(
+    const existing = await queryOne<{ paymentTransactionId: string }>(
       'SELECT "paymentTransactionId" FROM "paymentTransaction" WHERE "paymentTransactionId" = $1',
       [transaction.transactionId],
     );
@@ -204,7 +204,7 @@ export class PaymentRepo implements IPaymentRepository {
 
   // Refunds
   async findRefundById(refundId: string): Promise<PaymentRefund | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "paymentRefund" WHERE "paymentRefundId" = $1', [refundId]);
+    const row = await queryOne<DbPaymentRefund>('SELECT * FROM "paymentRefund" WHERE "paymentRefundId" = $1', [refundId]);
     return row ? this.mapToRefund(row) : null;
   }
 
@@ -218,7 +218,7 @@ export class PaymentRepo implements IPaymentRepository {
   async saveRefund(refund: PaymentRefund): Promise<PaymentRefund> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, unknown>>('SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1', [
+    const existing = await queryOne<{ paymentRefundId: string }>('SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1', [
       refund.refundId,
     ]);
 
@@ -292,13 +292,13 @@ export class PaymentRepo implements IPaymentRepository {
 
     const sql = `SELECT * FROM "paymentMethodConfig" WHERE ${conditions.join(' AND ')} ORDER BY "displayOrder" ASC`;
 
-    const rows = await query<Record<string, unknown>[]>(sql, params);
+    const rows = await query<DbPaymentMethodConfig[]>(sql, params);
     return (rows || []).map(row => ({
-      paymentMethodConfigId: row.paymentMethodConfigId as string,
-      paymentMethod: row.paymentMethod as string,
-      displayName: (row.displayName as string) || (row.type as string),
-      description: row.description as string | undefined,
-      icon: row.icon as string | undefined,
+      paymentMethodConfigId: row.paymentMethodConfigId,
+      paymentMethod: row.paymentMethod,
+      displayName: row.displayName || row.paymentMethod,
+      description: row.description || undefined,
+      icon: row.icon || undefined,
       processingFeeCents: row.processingFeeCents ? Number(row.processingFeeCents) : undefined,
     }));
   }
@@ -312,18 +312,18 @@ export class PaymentRepo implements IPaymentRepository {
     let row: Record<string, unknown> | null = null;
 
     if (organizationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(organizationId)) {
-      row = await queryOne<Record<string, unknown>>(
+      row = await queryOne<DbPaymentGateway>(
         'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
         [organizationId],
       );
     }
 
     if (!row) {
-      const fallback = await queryOne<Record<string, unknown>>(
+      const fallback = await queryOne<DbPaymentGateway>(
         'SELECT * FROM "paymentGateway" WHERE "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
       );
       if (!fallback) {
-        const anyGateway = await queryOne<Record<string, unknown>>(
+        const anyGateway = await queryOne<DbPaymentGateway>(
           'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
         );
         if (!anyGateway) return null;
