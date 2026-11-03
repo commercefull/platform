@@ -1,4 +1,4 @@
-import {jsonResponse} from 'libs/apiResponse';
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * SSO Business Controller
  *
@@ -6,13 +6,13 @@ import {jsonResponse} from 'libs/apiResponse';
  * Config routes require organization auth. SSO login routes are public.
  */
 
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase} from '../../application/wired';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import { manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase } from '../../application/wired';
 
 class SsoController {
   // ── List Providers ────────────────────────────────────────────
 
-  async listProviders(req: HttpRequest, res: HttpResponse) {
+  listProviders = async (req: HttpRequest, res: HttpResponse) => {
     const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, message: 'Authentication required' });
@@ -20,11 +20,11 @@ class SsoController {
     }
     const providers = await listProvidersUseCase.execute(organizationId);
     jsonResponse(res, 200, { success: true, data: providers });
-  }
+  };
 
   // ── SAML Config CRUD ──────────────────────────────────────────
 
-  async createSamlProvider(req: HttpRequest, res: HttpResponse) {
+  createSamlProvider = async (req: HttpRequest, res: HttpResponse) => {
     const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, message: 'Authentication required' });
@@ -48,9 +48,9 @@ class SsoController {
       attributeMapping: body.attributeMapping as Record<string, string> | undefined,
     });
     jsonResponse(res, 201, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async updateSamlProvider(req: HttpRequest, res: HttpResponse) {
+  updateSamlProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const body = req.body as Record<string, unknown>;
     const provider = await manageSamlUseCase.update(providerId, {
@@ -66,9 +66,9 @@ class SsoController {
       signAuthnRequest: body.signAuthnRequest as boolean | undefined,
     });
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async getSamlProvider(req: HttpRequest, res: HttpResponse) {
+  getSamlProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const provider = await manageSamlUseCase.getById(providerId);
     if (!provider) {
@@ -76,29 +76,29 @@ class SsoController {
       return;
     }
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async deleteSamlProvider(req: HttpRequest, res: HttpResponse) {
+  deleteSamlProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     await manageSamlUseCase.delete(providerId);
     jsonResponse(res, 200, { success: true, message: 'SAML provider deleted' });
-  }
+  };
 
-  async activateSamlProvider(req: HttpRequest, res: HttpResponse) {
+  activateSamlProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const provider = await manageSamlUseCase.activate(providerId);
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async deactivateSamlProvider(req: HttpRequest, res: HttpResponse) {
+  deactivateSamlProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const provider = await manageSamlUseCase.deactivate(providerId);
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
   // ── OIDC Config CRUD ──────────────────────────────────────────
 
-  async createOidcProvider(req: HttpRequest, res: HttpResponse) {
+  createOidcProvider = async (req: HttpRequest, res: HttpResponse) => {
     const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, message: 'Authentication required' });
@@ -122,9 +122,9 @@ class SsoController {
       claimMapping: body.claimMapping as Record<string, string> | undefined,
     });
     jsonResponse(res, 201, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async updateOidcProvider(req: HttpRequest, res: HttpResponse) {
+  updateOidcProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const body = req.body as Record<string, unknown>;
     const provider = await manageOidcUseCase.update(providerId, {
@@ -142,9 +142,9 @@ class SsoController {
       jwksUri: body.jwksUri as string | undefined,
     });
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async getOidcProvider(req: HttpRequest, res: HttpResponse) {
+  getOidcProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const provider = await manageOidcUseCase.getById(providerId);
     if (!provider) {
@@ -152,35 +152,35 @@ class SsoController {
       return;
     }
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async deleteOidcProvider(req: HttpRequest, res: HttpResponse) {
+  deleteOidcProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     await manageOidcUseCase.delete(providerId);
     jsonResponse(res, 200, { success: true, message: 'OIDC provider deleted' });
-  }
+  };
 
-  async activateOidcProvider(req: HttpRequest, res: HttpResponse) {
+  activateOidcProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const provider = await manageOidcUseCase.activate(providerId);
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
-  async deactivateOidcProvider(req: HttpRequest, res: HttpResponse) {
+  deactivateOidcProvider = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const provider = await manageOidcUseCase.deactivate(providerId);
     jsonResponse(res, 200, { success: true, data: provider.toJSON() });
-  }
+  };
 
   // ── SSO Login Flows (public) ──────────────────────────────────
 
-  async initiateSamlLogin(req: HttpRequest, res: HttpResponse) {
+  initiateSamlLogin = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const result = await ssoLoginUseCase.initiateSamlAsync(providerId);
     jsonResponse(res, 200, { success: true, redirectUrl: result.redirectUrl, requestId: result.requestId });
-  }
+  };
 
-  async samlCallback(req: HttpRequest, res: HttpResponse) {
+  samlCallback = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const body = req.body as Record<string, unknown>;
     const samlResponse = (body.SAMLResponse as string) || (req.query.SAMLResponse as string);
@@ -190,15 +190,15 @@ class SsoController {
     }
     const result = await ssoLoginUseCase.handleSamlCallback(providerId, samlResponse, req.ip);
     jsonResponse(res, 200, { success: true, ...result });
-  }
+  };
 
-  async initiateOidcLogin(req: HttpRequest, res: HttpResponse) {
+  initiateOidcLogin = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const result = await ssoLoginUseCase.initiateOidc(providerId);
     jsonResponse(res, 200, { success: true, authUrl: result.authUrl, state: result.state });
-  }
+  };
 
-  async oidcCallback(req: HttpRequest, res: HttpResponse) {
+  oidcCallback = async (req: HttpRequest, res: HttpResponse) => {
     const { providerId } = req.params;
     const body = req.body as Record<string, unknown>;
     const code = (body.code as string) || (req.query.code as string);
@@ -209,7 +209,7 @@ class SsoController {
     }
     const result = await ssoLoginUseCase.handleOidcCallback(providerId, code, codeVerifier, req.ip);
     jsonResponse(res, 200, { success: true, ...result });
-  }
+  };
 }
 
 export const ssoController = new SsoController();

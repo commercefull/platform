@@ -63,7 +63,7 @@ export class ScimController {
   /**
    * GET /scim/v2/Users — list provisioned users
    */
-  async listUsers(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listUsers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const organizationId = (req.query.organizationId as string) || '';
@@ -100,12 +100,12 @@ export class ScimController {
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * GET /scim/v2/Users/:id — get a single provisioned user
    */
-  async getUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -133,12 +133,12 @@ export class ScimController {
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * POST /scim/v2/Users — provision a new user
    */
-  async createUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const body = req.body as Record<string, unknown>;
@@ -185,12 +185,12 @@ export class ScimController {
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * PUT /scim/v2/Users/:id — replace a user
    */
-  async replaceUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  replaceUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -226,12 +226,12 @@ export class ScimController {
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * PATCH /scim/v2/Users/:id — update user attributes
    */
-  async patchUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  patchUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -251,12 +251,12 @@ export class ScimController {
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
   /**
    * DELETE /scim/v2/Users/:id — deprovision a user
    */
-  async deleteUser(req: HttpRequest, res: HttpResponse): Promise<void> {
+  deleteUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -274,16 +274,16 @@ export class ScimController {
         scimError(500, 'Internal server error', res);
       }
     }
-  }
+  };
 
-  private toScimUser(params: {
+  private toScimUser = (params: {
     scimUserId: string;
     user: { id: string; email: string; name?: string; firstName?: string; lastName?: string; isActive: boolean };
     active: boolean | null;
     createdAt: Date | null;
     updatedAt: Date | null;
     externalId?: string | null;
-  }): ScimUser {
+  }): ScimUser => {
     const { scimUserId, user, active, createdAt, updatedAt, externalId } = params;
     return {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
@@ -303,5 +303,5 @@ export class ScimController {
         lastModified: updatedAt?.toISOString() ?? new Date().toISOString(),
       },
     };
-  }
+  };
 }

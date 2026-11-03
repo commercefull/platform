@@ -4,7 +4,7 @@ import { manageImportJobs, manageImportMappings, manageImportErrors } from '../.
 import type { ImportJobType, ImportSource, ImportJobStatus } from '../../domain/entities/ImportJob';
 
 class MigrationController {
-  async createJob(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const organizationId = req.user?.organizationId || req.user?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, error: 'Organization not found' });
@@ -23,14 +23,14 @@ class MigrationController {
       autoActivate: autoActivate as boolean | undefined,
     });
     jsonResponse(res, 201, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async getJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  getJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const job = await manageImportJobs.getJob(req.params.importJobId);
     jsonResponse(res, 200, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async listJobs(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listJobs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const organizationId = req.user?.organizationId || req.user?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, error: 'Organization not found' });
@@ -42,46 +42,46 @@ class MigrationController {
       jobType: jobType as ImportJobType | undefined,
     });
     jsonResponse(res, 200, { success: true, data: jobs.map(j => j.toJSON()) });
-  }
+  };
 
-  async startJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  startJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const job = await manageImportJobs.startJob(req.params.importJobId);
     jsonResponse(res, 200, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async completeJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  completeJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const job = await manageImportJobs.completeJob(req.params.importJobId);
     jsonResponse(res, 200, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async failJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  failJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const { errorMessage } = req.body as { errorMessage: string };
     const job = await manageImportJobs.failJob(req.params.importJobId, errorMessage);
     jsonResponse(res, 200, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async pauseJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  pauseJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const job = await manageImportJobs.pauseJob(req.params.importJobId);
     jsonResponse(res, 200, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async cancelJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  cancelJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const job = await manageImportJobs.cancelJob(req.params.importJobId);
     jsonResponse(res, 200, { success: true, data: job.toJSON() });
-  }
+  };
 
-  async deleteJob(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  deleteJob = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     await manageImportJobs.deleteJob(req.params.importJobId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 
-  async getMappings(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  getMappings = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const { entityType } = req.query;
     const mappings = await manageImportMappings.findByJob(req.params.importJobId, entityType as string | undefined);
     jsonResponse(res, 200, { success: true, data: mappings.map(m => m.toJSON()) });
-  }
+  };
 
-  async createMapping(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  createMapping = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const { entityType, sourceId, platformId, sourceData } = req.body as Record<string, unknown>;
     const mapping = await manageImportMappings.createMapping({
       importJobId: req.params.importJobId,
@@ -91,9 +91,9 @@ class MigrationController {
       sourceData: sourceData as Record<string, unknown> | undefined,
     });
     jsonResponse(res, 201, { success: true, data: mapping.toJSON() });
-  }
+  };
 
-  async lookupMapping(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  lookupMapping = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const { entityType, sourceId } = req.query;
     const mapping = await manageImportMappings.findByJobAndSource(req.params.importJobId, entityType as string, sourceId as string);
     if (!mapping) {
@@ -101,25 +101,25 @@ class MigrationController {
       return;
     }
     jsonResponse(res, 200, { success: true, data: mapping.toJSON() });
-  }
+  };
 
-  async getErrors(req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> {
+  getErrors = async (req: HttpRequest<{ importJobId: string }>, res: HttpResponse): Promise<void> => {
     const { severity, resolved } = req.query;
     const errors = await manageImportErrors.findByJob(req.params.importJobId, {
       severity: severity as string | undefined,
       resolved: resolved === 'true',
     });
     jsonResponse(res, 200, { success: true, data: errors.map(e => e.toJSON()) });
-  }
+  };
 
-  async resolveError(req: HttpRequest<{ importErrorId: string }>, res: HttpResponse): Promise<void> {
+  resolveError = async (req: HttpRequest<{ importErrorId: string }>, res: HttpResponse): Promise<void> => {
     const error = await manageImportErrors.resolveError(req.params.importErrorId);
     if (!error) {
       jsonResponse(res, 404, { success: false, error: 'Error not found' });
       return;
     }
     jsonResponse(res, 200, { success: true, data: error.toJSON() });
-  }
+  };
 }
 
 export const migrationController = new MigrationController();

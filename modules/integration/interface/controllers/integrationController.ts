@@ -5,7 +5,7 @@ import type { IntegrationProvider } from '../../domain/entities/Integration';
 import type { CredentialType } from '../../domain/entities/IntegrationCredential';
 
 class IntegrationController {
-  async createIntegration(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const organizationId = (req.user as { id?: string })?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, error: 'Organization not found' });
@@ -21,14 +21,14 @@ class IntegrationController {
       config: config as Record<string, unknown> | undefined,
     });
     jsonResponse(res, 201, { success: true, data: integration.toJSON() });
-  }
+  };
 
-  async getIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  getIntegration = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const integration = await manageIntegrations.getIntegration(req.params.integrationId);
     jsonResponse(res, 200, { success: true, data: integration.toJSON() });
-  }
+  };
 
-  async listIntegrations(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listIntegrations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const organizationId = (req.user as { id?: string })?.id;
     if (!organizationId) {
       jsonResponse(res, 401, { success: false, error: 'Organization not found' });
@@ -40,9 +40,9 @@ class IntegrationController {
       status: status as string | undefined,
     });
     jsonResponse(res, 200, { success: true, data: integrations.map(i => i.toJSON()) });
-  }
+  };
 
-  async updateIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  updateIntegration = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const { name, description, webhookUrl, config } = req.body as Record<string, unknown>;
     const integration = await manageIntegrations.updateIntegration(req.params.integrationId, {
       name: name as string | undefined,
@@ -51,25 +51,25 @@ class IntegrationController {
       config: config as Record<string, unknown> | undefined,
     });
     jsonResponse(res, 200, { success: true, data: integration.toJSON() });
-  }
+  };
 
-  async activateIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  activateIntegration = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const integration = await manageIntegrations.activateIntegration(req.params.integrationId);
     jsonResponse(res, 200, { success: true, data: integration.toJSON() });
-  }
+  };
 
-  async deactivateIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  deactivateIntegration = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const integration = await manageIntegrations.deactivateIntegration(req.params.integrationId);
     jsonResponse(res, 200, { success: true, data: integration.toJSON() });
-  }
+  };
 
-  async deleteIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  deleteIntegration = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     await manageIntegrations.deleteIntegration(req.params.integrationId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 
   // Credentials
-  async addCredential(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  addCredential = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const { type, label, credentials, expiresAt } = req.body as Record<string, unknown>;
     const credential = await manageIntegrations.addCredential({
       integrationId: req.params.integrationId,
@@ -79,26 +79,26 @@ class IntegrationController {
       expiresAt: expiresAt ? new Date(expiresAt as string) : undefined,
     });
     jsonResponse(res, 201, { success: true, data: credential.toJSON() });
-  }
+  };
 
-  async listCredentials(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  listCredentials = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const credentials = await manageIntegrations.getCredentials(req.params.integrationId);
     jsonResponse(res, 200, { success: true, data: credentials.map(c => c.toJSON()) });
-  }
+  };
 
-  async updateCredential(req: HttpRequest<{ integrationId: string; credentialId: string }>, res: HttpResponse): Promise<void> {
+  updateCredential = async (req: HttpRequest<{ integrationId: string; credentialId: string }>, res: HttpResponse): Promise<void> => {
     const { credentials } = req.body as { credentials: Record<string, unknown> };
     const credential = await manageIntegrations.updateCredential(req.params.credentialId, credentials);
     jsonResponse(res, 200, { success: true, data: credential.toJSON() });
-  }
+  };
 
-  async deleteCredential(req: HttpRequest<{ integrationId: string; credentialId: string }>, res: HttpResponse): Promise<void> {
+  deleteCredential = async (req: HttpRequest<{ integrationId: string; credentialId: string }>, res: HttpResponse): Promise<void> => {
     await manageIntegrations.deleteCredential(req.params.credentialId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 
   // Subscriptions
-  async createSubscription(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  createSubscription = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const { eventType, targetAction, description, payloadMapping, headers } = req.body as Record<string, unknown>;
     const subscription = await manageSubscriptions.createSubscription({
       integrationId: req.params.integrationId,
@@ -109,14 +109,14 @@ class IntegrationController {
       headers: headers as Record<string, string> | undefined,
     });
     jsonResponse(res, 201, { success: true, data: subscription.toJSON() });
-  }
+  };
 
-  async listSubscriptions(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  listSubscriptions = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const subscriptions = await manageSubscriptions.listSubscriptions(req.params.integrationId);
     jsonResponse(res, 200, { success: true, data: subscriptions.map(s => s.toJSON()) });
-  }
+  };
 
-  async updateSubscription(req: HttpRequest<{ integrationId: string; subscriptionId: string }>, res: HttpResponse): Promise<void> {
+  updateSubscription = async (req: HttpRequest<{ integrationId: string; subscriptionId: string }>, res: HttpResponse): Promise<void> => {
     const { targetAction, payloadMapping, headers, isActive } = req.body as Record<string, unknown>;
     const subscription = await manageSubscriptions.updateSubscription(req.params.subscriptionId, {
       targetAction: targetAction as string | undefined,
@@ -125,15 +125,15 @@ class IntegrationController {
       isActive: isActive as boolean | undefined,
     });
     jsonResponse(res, 200, { success: true, data: subscription.toJSON() });
-  }
+  };
 
-  async deleteSubscription(req: HttpRequest<{ integrationId: string; subscriptionId: string }>, res: HttpResponse): Promise<void> {
+  deleteSubscription = async (req: HttpRequest<{ integrationId: string; subscriptionId: string }>, res: HttpResponse): Promise<void> => {
     await manageSubscriptions.deleteSubscription(req.params.subscriptionId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 
   // Logs
-  async listLogs(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  listLogs = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     const { status, limit, offset } = req.query;
     const result = await manageIntegrationLogs.listLogs(req.params.integrationId, {
       status: status as string | undefined,
@@ -141,12 +141,12 @@ class IntegrationController {
       offset: offset ? parseInt(offset as string, 10) : undefined,
     });
     jsonResponse(res, 200, { success: true, data: result.data.map(l => l.toJSON()), total: result.total });
-  }
+  };
 
-  async deleteLogs(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
+  deleteLogs = async (req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> => {
     await manageIntegrationLogs.deleteLogs(req.params.integrationId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 }
 
 export const integrationController = new IntegrationController();

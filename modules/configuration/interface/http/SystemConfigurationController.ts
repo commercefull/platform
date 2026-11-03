@@ -1,14 +1,14 @@
-import {jsonResponse} from 'libs/apiResponse';
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * System Configuration HTTP Controller
  * Handles system configuration-related HTTP requests
  */
 
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {SystemConfiguration} from '../../domain/entities/SystemConfiguration';
-import {UpdateSystemConfigurationCommand} from '../../application/useCases/UpdateSystemConfiguration';
-import {manageSystemConfigurationUseCase, updateSystemConfigurationUseCase} from '../../application/wired';
-import {generateUUID, isUuid} from '../../../../libs/uuid';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
+import { UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
+import { manageSystemConfigurationUseCase, updateSystemConfigurationUseCase } from '../../application/wired';
+import { generateUUID, isUuid } from '../../../../libs/uuid';
 
 interface CreateConfigBody {
   configId?: string;
@@ -45,7 +45,7 @@ export class SystemConfigurationController {
    * Create system configuration
    * POST /business/configuration
    */
-  async createSystemConfiguration(req: HttpRequest<Record<string, string>, unknown, CreateConfigBody>, res: HttpResponse) {
+  createSystemConfiguration = async (req: HttpRequest<Record<string, string>, unknown, CreateConfigBody>, res: HttpResponse) => {
     const body = req.body;
     if (!body.platformName || !body.platformName.trim()) {
       return jsonResponse(res, 400, { success: false, message: 'platformName is required' });
@@ -73,13 +73,13 @@ export class SystemConfigurationController {
       success: true,
       data: config.toJSON(),
     });
-  }
+  };
 
   /**
    * Update system configuration
    * PUT /business/configuration/:configId
    */
-  async updateSystemConfiguration(req: HttpRequest<Record<string, string>, unknown, UpdateConfigBody>, res: HttpResponse) {
+  updateSystemConfiguration = async (req: HttpRequest<Record<string, string>, unknown, UpdateConfigBody>, res: HttpResponse) => {
     if (!isUuid(req.params.configId)) {
       return jsonResponse(res, 400, {
         success: false,
@@ -110,13 +110,13 @@ export class SystemConfigurationController {
       success: true,
       data: result,
     });
-  }
+  };
 
   /**
    * Get system configuration by ID
    * GET /business/configuration/:configId
    */
-  async getSystemConfiguration(req: HttpRequest, res: HttpResponse) {
+  getSystemConfiguration = async (req: HttpRequest, res: HttpResponse) => {
     if (!isUuid(req.params.configId)) {
       return jsonResponse(res, 400, {
         success: false,
@@ -136,13 +136,13 @@ export class SystemConfigurationController {
       success: true,
       data: config.toJSON(),
     });
-  }
+  };
 
   /**
    * Get active system configuration
    * GET /business/configuration/active
    */
-  async getActiveSystemConfiguration(req: HttpRequest, res: HttpResponse) {
+  getActiveSystemConfiguration = async (req: HttpRequest, res: HttpResponse) => {
     const config = await manageSystemConfigurationUseCase.findActive();
 
     if (!config) {
@@ -156,13 +156,13 @@ export class SystemConfigurationController {
       success: true,
       data: config.toJSON(),
     });
-  }
+  };
 
   /**
    * List all system configurations
    * GET /business/configuration
    */
-  async listSystemConfigurations(req: HttpRequest, res: HttpResponse) {
+  listSystemConfigurations = async (req: HttpRequest, res: HttpResponse) => {
     const configs = await manageSystemConfigurationUseCase.findAll();
 
     jsonResponse(res, 200, {
@@ -170,5 +170,5 @@ export class SystemConfigurationController {
       data: configs.map(config => config.toJSON()),
       count: configs.length,
     });
-  }
+  };
 }

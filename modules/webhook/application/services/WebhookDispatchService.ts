@@ -32,7 +32,7 @@ export class WebhookDispatchService {
    * Start listening to all events on the eventBus and dispatch to webhooks
    */
   start(): void {
-    eventBus.on('*', this.handleEvent.bind(this));
+    eventBus.on('*', this.handleEvent);
     // The retry poller runs once per deployment — only in processes that
     // consume events (worker, or a single-process deployment). PM2 web
     // workers set EVENT_CONSUMER_DISABLED=1 and must not poll.
@@ -57,7 +57,7 @@ export class WebhookDispatchService {
   /**
    * Handle an incoming event from the eventBus
    */
-  private async handleEvent(payload: EventPayload): Promise<void> {
+  private handleEvent = async (payload: EventPayload): Promise<void> => {
     try {
       const endpoints = await this.repo.findEndpointsByEvent(payload.type);
       if (endpoints.length === 0) return;
@@ -74,7 +74,7 @@ export class WebhookDispatchService {
     } catch (error) {
       logger.error('[WEBHOOK] Error handling event:', error);
     }
-  }
+  };
 
   /**
    * Dispatch a single event payload to a webhook endpoint

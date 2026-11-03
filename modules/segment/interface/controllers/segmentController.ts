@@ -1,22 +1,35 @@
-import {jsonResponse} from 'libs/apiResponse';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {createSegmentUseCase, updateSegmentUseCase, deleteSegmentUseCase, getSegmentUseCase, listSegmentsUseCase, getCustomerProfileUseCase, listCustomerProfilesUseCase, computeCustomerProfileUseCase, recomputeAllProfilesUseCase, evaluateSegmentUseCase, getSegmentMembersUseCase, getCustomerSegmentsUseCase} from '../../application/useCases/wired';
+import { jsonResponse } from 'libs/apiResponse';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import {
+  createSegmentUseCase,
+  updateSegmentUseCase,
+  deleteSegmentUseCase,
+  getSegmentUseCase,
+  listSegmentsUseCase,
+  getCustomerProfileUseCase,
+  listCustomerProfilesUseCase,
+  computeCustomerProfileUseCase,
+  recomputeAllProfilesUseCase,
+  evaluateSegmentUseCase,
+  getSegmentMembersUseCase,
+  getCustomerSegmentsUseCase,
+} from '../../application/useCases/wired';
 
 class SegmentController {
   // ── Segment CRUD ──────────────────────────────────────────────
 
-  async listSegments(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listSegments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const activeOnly = req.query.activeOnly === 'true';
     const segments = await listSegmentsUseCase.execute(activeOnly);
     jsonResponse(res, 200, { success: true, data: segments.map(s => s.toJSON()) });
-  }
+  };
 
-  async getSegment(req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> {
+  getSegment = async (req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> => {
     const segment = await getSegmentUseCase.execute(req.params.segmentId);
     jsonResponse(res, 200, { success: true, data: segment.toJSON() });
-  }
+  };
 
-  async createSegment(
+  createSegment = async (
     req: HttpRequest<
       Record<string, never>,
       Record<string, never>,
@@ -33,7 +46,7 @@ class SegmentController {
       }
     >,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const body = req.body;
     // Normalize: accept "rules" as shorthand for "conditions"
     const conditions = body.conditions || body.rules || [];
@@ -47,9 +60,9 @@ class SegmentController {
     const payload = { ...body, conditions, code };
     const segment = await createSegmentUseCase.execute(payload as Parameters<typeof createSegmentUseCase.execute>[0]);
     jsonResponse(res, 201, { success: true, data: segment.toJSON() });
-  }
+  };
 
-  async updateSegment(
+  updateSegment = async (
     req: HttpRequest<
       { segmentId: string },
       Record<string, never>,
@@ -64,34 +77,34 @@ class SegmentController {
       }
     >,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const segment = await updateSegmentUseCase.execute(
       req.params.segmentId,
       req.body as Parameters<typeof updateSegmentUseCase.execute>[1],
     );
     jsonResponse(res, 200, { success: true, data: segment.toJSON() });
-  }
+  };
 
-  async deleteSegment(req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> {
+  deleteSegment = async (req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> => {
     await deleteSegmentUseCase.execute(req.params.segmentId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 
   // ── Segment Evaluation ────────────────────────────────────────
 
-  async evaluateSegment(req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> {
+  evaluateSegment = async (req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> => {
     const result = await evaluateSegmentUseCase.execute(req.params.segmentId);
     jsonResponse(res, 200, { success: true, data: result });
-  }
+  };
 
-  async getSegmentMembers(req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> {
+  getSegmentMembers = async (req: HttpRequest<{ segmentId: string }>, res: HttpResponse): Promise<void> => {
     const members = await getSegmentMembersUseCase.execute(req.params.segmentId);
     jsonResponse(res, 200, { success: true, data: members.map(m => m.toJSON()) });
-  }
+  };
 
   // ── Customer Profile ──────────────────────────────────────────
 
-  async getCustomerProfile(req: HttpRequest<{ customerId: string }>, res: HttpResponse): Promise<void> {
+  getCustomerProfile = async (req: HttpRequest<{ customerId: string }>, res: HttpResponse): Promise<void> => {
     const profile = await getCustomerProfileUseCase.execute(req.params.customerId);
     if (!profile) {
       // Return a default empty profile instead of 404
@@ -115,16 +128,16 @@ class SegmentController {
       return;
     }
     jsonResponse(res, 200, { success: true, data: profile.toJSON() });
-  }
+  };
 
-  async listCustomerProfiles(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listCustomerProfiles = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
     const profiles = await listCustomerProfilesUseCase.execute(limit, offset);
     jsonResponse(res, 200, { success: true, data: profiles.map(p => p.toJSON()) });
-  }
+  };
 
-  async computeProfile(req: HttpRequest<{ customerId: string }>, res: HttpResponse): Promise<void> {
+  computeProfile = async (req: HttpRequest<{ customerId: string }>, res: HttpResponse): Promise<void> => {
     const profile = await computeCustomerProfileUseCase.execute(req.params.customerId);
     if (!profile) {
       // Return a default empty profile instead of 404
@@ -148,19 +161,19 @@ class SegmentController {
       return;
     }
     jsonResponse(res, 200, { success: true, data: profile.toJSON() });
-  }
+  };
 
-  async recomputeAll(_req: HttpRequest, res: HttpResponse): Promise<void> {
+  recomputeAll = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
     const count = await recomputeAllProfilesUseCase.execute();
     jsonResponse(res, 200, { success: true, data: { recomputed: count } });
-  }
+  };
 
   // ── Customer Segments ─────────────────────────────────────────
 
-  async getCustomerSegments(req: HttpRequest<{ customerId: string }>, res: HttpResponse): Promise<void> {
+  getCustomerSegments = async (req: HttpRequest<{ customerId: string }>, res: HttpResponse): Promise<void> => {
     const segments = await getCustomerSegmentsUseCase.execute(req.params.customerId);
     jsonResponse(res, 200, { success: true, data: segments });
-  }
+  };
 }
 
 export default new SegmentController();

@@ -95,6 +95,31 @@ export * as adminCollectionController from './controllers/adminCollectionControl
 
 > Migration and seed files are plain JavaScript (`.js`) and use `exports.up` / `exports.seed` — `require()` is acceptable in those `.js` files only.
 
+## Class Controllers & Router Wiring
+
+- **Controller handlers must be arrow-function class fields**, not prototype methods, when the method is passed by reference to a router or event bus. Arrow fields capture `this` lexically, so handlers work unbound.
+- **Never call `.bind()` in router files** — no `asyncHandler(controller.method.bind(controller))`. Reference the handler directly: `asyncHandler(controller.method)`.
+- The same rule applies anywhere a class method is passed as a callback (e.g. `eventBus.on('*', this.handleEvent)` — make `handleEvent` a private arrow field).
+
+```typescript
+// ✅ CORRECT — arrow fields bind `this` at construction
+export class StoreController {
+  updateStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+    const result = await this.updateStoreUseCase.execute(command);
+    jsonResponse(res, 200, { success: true, data: result });
+  };
+}
+
+router.put('/stores/:storeId', asyncHandler(storeController.updateStore));
+
+// ❌ WRONG — prototype method requires .bind() at every call site
+export class StoreController {
+  async updateStore(req: HttpRequest, res: HttpResponse) { ... }
+}
+
+router.put('/stores/:storeId', asyncHandler(storeController.updateStore.bind(storeController)));
+```
+
 ## Comments & Documentation
 
 - Do not add or delete comments unless explicitly asked.

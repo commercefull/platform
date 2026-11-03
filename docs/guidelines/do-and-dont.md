@@ -76,6 +76,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Delete a `create` migration file for a table you want gone — drop it with a forward `drop` migration; deleting applied migrations corrupts the `knexMigrations` record.
 - Cast an enum-union generated type to `string` to silence `tsc` — the union is the DB CHECK constraint; fix the literal or change the enum via migration.
 - Use `crypto.randomUUID` for DB identifiers — it produces v4; use `generateUUID()` (v7).
+- Use `.bind()` in router files — declare controller handlers as arrow-function class fields and pass them unbound (`asyncHandler(controller.method)`).
 - Store plaintext credentials in the database — use `libs/secrets` encryption.
 - Log decrypted credential values or sensitive PII.
 - Use `throw new Error('...')` in `domain/` or `application/` — use typed domain errors.

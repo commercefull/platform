@@ -14,11 +14,11 @@ const scimController = new ScimController(manageScimProvisioningUseCase);
 const router = createHttpRouter();
 
 // SCIM 2.0 /Users endpoints
-router.get('/scim/v2/Users', asyncHandler(scimController.listUsers.bind(scimController)));
-router.get('/scim/v2/Users/:id', asyncHandler(scimController.getUser.bind(scimController)));
-router.post('/scim/v2/Users', asyncHandler(scimController.createUser.bind(scimController)));
-router.put('/scim/v2/Users/:id', asyncHandler(scimController.replaceUser.bind(scimController)));
-router.patch('/scim/v2/Users/:id', asyncHandler(scimController.patchUser.bind(scimController)));
-router.delete('/scim/v2/Users/:id', asyncHandler(scimController.deleteUser.bind(scimController)));
+router.get('/scim/v2/Users', asyncHandler(scimController.listUsers));
+router.get('/scim/v2/Users/:id', asyncHandler(scimController.getUser));
+router.post('/scim/v2/Users', asyncHandler(scimController.createUser));
+router.put('/scim/v2/Users/:id', asyncHandler(scimController.replaceUser));
+router.patch('/scim/v2/Users/:id', asyncHandler(scimController.patchUser));
+router.delete('/scim/v2/Users/:id', asyncHandler(scimController.deleteUser));
 
 export const scimRouter = router;

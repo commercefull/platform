@@ -57,25 +57,25 @@ function normalizeCreatePayload(body: CreateRuleBody, fallbackUserId: string) {
 }
 
 class AutomationController {
-  async listRules(req: HttpRequest, res: HttpResponse): Promise<void> {
+  listRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const activeOnly = req.query.activeOnly === 'true';
     const rules = await listAutomationRulesUseCase.execute(activeOnly);
     jsonResponse(res, 200, { success: true, data: rules.map(r => r.toJSON()) });
-  }
+  };
 
-  async getRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
+  getRule = async (req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> => {
     const rule = await getAutomationRuleUseCase.execute(req.params.ruleId);
     jsonResponse(res, 200, { success: true, data: rule.toJSON() });
-  }
+  };
 
-  async createRule(req: HttpRequest<Record<string, never>, Record<string, never>, CreateRuleBody>, res: HttpResponse): Promise<void> {
+  createRule = async (req: HttpRequest<Record<string, never>, Record<string, never>, CreateRuleBody>, res: HttpResponse): Promise<void> => {
     const fallbackUserId = (req.user as { id?: string })?.id || '';
     const payload = normalizeCreatePayload(req.body, fallbackUserId);
     const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
     jsonResponse(res, 201, { success: true, data: rule.toJSON() });
-  }
+  };
 
-  async updateRule(
+  updateRule = async (
     req: HttpRequest<
       { ruleId: string },
       Record<string, never>,
@@ -92,32 +92,32 @@ class AutomationController {
       }
     >,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const rule = await updateAutomationRuleUseCase.execute(
       req.params.ruleId,
       req.body as Parameters<typeof updateAutomationRuleUseCase.execute>[1],
     );
     jsonResponse(res, 200, { success: true, data: rule.toJSON() });
-  }
+  };
 
-  async deleteRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
+  deleteRule = async (req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> => {
     await deleteAutomationRuleUseCase.execute(req.params.ruleId);
     jsonResponse(res, 200, { success: true });
-  }
+  };
 
-  async triggerRule(
+  triggerRule = async (
     req: HttpRequest<{ ruleId: string }, Record<string, never>, { context?: Record<string, unknown> }>,
     res: HttpResponse,
-  ): Promise<void> {
+  ): Promise<void> => {
     const result = await triggerAutomationRuleUseCase.execute(req.params.ruleId, req.body?.context);
     jsonResponse(res, 200, { success: true, data: result });
-  }
+  };
 
-  async getExecutionLogs(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
+  getExecutionLogs = async (req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> => {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const logs = await listExecutionLogsUseCase.findByRule(req.params.ruleId, limit);
     jsonResponse(res, 200, { success: true, data: logs });
-  }
+  };
 }
 
 export default new AutomationController();

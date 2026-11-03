@@ -11,8 +11,7 @@ import type { AttributeFilter } from '../../application/ports/ProductSearchPort'
 
 type QueryBag = Record<string, unknown>;
 
-const optBool = (value: unknown): boolean | undefined =>
-  value === 'true' ? true : value === 'false' ? false : undefined;
+const optBool = (value: unknown): boolean | undefined => (value === 'true' ? true : value === 'false' ? false : undefined);
 const optInt = (value: unknown): number | undefined => (value ? parseInt(value as string, 10) : undefined);
 
 /** Parse attribute filters from query string. Format: attributes[0][code]=color&attributes[0][value]=red&attributes[0][operator]=eq */
@@ -55,7 +54,7 @@ class ProductSearchController {
    * GET /products/search
    * Search products with filters and facets
    */
-  async search(req: HttpRequest, res: HttpResponse): Promise<void> {
+  search = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const result = await searchProductsUseCase.execute(buildSearchQuery(req.query));
 
     if (!result.success) {
@@ -64,13 +63,13 @@ class ProductSearchController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * POST /products/search
    * Search products with filters (POST for complex queries)
    */
-  async searchPost(req: HttpRequest, res: HttpResponse): Promise<void> {
+  searchPost = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const result = await searchProductsUseCase.execute(req.body as SearchProductsQuery);
 
     if (!result.success) {
@@ -79,13 +78,13 @@ class ProductSearchController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * GET /products/search/suggestions
    * Get search suggestions for autocomplete
    */
-  async getSuggestions(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getSuggestions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { q, query, limit } = req.query;
 
     const result = await getSearchSuggestionsUseCase.execute({
@@ -99,13 +98,13 @@ class ProductSearchController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * GET /products/:productId/similar
    * Get similar products based on attributes
    */
-  async findSimilar(req: HttpRequest, res: HttpResponse): Promise<void> {
+  findSimilar = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { productId } = req.params;
     const { limit } = req.query;
 
@@ -120,13 +119,13 @@ class ProductSearchController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 
   /**
    * GET /products/by-attribute/:code/:value
    * Find products by a specific attribute value
    */
-  async findByAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  findByAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { code, value } = req.params;
 
     const result = await findByAttributeUseCase.execute({
@@ -140,7 +139,7 @@ class ProductSearchController {
     }
 
     jsonResponse(res, 200, result);
-  }
+  };
 }
 
 export default new ProductSearchController();

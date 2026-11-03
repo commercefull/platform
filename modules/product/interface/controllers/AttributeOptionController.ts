@@ -13,7 +13,7 @@ class AttributeOptionController {
    * GET /attribute-options/:id
    * Get a single attribute option by ID
    */
-  async getAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getAttributeOption = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Guard against literal "null" or "undefined" strings
@@ -30,24 +30,24 @@ class AttributeOptionController {
     }
 
     jsonResponse(res, 200, { success: true, data: mapOption(option) });
-  }
+  };
 
   /**
    * GET /attribute-options/attribute/:attributeId
    * Get all options for an attribute
    */
-  async getOptionsByAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getOptionsByAttribute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { attributeId } = req.params;
     const options = await manageAttributeOptionsUseCase.findByAttribute(attributeId);
 
     jsonResponse(res, 200, { success: true, data: options.map(mapOption) });
-  }
+  };
 
   /**
    * GET /attribute-options/attribute/:attributeId/value/:value
    * Find an option by value
    */
-  async getOptionByValue(req: HttpRequest, res: HttpResponse): Promise<void> {
+  getOptionByValue = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { attributeId, value } = req.params;
     const option = await manageAttributeOptionsUseCase.findByValue(attributeId, value);
 
@@ -57,13 +57,13 @@ class AttributeOptionController {
     }
 
     jsonResponse(res, 200, { success: true, data: mapOption(option) });
-  }
+  };
 
   /**
    * POST /attribute-options
    * Create a new attribute option
    */
-  async createAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
+  createAttributeOption = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { attributeId, value, label, sortOrder } = req.body as {
       attributeId?: string;
       value?: string;
@@ -84,13 +84,13 @@ class AttributeOptionController {
     });
 
     jsonResponse(res, 201, { success: true, data: mapOption(option) });
-  }
+  };
 
   /**
    * PUT /attribute-options/:id
    * Update an attribute option
    */
-  async updateAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
+  updateAttributeOption = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { value, label, sortOrder } = req.body as { value?: string; label?: string; sortOrder?: number };
 
@@ -107,13 +107,13 @@ class AttributeOptionController {
     });
 
     jsonResponse(res, 200, { success: true, data: mapOption(updated as ProductAttributeOption) });
-  }
+  };
 
   /**
    * DELETE /attribute-options/:id
    * Delete an attribute option
    */
-  async deleteAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
+  deleteAttributeOption = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     const existing = await manageAttributeOptionsUseCase.findOne(id);
@@ -125,7 +125,7 @@ class AttributeOptionController {
     await manageAttributeOptionsUseCase.delete(id);
 
     jsonResponse(res, 200, { success: true, message: 'Attribute option deleted successfully' });
-  }
+  };
 }
 
 export default new AttributeOptionController();

@@ -35,7 +35,7 @@ export class StoreController {
    * Create a new store
    * POST /business/stores
    */
-  async createStore(req: HttpRequest, res: HttpResponse) {
+  createStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const body = req.body as Record<string, unknown>;
     const command = new CreateStoreCommand({
       name: body.name as string,
@@ -78,53 +78,55 @@ export class StoreController {
       success: true,
       data: result,
     });
-  }
+  };
 
   /**
    * Get store by ID
    * GET /business/stores/:storeId
    */
-  async getStore(req: HttpRequest, res: HttpResponse) {
+  getStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const store = await manageStoresAdminUseCase.findById(req.params.storeId);
 
     if (!store) {
-      return jsonResponse(res, 404, {
+      jsonResponse(res, 404, {
         success: false,
         message: 'Store not found',
       });
+      return;
     }
 
     jsonResponse(res, 200, {
       success: true,
       data: store.toJSON(),
     });
-  }
+  };
 
   /**
    * Get store by slug
    * GET /business/stores/slug/:slug
    */
-  async getStoreBySlug(req: HttpRequest, res: HttpResponse) {
+  getStoreBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const store = await manageStoresAdminUseCase.findBySlug(req.params.slug);
 
     if (!store) {
-      return jsonResponse(res, 404, {
+      jsonResponse(res, 404, {
         success: false,
         message: 'Store not found',
       });
+      return;
     }
 
     jsonResponse(res, 200, {
       success: true,
       data: store.toJSON(),
     });
-  }
+  };
 
   /**
    * Get stores by business
    * GET /business/stores/business/:organizationId
    */
-  async getStoresByBusiness(req: HttpRequest, res: HttpResponse) {
+  getStoresByBusiness = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const stores = await manageStoresAdminUseCase.findByBusiness(req.params.organizationId);
 
     jsonResponse(res, 200, {
@@ -132,13 +134,13 @@ export class StoreController {
       data: stores.map(store => store.toJSON()),
       count: stores.length,
     });
-  }
+  };
 
   /**
    * Get active stores
    * GET /business/stores/active
    */
-  async getActiveStores(req: HttpRequest, res: HttpResponse) {
+  getActiveStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const stores = await manageStoresAdminUseCase.findActive();
 
     jsonResponse(res, 200, {
@@ -146,13 +148,13 @@ export class StoreController {
       data: stores.map(store => store.toJSON()),
       count: stores.length,
     });
-  }
+  };
 
   /**
    * Update store
    * PUT /business/stores/:storeId
    */
-  async updateStore(req: HttpRequest, res: HttpResponse) {
+  updateStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const command = new UpdateStoreCommand(req.params.storeId, req.body as UpdateStoreCommand['updates']);
     const result = await this.updateStoreUseCase.execute(command);
 
@@ -160,26 +162,26 @@ export class StoreController {
       success: true,
       data: result,
     });
-  }
+  };
 
   /**
    * Delete store
    * DELETE /business/stores/:storeId
    */
-  async deleteStore(req: HttpRequest, res: HttpResponse) {
+  deleteStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     await this.deleteStoreUseCase.execute(req.params.storeId);
 
     jsonResponse(res, 200, {
       success: true,
       message: 'Store deleted successfully',
     });
-  }
+  };
 
   /**
    * Configure store pickup (BOPIS)
    * PUT /business/stores/:storeId/pickup
    */
-  async configurePickup(req: HttpRequest, res: HttpResponse) {
+  configurePickup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const body = req.body as Record<string, unknown>;
     const result = await this.configurePickupUseCase.execute({
       storeId: req.params.storeId,
@@ -191,13 +193,13 @@ export class StoreController {
       success: true,
       data: result,
     });
-  }
+  };
 
   /**
    * Set local delivery zone
    * PUT /business/stores/:storeId/local-delivery
    */
-  async setLocalDelivery(req: HttpRequest, res: HttpResponse) {
+  setLocalDelivery = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const body = req.body as Record<string, unknown>;
     const result = await this.setLocalDeliveryUseCase.execute({
       storeId: req.params.storeId,
@@ -215,13 +217,13 @@ export class StoreController {
       success: true,
       data: result,
     });
-  }
+  };
 
   /**
    * Create store hierarchy
    * POST /business/stores/hierarchy
    */
-  async createStoreHierarchy(req: HttpRequest, res: HttpResponse) {
+  createStoreHierarchy = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const body = req.body as Record<string, unknown>;
     const result = await this.createStoreHierarchyUseCase.execute({
       organizationId: body.organizationId as string,
@@ -237,13 +239,13 @@ export class StoreController {
       success: true,
       data: result,
     });
-  }
+  };
 
   /**
    * List stores with filtering and pagination
    * GET /business/stores
    */
-  async listStores(req: HttpRequest, res: HttpResponse) {
+  listStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const query = new ListStoresQuery(
       {
         storeType: req.query.storeType as 'merchant_store' | 'organization_store' | undefined,
@@ -276,5 +278,5 @@ export class StoreController {
         totalPages: result.totalPages,
       },
     });
-  }
+  };
 }

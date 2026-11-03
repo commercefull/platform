@@ -1,14 +1,14 @@
-import {jsonResponse} from 'libs/apiResponse';
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Store Customer Router
  *
  * Public-facing routes for browsing stores and pickup locations.
  */
 
-import {createHttpRouter} from 'libs/http';
-import type {HttpRequest, HttpResponse} from 'libs/http';
-import {manageStoresAdminUseCase, resolveMarketContextUseCase} from '../../application/useCases/wired';
-import {ResolveMarketContextCommand} from '../../application/useCases/ResolveMarketContext';
+import { createHttpRouter } from 'libs/http';
+import type { HttpRequest, HttpResponse } from 'libs/http';
+import { manageStoresAdminUseCase, resolveMarketContextUseCase } from '../../application/useCases/wired';
+import { ResolveMarketContextCommand } from '../../application/useCases/ResolveMarketContext';
 const router = createHttpRouter();
 
 router.get('/stores', async (req: HttpRequest, res: HttpResponse) => {

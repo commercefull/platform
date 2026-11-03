@@ -37,31 +37,31 @@ const router = createHttpRouter();
  * Search products with advanced filters and facets
  * GET /customer/products/search
  */
-router.get('/products/search', asyncHandler(productSearchController.search.bind(productSearchController)));
+router.get('/products/search', asyncHandler(productSearchController.search));
 
 /**
  * Search products (POST for complex queries)
  * POST /customer/products/search
  */
-router.post('/products/search', asyncHandler(productSearchController.searchPost.bind(productSearchController)));
+router.post('/products/search', asyncHandler(productSearchController.searchPost));
 
 /**
  * Get search suggestions for autocomplete
  * GET /customer/products/search/suggestions
  */
-router.get('/products/search/suggestions', asyncHandler(productSearchController.getSuggestions.bind(productSearchController)));
+router.get('/products/search/suggestions', asyncHandler(productSearchController.getSuggestions));
 
 /**
  * Find products by attribute
  * GET /customer/products/by-attribute/:code/:value
  */
-router.get('/products/by-attribute/:code/:value', asyncHandler(productSearchController.findByAttribute.bind(productSearchController)));
+router.get('/products/by-attribute/:code/:value', asyncHandler(productSearchController.findByAttribute));
 
 /**
  * Find similar products
  * GET /customer/products/:productId/similar
  */
-router.get('/products/:productId/similar', asyncHandler(productSearchController.findSimilar.bind(productSearchController)));
+router.get('/products/:productId/similar', asyncHandler(productSearchController.findSimilar));
 
 /**
  * Find product by variant barcode
