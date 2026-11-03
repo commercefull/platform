@@ -12,8 +12,6 @@ type MemberWithTierRow = DbLoyaltyPoints & {
   multiplier: string | null;
 };
 type PointsBalanceRow = DbLoyaltyPoints & { pointsBalance: number };
-type LoyaltyPointsIdRow = { loyaltyPointsId: string };
-type LoyaltyTransactionIdRow = { loyaltyTransactionId: string };
 
 async function findMemberWithTier(customerId: string): Promise<unknown | null> {
   return await queryOne<MemberWithTierRow>(
@@ -59,21 +57,6 @@ async function findMemberByCustomerId(customerId: string): Promise<unknown | nul
   ]);
 }
 
-async function deductPoints(customerId: string, points: number): Promise<void> {
-  await queryOne<LoyaltyPointsIdRow>(
-    `UPDATE "loyaltyPoints" SET "currentPoints" = "currentPoints" - $1, "lastActivity" = NOW(), "updatedAt" = NOW() WHERE "customerId" = $2 RETURNING "loyaltyPointsId"`,
-    [points, customerId],
-  );
-}
-
-async function createRedeemTransaction(customerId: string, points: number, description: string): Promise<void> {
-  await queryOne<LoyaltyTransactionIdRow>(
-    `INSERT INTO "loyaltyTransaction" ("customerId", "action", "points", "description", "createdAt", "updatedAt")
-     VALUES ($1, 'debit', $2, $3, NOW(), NOW()) RETURNING "loyaltyTransactionId"`,
-    [customerId, -Math.abs(points), description],
-  );
-}
-
 export default {
   findMemberWithTier,
   findCustomerTransactions,
@@ -81,6 +64,4 @@ export default {
   findAvailableRewards,
   findRewardById,
   findMemberByCustomerId,
-  deductPoints,
-  createRedeemTransaction,
 };

@@ -11,12 +11,13 @@ import { eventBus } from '../../../libs/events/eventBus';
 import { logger } from '../../../libs/logger';
 import { JobScheduler } from '../../../libs/jobs/cronScheduler';
 import type { OrderRepository } from '../../order/domain/repositories/OrderRepository';
-import type { LoyaltyRepository } from '../domain/repositories/LoyaltyRepository';
+import type { LoyaltyPointsRepository } from '../domain/repositories/LoyaltyPointsRepository';
+import type { LoyaltyTransactionRepository } from '../domain/repositories/LoyaltyTransactionRepository';
 
 export interface LoyaltyEventHandlerDeps {
   orders: Pick<OrderRepository, 'findById'>;
   points: Pick<
-    LoyaltyRepository,
+    LoyaltyPointsRepository & LoyaltyTransactionRepository,
     | 'processOrderPoints'
     | 'findCustomerPointsWithTier'
     | 'findTransactionByOrderAndAction'

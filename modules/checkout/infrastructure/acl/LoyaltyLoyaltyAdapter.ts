@@ -7,12 +7,14 @@
  */
 
 import type { LoyaltyQuotePort, LoyaltyRedemptionPort, LoyaltyRewardQuote } from '../../application/ports/LoyaltyPort';
-import type { LoyaltyRepository } from '../../../loyalty/domain/repositories/LoyaltyRepository';
+import type { LoyaltyPointsRepository } from '../../../loyalty/domain/repositories/LoyaltyPointsRepository';
+import type { LoyaltyRewardRepository } from '../../../loyalty/domain/repositories/LoyaltyRewardRepository';
 import type { RedeemPointsUseCase } from '../../../loyalty/application/useCases/RedeemPoints';
 
 export class LoyaltyLoyaltyAdapter implements LoyaltyQuotePort, LoyaltyRedemptionPort {
   constructor(
-    private readonly loyaltyRepository: Pick<LoyaltyRepository, 'findCustomerPoints' | 'findRewardById'>,
+    private readonly loyaltyRepository: Pick<LoyaltyPointsRepository, 'findCustomerPoints'> &
+      Pick<LoyaltyRewardRepository, 'findRewardById'>,
     private readonly redeemPointsUseCase: RedeemPointsUseCase,
   ) {}
 
