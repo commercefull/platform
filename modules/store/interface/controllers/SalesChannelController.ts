@@ -1,7 +1,6 @@
 import { jsonResponse } from '../../../../libs/apiResponse';
-import { AppError, getErrorStatusCode } from '../../../../libs/errors';
+import { AppError, getErrorStatusCode, logCaughtError} from '../../../../libs/errors';
 import type { HttpRequest, HttpResponse } from '../../../../libs/http';
-import { logger } from '../../../../libs/logger';
 import { manageSalesChannelsUseCase } from '../../application/useCases/wired';
 import type { SalesChannelStatus, SalesChannelType, StoreSalesChannel } from '../../domain/entities/SalesChannel';
 
@@ -19,7 +18,7 @@ function assignmentResponse(assignment: StoreSalesChannel) {
 }
 
 function handleError(res: HttpResponse, error: unknown): void {
-  logger.error('Sales channel request failed', error);
+  logCaughtError('Sales channel request failed', error);
   jsonResponse(res, getErrorStatusCode(error), {
     success: false,
     message: error instanceof Error ? error.message : 'Sales channel request failed',

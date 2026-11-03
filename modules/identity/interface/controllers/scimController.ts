@@ -9,10 +9,10 @@ import { jsonResponse, sendResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
 import { safeEqual } from '../../../../libs/httpSecurity';
 import { ScimValidationError, ScimResourceNotFoundError, ScimConflictError, ScimAuthenticationError } from '../../domain/errors/SsoErrors';
 import type { ManageScimProvisioningUseCase, ScimPatchOperation } from '../../application/useCases/ManageScimProvisioning';
+import { logCaughtError } from '../../../../libs/errors';
 
 const SCIM_BEARER_TOKEN = process.env.SCIM_BEARER_TOKEN || '';
 
@@ -96,7 +96,7 @@ export class ScimController {
       } else if (error instanceof ScimValidationError) {
         scimError(400, error.message, res);
       } else {
-        logger.error('SCIM listUsers error', { error: (error as Error).message });
+        logCaughtError('SCIM listUsers error', error);
         scimError(500, 'Internal server error', res);
       }
     }
@@ -129,7 +129,7 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM getUser error', { error: (error as Error).message });
+        logCaughtError('SCIM getUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
@@ -181,7 +181,7 @@ export class ScimController {
       } else if (error instanceof ScimConflictError) {
         scimError(409, error.message, res);
       } else {
-        logger.error('SCIM createUser error', { error: (error as Error).message });
+        logCaughtError('SCIM createUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
@@ -222,7 +222,7 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM replaceUser error', { error: (error as Error).message });
+        logCaughtError('SCIM replaceUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
@@ -247,7 +247,7 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM patchUser error', { error: (error as Error).message });
+        logCaughtError('SCIM patchUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }
@@ -270,7 +270,7 @@ export class ScimController {
       } else if (error instanceof ScimResourceNotFoundError) {
         scimError(404, error.message, res);
       } else {
-        logger.error('SCIM deleteUser error', { error: (error as Error).message });
+        logCaughtError('SCIM deleteUser error', error);
         scimError(500, 'Internal server error', res);
       }
     }

@@ -19,7 +19,7 @@ import {
   ChannelAuthenticationError,
 } from '../../domain/errors/AgenticCheckoutErrors';
 import { setHeader, jsonResponse } from '../../../../libs/apiResponse';
-import { logger } from '../../../../libs/logger';
+import { logCaughtError } from '../../../../libs/errors';
 
 function requestHash(req: HttpRequest): string {
   const rawBody = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : JSON.stringify(req.body ?? {});
@@ -76,7 +76,7 @@ export function createIdempotencyMiddleware(idempotencyRepository: IdempotencyRe
       res.json = ((body: unknown) => {
         record.complete(res.statusCode, body as Record<string, unknown>);
         idempotencyRepository.update(record).catch(err => {
-          logger.error('Failed to persist idempotency record', { error: String(err) });
+          logCaughtError('Failed to persist idempotency record', err);
         });
         return originalJson(body);
       }) as typeof res.json;

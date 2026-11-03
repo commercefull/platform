@@ -7,8 +7,7 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { getErrorStatusCode, getErrorMessage, logCaughtError} from '../../../../libs/errors';
 import { manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase } from '../../application/wired';
 
 class SsoController {
@@ -24,7 +23,7 @@ class SsoController {
       const providers = await listProvidersUseCase.execute(organizationId);
       jsonResponse(res, 200, { success: true, data: providers });
     } catch (error) {
-      logger.error('Error listing SSO providers:', error);
+      logCaughtError('Error listing SSO providers:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to list SSO providers' });
     }
   }
@@ -93,7 +92,7 @@ class SsoController {
       }
       jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      logger.error('Error getting SAML provider:', error);
+      logCaughtError('Error getting SAML provider:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to get SAML provider' });
     }
   }
@@ -194,7 +193,7 @@ class SsoController {
       }
       jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      logger.error('Error getting OIDC provider:', error);
+      logCaughtError('Error getting OIDC provider:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to get OIDC provider' });
     }
   }

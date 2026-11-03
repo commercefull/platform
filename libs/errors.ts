@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 interface ErrorWithCapture {
   captureStackTrace?: (target: object, constructorOpt?: (...args: unknown[]) => unknown) => void;
 }
@@ -108,4 +110,21 @@ export function getErrorStatusCode(error: unknown): number {
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return 'An unexpected error occurred';
+}
+
+/**
+ * Log a caught error at its declared severity (AppError.severity — 4xx domain
+ * errors default to 'info'), or error level for untyped/unexpected failures.
+ * Use in catch blocks instead of unconditional logger.error so expected
+ * business errors do not pollute the error-rate alert signal.
+ */
+export function logCaughtError(message: string, error: unknown, meta?: Record<string, unknown>): void {
+  if (error instanceof AppError) {
+    const logMeta = { code: error.code, statusCode: error.statusCode, error: error.message, ...meta };
+    if (error.severity === 'error') logger.error(message, logMeta);
+    else if (error.severity === 'warn') logger.warn(message, logMeta);
+    else logger.info(message, logMeta);
+    return;
+  }
+  logger.error(message, { ...meta, error });
 }

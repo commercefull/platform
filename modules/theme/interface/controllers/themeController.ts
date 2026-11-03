@@ -5,8 +5,7 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { getErrorStatusCode, getErrorMessage, logCaughtError} from '../../../../libs/errors';
 import { CreateThemeCommand, CreateThemeOverrideCommand, AssignThemeToStoreCommand } from '../../application/useCases';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
 import { manageThemesUseCase, manageOverridesUseCase, assignThemeUseCase, resolveThemeUseCase } from '../../application/wired';
@@ -24,7 +23,7 @@ class ThemeController {
       const themes = await manageThemesUseCase.list({ status, type, tags, organizationId });
       jsonResponse(res, 200, { success: true, data: themes });
     } catch (error) {
-      logger.error('Error listing themes:', error);
+      logCaughtError('Error listing themes:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to list themes' });
     }
   }
@@ -34,7 +33,7 @@ class ThemeController {
       const themes = await manageThemesUseCase.listBuiltIn();
       jsonResponse(res, 200, { success: true, data: themes });
     } catch (error) {
-      logger.error('Error listing built-in themes:', error);
+      logCaughtError('Error listing built-in themes:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to list built-in themes' });
     }
   }
@@ -145,7 +144,7 @@ class ThemeController {
       const override = await manageOverridesUseCase.getByStore(req.params.storeId);
       jsonResponse(res, 200, { success: true, data: override });
     } catch (error) {
-      logger.error('Error getting override:', error);
+      logCaughtError('Error getting override:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to get override' });
     }
   }
@@ -155,7 +154,7 @@ class ThemeController {
       const overrides = await manageOverridesUseCase.getByOrganization(req.params.organizationId);
       jsonResponse(res, 200, { success: true, data: overrides });
     } catch (error) {
-      logger.error('Error listing overrides:', error);
+      logCaughtError('Error listing overrides:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to list overrides' });
     }
   }
@@ -241,7 +240,7 @@ class ThemeController {
       const assignment = await assignThemeUseCase.getAssignment(req.params.storeId);
       jsonResponse(res, 200, { success: true, data: assignment });
     } catch (error) {
-      logger.error('Error getting assignment:', error);
+      logCaughtError('Error getting assignment:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to get assignment' });
     }
   }
@@ -271,7 +270,7 @@ class ThemeController {
         },
       });
     } catch (error) {
-      logger.error('Error resolving theme:', error);
+      logCaughtError('Error resolving theme:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to resolve theme' });
     }
   }
@@ -283,7 +282,7 @@ class ThemeController {
       const count = await manageThemesUseCase.seedBuiltInThemes();
       jsonResponse(res, 200, { success: true, message: `Seeded ${count} built-in themes` });
     } catch (error) {
-      logger.error('Error seeding themes:', error);
+      logCaughtError('Error seeding themes:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to seed built-in themes' });
     }
   }

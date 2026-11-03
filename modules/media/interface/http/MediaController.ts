@@ -4,8 +4,7 @@ import { jsonResponse } from 'libs/apiResponse';
  * Handles media upload and processing requests
  */
 
-import { logger } from '../../../../libs/logger';
-import { AppError } from '../../../../libs/errors';
+import { AppError, logCaughtError} from '../../../../libs/errors';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import multer from 'multer';
 import { processImageUseCase, downloadImageUseCase } from '../../application/wired';
@@ -100,7 +99,7 @@ export class MediaController {
         },
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       const status = isClientUploadError(error) ? 400 : 500;
@@ -151,7 +150,7 @@ export class MediaController {
         })),
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
@@ -193,7 +192,7 @@ export class MediaController {
         },
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
 
       const statusCode = (error as { statusCode?: number }).statusCode || 500;
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';

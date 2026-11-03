@@ -5,8 +5,7 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
-import { AppError, getErrorStatusCode } from '../../../../libs/errors';
+import { AppError, getErrorStatusCode, logCaughtError} from '../../../../libs/errors';
 import { CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { UpdateStoreCommand } from '../../application/useCases/UpdateStore';
 import { type ConfigureStorePickupInput } from '../../application/useCases/ConfigureStorePickup';
@@ -25,7 +24,7 @@ import {
 } from '../../application/useCases/wired';
 
 function handleControllerError(res: HttpResponse, action: string, error: unknown): void {
-  logger.error(`${action}:`, error);
+  logCaughtError(`${action}:`, error);
   const statusCode = getErrorStatusCode(error);
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   jsonResponse(res, statusCode, {

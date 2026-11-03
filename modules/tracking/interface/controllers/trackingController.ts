@@ -5,8 +5,7 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { getErrorStatusCode, getErrorMessage, logCaughtError} from '../../../../libs/errors';
 import { GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
 import {
   manageTrackingConfigUseCase as manageConfigUseCase,
@@ -37,7 +36,7 @@ class TrackingController {
 
       jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      logger.error('Error getting tracking config:', error);
+      logCaughtError('Error getting tracking config:', error);
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
@@ -62,7 +61,7 @@ class TrackingController {
       const status = await getStatusUseCase.execute(storeId);
       jsonResponse(res, 200, { success: true, data: status });
     } catch (error) {
-      logger.error('Error getting tracking status:', error);
+      logCaughtError('Error getting tracking status:', error);
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }

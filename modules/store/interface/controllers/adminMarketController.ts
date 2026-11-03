@@ -15,6 +15,7 @@ import {
   type MarketWriteData,
 } from '../../application/useCases';
 import type { MarketStatus, MarketTaxDisplayMode } from '../../domain/entities/Market';
+import { logCaughtError } from '../../../../libs/errors';
 
 function parseList(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
@@ -132,7 +133,7 @@ export const adminCreateMarket = async (req: HttpRequest, res: HttpResponse): Pr
     const market = await manageMarketsUseCase.create(new CreateMarketCommand(organizationId(req), bodyToWriteData(body)));
     redirectResponse(res, `/admin/markets/${market.marketId}?success=Market created successfully`);
   } catch (error) {
-    logger.error('Failed to create market', error);
+    logCaughtError('Failed to create market', error);
     adminRespond(req, res, 'markets/form', {
       pageName: 'Create Market',
       market: null,
@@ -149,7 +150,7 @@ export const adminUpdateMarket = async (req: HttpRequest, res: HttpResponse): Pr
     await manageMarketsUseCase.update(new UpdateMarketCommand(marketId, bodyToWriteData(body)));
     redirectResponse(res, `/admin/markets/${marketId}?success=Market updated successfully`);
   } catch (error) {
-    logger.error('Failed to update market', error);
+    logCaughtError('Failed to update market', error);
     adminRespond(req, res, 'markets/form', {
       pageName: 'Edit Market',
       market: null,
@@ -164,7 +165,7 @@ export const adminDeleteMarket = async (req: HttpRequest, res: HttpResponse): Pr
     await manageMarketsUseCase.delete(new DeleteMarketCommand(req.params.marketId));
     redirectResponse(res, '/admin/markets?success=Market deleted');
   } catch (error) {
-    logger.error('Failed to delete market', error);
+    logCaughtError('Failed to delete market', error);
     redirectResponse(res, `/admin/markets?error=${encodeURIComponent(error instanceof Error ? error.message : 'Delete failed')}`);
   }
 };
@@ -175,7 +176,7 @@ export const adminLaunchMarket = async (req: HttpRequest, res: HttpResponse): Pr
     await launchMarketUseCase.execute(new LaunchMarketCommand(marketId));
     redirectResponse(res, `/admin/markets/${marketId}?success=Market launched`);
   } catch (error) {
-    logger.error('Failed to launch market', error);
+    logCaughtError('Failed to launch market', error);
     redirectResponse(
       res,
       `/admin/markets/${marketId}?error=${encodeURIComponent(error instanceof Error ? error.message : 'Launch failed')}`,
@@ -189,7 +190,7 @@ export const adminDisableMarket = async (req: HttpRequest, res: HttpResponse): P
     await manageMarketsUseCase.disable(new SetMarketStatusCommand(marketId, 'disable'));
     redirectResponse(res, `/admin/markets/${marketId}?success=Market disabled`);
   } catch (error) {
-    logger.error('Failed to disable market', error);
+    logCaughtError('Failed to disable market', error);
     redirectResponse(
       res,
       `/admin/markets/${marketId}?error=${encodeURIComponent(error instanceof Error ? error.message : 'Disable failed')}`,

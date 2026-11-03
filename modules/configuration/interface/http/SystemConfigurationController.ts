@@ -5,12 +5,11 @@ import { jsonResponse } from 'libs/apiResponse';
  */
 
 
-import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { manageSystemConfigurationUseCase, updateSystemConfigurationUseCase } from '../../application/wired';
-import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { getErrorStatusCode, getErrorMessage, logCaughtError} from '../../../../libs/errors';
 import { generateUUID, isUuid } from '../../../../libs/uuid';
 
 interface CreateConfigBody {
@@ -78,7 +77,7 @@ export class SystemConfigurationController {
         data: config.toJSON(),
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
       jsonResponse(res, getErrorStatusCode(error), {
         success: false,
         message: getErrorMessage(error),
@@ -123,7 +122,7 @@ export class SystemConfigurationController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
       jsonResponse(res, getErrorStatusCode(error), {
         success: false,
         message: getErrorMessage(error),
@@ -157,7 +156,7 @@ export class SystemConfigurationController {
         data: config.toJSON(),
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
@@ -188,7 +187,7 @@ export class SystemConfigurationController {
         data: config.toJSON(),
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
@@ -213,7 +212,7 @@ export class SystemConfigurationController {
         count: configs.length,
       });
     } catch (error) {
-      logger.error('Error:', error);
+      logCaughtError('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {

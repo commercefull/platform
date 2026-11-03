@@ -1,7 +1,6 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { AppError } from '../../../../libs/errors';
-import { logger } from '../../../../libs/logger';
+import { AppError, logCaughtError} from '../../../../libs/errors';
 import { ManageCompanyUseCase, ManageB2BUserUseCase, ManageQuoteUseCase, ManageApprovalWorkflowUseCase } from '../../application/useCases';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
@@ -47,7 +46,7 @@ export class B2BController {
       jsonResponse(res, error.statusCode, { success: false, error: error.message, code: error.code });
       return;
     }
-    logger.error('B2B controller error', { error: (error as Error).message, stack: (error as Error).stack });
+    logCaughtError('B2B controller error', error);
     jsonResponse(res, 500, { success: false, error: 'Internal error' });
   }
 

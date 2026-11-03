@@ -15,7 +15,7 @@ import {
   getCustomerSegmentsUseCase,
 } from '../../application/useCases/wired';
 import { SegmentNotFoundError, SegmentAlreadyExistsError, InvalidSegmentConditionsError } from '../../domain/errors/SegmentErrors';
-import { logger } from '../../../../libs/logger';
+import { logCaughtError } from '../../../../libs/errors';
 
 class SegmentController {
   // ── Segment CRUD ──────────────────────────────────────────────
@@ -175,10 +175,7 @@ class SegmentController {
       const profiles = await listCustomerProfilesUseCase.execute(limit, offset);
       jsonResponse(res, 200, { success: true, data: profiles.map(p => p.toJSON()) });
     } catch (err) {
-      logger.error('Failed to list customer profiles', {
-        error: err instanceof Error ? err.message : String(err),
-        stack: err instanceof Error ? err.stack : undefined,
-      });
+      logCaughtError('Failed to list customer profiles', err);
       jsonResponse(res, 500, { success: false, error: 'Internal error' });
     }
   }

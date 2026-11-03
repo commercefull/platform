@@ -1,6 +1,5 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
 import { ManageVendorUseCase } from '../../application/useCases/ManageVendor';
 import { ManageCommissionRuleUseCase } from '../../application/useCases/ManageCommissionRule';
 import { ManagePayoutUseCase } from '../../application/useCases/ManagePayout';
@@ -16,6 +15,7 @@ import {
   PayoutStatusError,
   MarketplaceValidationError,
 } from '../../domain/errors/MarketplaceErrors';
+import { logCaughtError } from '../../../../libs/errors';
 
 export class MarketplaceController {
   private vendorUseCase: ManageVendorUseCase;
@@ -36,7 +36,7 @@ export class MarketplaceController {
     } else if (error instanceof CommissionValidationError || error instanceof MarketplaceValidationError) {
       jsonResponse(res, 400, { success: false, error: error.message, code: error.code });
     } else {
-      logger.error('Marketplace controller error', { error: (error as Error).message, stack: (error as Error).stack });
+      logCaughtError('Marketplace controller error', error);
       jsonResponse(res, 500, { success: false, error: 'Internal error' });
     }
   }

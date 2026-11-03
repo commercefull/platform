@@ -1,6 +1,5 @@
 import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
 import {
   createAutomationRuleUseCase,
   updateAutomationRuleUseCase,
@@ -11,6 +10,7 @@ import {
   listExecutionLogsUseCase,
 } from '../../application/useCases/wired';
 import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
+import { logCaughtError } from '../../../../libs/errors';
 
 interface CreateRuleBody {
   name: string;
@@ -88,7 +88,7 @@ class AutomationController {
       const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
       jsonResponse(res, 201, { success: true, data: rule.toJSON() });
     } catch (error) {
-      logger.error('Automation createRule error:', error);
+      logCaughtError('Automation createRule error:', error);
       if (error instanceof InvalidAutomationRuleError) {
         jsonResponse(res, 400, { success: false, error: error.message });
       } else {

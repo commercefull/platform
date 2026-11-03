@@ -1,7 +1,6 @@
 import { jsonResponse } from '../../../../libs/apiResponse';
-import { AppError, getErrorStatusCode } from '../../../../libs/errors';
+import { AppError, getErrorStatusCode, logCaughtError} from '../../../../libs/errors';
 import type { HttpRequest, HttpResponse } from '../../../../libs/http';
-import { logger } from '../../../../libs/logger';
 import { evaluateMarketReadinessUseCase, launchMarketUseCase, manageMarketsUseCase } from '../../application/useCases/wired';
 import {
   CreateMarketCommand,
@@ -21,7 +20,7 @@ function organizationId(req: HttpRequest): string | undefined {
 }
 
 function handleError(res: HttpResponse, error: unknown): void {
-  logger.error('Market request failed', error);
+  logCaughtError('Market request failed', error);
   jsonResponse(res, getErrorStatusCode(error), {
     success: false,
     message: error instanceof Error ? error.message : 'Market request failed',
