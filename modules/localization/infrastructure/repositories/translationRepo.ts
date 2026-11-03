@@ -4,7 +4,13 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { TranslatableEntityType } from '../../domain/entities/Translation';
+import type {
+  ContentPageTranslation as DbContentPageTranslation,
+  NotificationTemplateTranslation as DbNotificationTemplateTranslation,
+} from '../../../../libs/db/types';
+
+/** Entity types backed by a real translation table in the current schema. */
+export type ImplementedTranslatableEntity = 'product' | 'category' | 'contentPage' | 'notificationTemplate';
 import type {
   ProductTranslation as DbProductTranslation,
   LocalizationCategoryTranslation as DbLocalizationCategoryTranslation,
@@ -15,7 +21,9 @@ type ProductTranslationRow = DbProductTranslation & { localeCode: string; locale
 type CategoryTranslationRow = DbLocalizationCategoryTranslation & { localeCode: string; localeName?: string };
 type ProductTranslationIdRow = { productTranslationId: string };
 type CategoryTranslationIdRow = { categoryTranslationId: string };
-type EntityTranslationRow = (DbProductTranslation | DbLocalizationCategoryTranslation) & {
+type EntityTranslationRow = (
+  DbProductTranslation | DbLocalizationCategoryTranslation | DbContentPageTranslation | DbNotificationTemplateTranslation
+) & {
   localeCode: string;
   localeName?: string;
 };
@@ -23,36 +31,27 @@ type LocaleSummaryRow = Pick<DbLocale, 'localeId' | 'code' | 'name'>;
 type TranslationStatsRow = { total: string; approved: string; autoTranslated: string; pending: string };
 
 // Table mapping for different entity types
-const TABLE_MAP: Record<TranslatableEntityType, string> = {
+const TABLE_MAP: Record<ImplementedTranslatableEntity, string> = {
   product: 'productTranslation',
   category: 'localizationCategoryTranslation',
-  collection: 'collectionTranslation',
   contentPage: 'contentPageTranslation',
   notificationTemplate: 'notificationTemplateTranslation',
-  attribute: 'attributeTranslation',
-  attributeOption: 'attributeOptionTranslation',
 };
 
 // Primary key mapping
-const PK_MAP: Record<TranslatableEntityType, string> = {
+const PK_MAP: Record<ImplementedTranslatableEntity, string> = {
   product: 'productTranslationId',
   category: 'categoryTranslationId',
-  collection: 'collectionTranslationId',
   contentPage: 'contentPageTranslationId',
   notificationTemplate: 'notificationTemplateTranslationId',
-  attribute: 'attributeTranslationId',
-  attributeOption: 'attributeOptionTranslationId',
 };
 
 // Entity ID column mapping
-const ENTITY_ID_MAP: Record<TranslatableEntityType, string> = {
+const ENTITY_ID_MAP: Record<ImplementedTranslatableEntity, string> = {
   product: 'productId',
   category: 'productCategoryId',
-  collection: 'assortmentCollectionId',
   contentPage: 'contentPageId',
   notificationTemplate: 'notificationTemplateId',
-  attribute: 'productAttributeId',
-  attributeOption: 'productAttributeOptionId',
 };
 
 // ============================================================================
@@ -295,7 +294,10 @@ export async function saveCategoryTranslation(data: {
 /**
  * Get all translations for an entity
  */
-export async function getEntityTranslations(entityType: TranslatableEntityType, entityId: string): Promise<Record<string, unknown>[]> {
+export async function getEntityTranslations(
+  entityType: ImplementedTranslatableEntity,
+  entityId: string,
+): Promise<Record<string, unknown>[]> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
 
@@ -314,7 +316,7 @@ export async function getEntityTranslations(entityType: TranslatableEntityType, 
  * Get translation for a specific locale
  */
 export async function getEntityTranslation(
-  entityType: TranslatableEntityType,
+  entityType: ImplementedTranslatableEntity,
   entityId: string,
   localeId: string,
 ): Promise<Record<string, unknown> | null> {
@@ -334,7 +336,10 @@ export async function getEntityTranslation(
 /**
  * Get missing translations for an entity
  */
-export async function getMissingTranslations(entityType: TranslatableEntityType, entityId: string): Promise<Record<string, unknown>[]> {
+export async function getMissingTranslations(
+  entityType: ImplementedTranslatableEntity,
+  entityId: string,
+): Promise<Record<string, unknown>[]> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
 
@@ -397,7 +402,7 @@ export async function getTranslationStatistics(): Promise<
  * Bulk approve translations
  */
 export async function bulkApproveTranslations(
-  entityType: TranslatableEntityType,
+  entityType: ImplementedTranslatableEntity,
   translationIds: string[],
   reviewerId: string,
 ): Promise<number> {
